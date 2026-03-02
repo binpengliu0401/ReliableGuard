@@ -1,0 +1,2 @@
+mistralai==1.12.4
+python-dotenv==1.2.1

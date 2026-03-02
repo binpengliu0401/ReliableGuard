@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  reliable_guard:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./orders.db:/app/orders.db
