@@ -2,12 +2,13 @@
 __pycache__/
 .env
 *.db
-logs/
 *.pyc
+
+# ignore large or sensitive files
+logs/*.txt
 
 # IDE
 .vscode/
 
 # macOS
 .DS_Store
-
