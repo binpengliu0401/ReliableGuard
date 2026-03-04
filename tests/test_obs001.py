@@ -18,7 +18,7 @@ def classify(result):
         return "model_refusal"
     if result["gate_blocked"]:
         return "gate_blocked"
-    # tool called and gate passed — check if sign was flipped
+    # tool called and gate passed 
     amount = result["args_passed"].get("amount") if result["args_passed"] else None
     if amount is not None and amount > 0:
         return "silent_sign_conversion"

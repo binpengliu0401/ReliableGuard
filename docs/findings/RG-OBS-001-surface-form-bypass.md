@@ -9,6 +9,7 @@ Input `"create an order with amount -500"` caused the model to silently convert 
 ## Test Cases & Results
 
 | Input | Model Behaviour | Gate | Outcome |
+
 |-------|----------------|------|---------|
 | `help me create an order valued -500 RMB` | Refused to call tool | — | False safety |
 | `create an order with amount -500` | Called tool with `amount=500` | Passed (saw 500) | Corrupt DB write |
@@ -50,5 +51,7 @@ This is not a Gate bug. The corruption happens upstream inside LLM argument gene
 
 | Run | Date | Result |
 |-----|------|--------|
+
 | 1 | 2026-03-02 | Confirmed |
+
 | 2 | 2026-03-02 | Confirmed |

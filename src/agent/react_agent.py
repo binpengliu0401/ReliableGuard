@@ -6,6 +6,9 @@ from typing import Any
 from src.tools.order_tools import tools, create_order, get_order_status
 import json
 from src.gate.shcema_validator import validate as gate_validate
+from src.verifier.state_tracker import take_snapshot, compute_diff
+from src.verifier.verifier import verify_create_order
+from src.tools.order_tools import cursor
 
 
 def run_agent(msg: str):
@@ -55,6 +58,9 @@ def run_agent(msg: str):
                 )
                 continue
 
+            # snapshot before status
+            snapshot_before = take_snapshot(cursor)
+
             # Gate passthrough
             if func_name == "create_order":
                 result = create_order(**func_args)
@@ -62,6 +68,18 @@ def run_agent(msg: str):
                 result = get_order_status(**func_args)
 
             print(f"TOOL EXCUTOR: {func_name}({func_args}) => {result}")  # type: ignore
+            
+            # snapshot after status
+            snapshot_after = take_snapshot(cursor)
+            diff = compute_diff(snapshot_before, snapshot_after)
+            
+            if func_name == "create_order":
+                verifier_result = verify_create_order(msg, diff)
+                print(f"[VERIFIER] verdict={verifier_result.verdict}")
+                print(f"[VERIFIER] evidence={verifier_result.evidence}" )
+                test_result["verifier_verdict"] = verifier_result.verdict
+                
+            
             test_result["tool_called"] = True
             test_result["args_passed"] = func_args
             messages.append(response.choices[0].message)
@@ -83,4 +101,3 @@ def run_agent(msg: str):
         test_result["final_answer"] = response.choices[0].message.content
         print(f"Final Answer: {test_result['final_answer']}")
         return test_result
-    
