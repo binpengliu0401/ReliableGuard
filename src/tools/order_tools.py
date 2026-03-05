@@ -1,21 +1,17 @@
 from src.db.init_db import init_db
-from mistralai.models import Tool, Function, UserMessage, ToolMessage
+from mistralai.models import Tool, Function
 
 cursor, conn = init_db()
 
 
 def create_order(amount):
-    cursor.execute("INSERT INTO orders(amount, status) VALUES(?, 'pending')", (amount,))
+    cursor.execute("INSERT INTO orders(amount, status) VALUES(?, 'pending')", (amount,))  # type: ignore
     conn.commit()
-    return {"order_id": cursor.lastrowid, "amount": amount, "status": "pending"}
-
-
-# # print(create_order(100.0))
-# # print(create_order(200.0))
+    return {"order_id": cursor.lastrowid, "amount": amount, "status": "pending"}  # type: ignore
 
 
 def get_order_status(order_id):
-    result = cursor.execute(
+    result = cursor.execute(  # type: ignore
         "SELECT status FROM orders WHERE id=?", (order_id,)
     ).fetchone()
     if result:
@@ -30,7 +26,9 @@ tools = [
             description="Creat An Order",
             parameters={
                 "type": "object",
-                "properties": {"amount": {"type": "number", "description": "Order Amount"}},
+                "properties": {
+                    "amount": {"type": "number", "description": "Order Amount"}
+                },
                 "required": ["amount"],
             },
         )

@@ -13,6 +13,9 @@ from src.tools.order_tools import cursor
 
 def run_agent(msg: str):
 
+    print(f"\n{'='*50}")
+    print(f"[INPUT]    {msg}")
+
     test_result = {
         "input": msg,
         "tool_called": False,
@@ -22,16 +25,18 @@ def run_agent(msg: str):
         "final_answer": None,
     }
 
-    # Initial Mistral Client
+    # Initial Mistral.ai Client
     load_dotenv()
     client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
     messages: list[Any] = [UserMessage(content=msg)]
 
     # First request
     response = client.chat.complete(
-        model="mistral-small-latest", messages=messages, tools=tools, tool_choice="auto"  # type: ignore
+        model="mistral-small-latest",
+        messages=messages,
+        tools=tools,
+        tool_choice="auto",  # type: ignore
     )
-    print(response)
 
     # Second request, add data in dataset
     tool_calls = response.choices[0].message.tool_calls
@@ -40,10 +45,9 @@ def run_agent(msg: str):
             func_name = tool_call.function.name
             func_args = json.loads(tool_call.function.arguments)  # type: ignore
             gate_result = gate_validate(func_name, func_args)
-            print(f"raw output: {str(func_args)}")
 
             if not gate_result.allowed:
-                print(f"Gate Interception: {gate_result.reason}")
+                print(f"[GATE]    BLOCKED - {gate_result.reason}")
                 test_result["tool_called"] = True
                 test_result["gate_blocked"] = True
                 test_result["gate_reason"] = gate_result.reason
@@ -58,6 +62,8 @@ def run_agent(msg: str):
                 )
                 continue
 
+            print(f"[GATE]     PASSED — args={func_args}")
+
             # snapshot before status
             snapshot_before = take_snapshot(cursor)
 
@@ -67,19 +73,19 @@ def run_agent(msg: str):
             elif func_name == "get_order_status":
                 result = get_order_status(**func_args)
 
-            print(f"TOOL EXCUTOR: {func_name}({func_args}) => {result}")  # type: ignore
-            
+            print(f"[EXECUTOR]    {func_name}({func_args}) => {result}")  # type: ignore
+
             # snapshot after status
             snapshot_after = take_snapshot(cursor)
             diff = compute_diff(snapshot_before, snapshot_after)
-            
+
             if func_name == "create_order":
                 verifier_result = verify_create_order(msg, diff)
-                print(f"[VERIFIER] verdict={verifier_result.verdict}")
-                print(f"[VERIFIER] evidence={verifier_result.evidence}" )
+                print(
+                    f"[VERIFIER]    {verifier_result.verdict} — {verifier_result.evidence}"
+                )
                 test_result["verifier_verdict"] = verifier_result.verdict
-                
-            
+
             test_result["tool_called"] = True
             test_result["args_passed"] = func_args
             messages.append(response.choices[0].message)
@@ -95,9 +101,10 @@ def run_agent(msg: str):
             messages=messages,  # type: ignore
         )
         test_result["final_answer"] = final.choices[0].message.content
-        print(f"Final Answer: {test_result['final_answer']}")
+        print(f"[ANSWER]    {test_result['final_answer']}")
         return test_result
     else:
         test_result["final_answer"] = response.choices[0].message.content
-        print(f"Final Answer: {test_result['final_answer']}")
+        print(f"[GATE]    NOT TRIGGERED — model refused to call tool")
+        print(f"[ANSWER]    {test_result['final_answer']}")
         return test_result
