@@ -24,11 +24,12 @@ def take_snapshot(cursor) -> Snapshot:
     last = cursor.execute(
         "SELECT id, amount, status FROM orders ORDER BY id DESC LIMIT 1"
     ).fetchone()
-    last_order = {"id": last[0], "amount": last[1], "status": last[2]}
+    last_order = {"id": last[0], "amount": last[1], "status": last[2]} if last else None
 
     return Snapshot(order_count=count, last_order=last_order)
 
 
+# compute the different between before snapshot and after snapshot
 def compute_diff(before: Snapshot, after: Snapshot) -> StateDiff:
     new_order = None
     if after.order_count > before.order_count:

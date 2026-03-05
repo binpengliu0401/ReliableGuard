@@ -1,17 +1,20 @@
 from src.agent.react_agent import run_agent
 from tasks.obs001_tasks import TASKS
+from src.db.reset_env import reset_env
 
 
 if __name__ == "__main__":
-    
+
+    reset_env()
+
     for task in TASKS:
         result = run_agent(task["input"])
-        
+
         # conclusion
         verdict = result.get("verifier_verdict", "N/A")
         gate_blocked = result.get("gate_blocked", False)
         tool_called = result.get("tool_called", False)
-        
+
         if not tool_called:
             status = "NOT_TRIGGERED"
         elif gate_blocked:
@@ -22,8 +25,5 @@ if __name__ == "__main__":
             status = "SUCCESS"
         else:
             status = "UNKNOWN"
-        
+
         print(f"[RESULT]    {task['id']} - {status}\n")
-        
-    
-    

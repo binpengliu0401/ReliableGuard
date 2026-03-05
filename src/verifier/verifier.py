@@ -10,7 +10,6 @@ class VerifierResult:
 
 
 def verify_create_order(user_input: str, diff: StateDiff) -> VerifierResult:
-    # No order
     if not diff.order_created:
         return VerifierResult(passed=False, verdict="UNVERIFIED", evidence="No Order")
 
