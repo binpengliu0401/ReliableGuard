@@ -18,6 +18,12 @@ TOOL_SCHEMAS = {
                 "max": 10000,
             }
         },
+        "policies": [
+            {
+                "condition": lambda args: args.get("amount", 0) > 5000, 
+                "reason": "amount exceeds 5000, requires approval before order creation"
+            }
+        ]
     },
     "get_order_status": {
         "required": ["order_id"],
@@ -27,11 +33,12 @@ TOOL_SCHEMAS = {
                 "min": 1,
             }
         },
+        "dependencies": ["create_order"]
     },
 }
 
 
-def validate(func_name: str, func_args: dict) -> GateResult:
+def validate(func_name: str, func_args: dict, executed_tools: list[str] = []) -> GateResult:
     # If tool does not in schema defination, pass
     if func_name not in TOOL_SCHEMAS:
         return GateResult(allowed=True, reason="tools not in schema, passthrough")
@@ -71,6 +78,21 @@ def validate(func_name: str, func_args: dict) -> GateResult:
             return GateResult(
                 allowed=False,
                 reason=f"field  '{field}' must be <= {rules["max"]}, got {value}",
+            )
+
+    # policies verify
+    for policy in schema.get("policies", []):
+        if policy["condition"](func_args):
+            return GateResult(
+                allowed=False,
+                reason=f"Policy violation: {policy['reason']}"
+            )
+    # dependices verify
+    for dep in schema.get("dependencies", []):
+        if dep not in executed_tools:
+            return GateResult(
+                allowed=False,
+                reason=f"Dependency violation: '{dep}' must be executed before '{func_name}'"
             )
 
     return GateResult(allowed=True)

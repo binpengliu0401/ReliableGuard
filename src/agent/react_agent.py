@@ -24,6 +24,9 @@ def run_agent(msg: str):
         "gate_reason": None,
         "final_answer": None,
     }
+    
+    # Record successfully excuted tools
+    executed_tools: list[str] = []
 
     # Initial Mistral.ai Client
     load_dotenv()
@@ -44,7 +47,7 @@ def run_agent(msg: str):
         for tool_call in tool_calls:
             func_name = tool_call.function.name
             func_args = json.loads(tool_call.function.arguments)  # type: ignore
-            gate_result = gate_validate(func_name, func_args)
+            gate_result = gate_validate(func_name, func_args, executed_tools)
 
             if not gate_result.allowed:
                 print(f"[GATE]    BLOCKED - {gate_result.reason}")
@@ -74,7 +77,8 @@ def run_agent(msg: str):
                 result = get_order_status(**func_args)
 
             print(f"[EXECUTOR]    {func_name}({func_args}) => {result}")  # type: ignore
-
+            executed_tools.append(func_name)
+            
             # snapshot after status
             snapshot_after = take_snapshot(cursor)
             diff = compute_diff(snapshot_before, snapshot_after)
