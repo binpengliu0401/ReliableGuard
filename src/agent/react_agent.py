@@ -7,8 +7,9 @@ from src.tools.order_tools import tools, create_order, get_order_status
 import json
 from src.gate.shcema_validator import validate as gate_validate
 from src.verifier.state_tracker import take_snapshot, compute_diff
-from src.verifier.verifier import verify_create_order
+from src.verifier.verifier import verify
 from src.tools.order_tools import cursor
+from src.verifier.verifier import verify, VerifierResult
 
 
 def run_agent(msg: str):
@@ -24,7 +25,7 @@ def run_agent(msg: str):
         "gate_reason": None,
         "final_answer": None,
     }
-    
+
     # Record successfully excuted tools
     executed_tools: list[str] = []
 
@@ -78,13 +79,31 @@ def run_agent(msg: str):
 
             print(f"[EXECUTOR]    {func_name}({func_args}) => {result}")  # type: ignore
             executed_tools.append(func_name)
-            
+
             # snapshot after status
             snapshot_after = take_snapshot(cursor)
             diff = compute_diff(snapshot_before, snapshot_after)
 
             if func_name == "create_order":
-                verifier_result = verify_create_order(msg, diff)
+                verifier_result = verify(func_name, func_args, diff)
+
+                # Independent detection intent - parameter inconsistency
+                if verifier_result.passed and func_name == "create_order":
+                    negative_signals = ["-", "negative", "minus", "负"]
+                    user_intended_negative = any(
+                        s in msg.lower() for s in negative_signals
+                    )
+                    if (
+                        user_intended_negative
+                        and diff.new_order
+                        and diff.new_order["amount"] > 0
+                    ):
+                        verifier_result = VerifierResult(
+                            passed=False,
+                            verdict="FALSE_SUCCESS",
+                            evidence=f"User input suggests negative amount, but DB recorded amount={diff.new_order['amount']}. Silent sign conversion detected.",
+                        )
+
                 print(
                     f"[VERIFIER]    {verifier_result.verdict} — {verifier_result.evidence}"
                 )

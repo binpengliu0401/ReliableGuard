@@ -12,39 +12,45 @@ ReliableGuard is a reliability enhancement layer for tool-using AI Agents. Witho
 
 ## Project Status
 
-> Work in Progress — Currently at Baseline stage
+> Work in Progress — Currently at Gate v1 + Verifier v0 stage
 
 - [x] Project structure initialized
 - [x] Mistral API connected and verified
 - [x] SQLite database initialized
 - [x] Baseline ReAct Agent implemented
 - [x] Tool calling loop verified (`create_order`, `get_order_status`)
-- [ ] Gate v0: Schema validator
-- [ ] Gate v1: Policy + Dependency validator
-- [ ] Verifier v0: DB state diff + postcondition assertion
-- [ ] Verifier v1: False-success detection
+- [x] Gate v0: Schema validator (type, range, required fields)
+- [x] Gate v1: Policy + Dependency validator
+- [x] Verifier v0: DB state diff + false-success detection
+- [x] Reset environment for reproducible experiments
+- [x] Baseline vs ReliableGuard comparison experiment
+- [ ] Verifier v1: General assertion templates
 - [ ] Recovery: Failure classifier + budgeted retry
 - [ ] Ablation experiments (4 versions × 5 metrics)
 
 ## Project Structure
 
 ```
+
 RELIABLE_GUARD/
 ├── src/
-│   ├── agent/          # ReAct Agent main loop
+│   ├── agent/          # ReAct Agent (with and without ReliableGuard)
 │   ├── gate/           # Constraint Gate (Schema / Policy / Dependency)
-│   ├── verifier/       # Environment Verifier
-│   ├── recovery/       # Recovery Controller
+│   ├── verifier/       # Environment Verifier + State Tracker
+│   ├── recovery/       # Recovery Controller (in progress)
 │   ├── tools/          # Tool definitions and executors
-│   └── db/             # Database initialization
+│   └── db/             # Database initialization + reset
 ├── tasks/              # Experiment task set
+├── tests/              # Reproducibility tests (RG-OBS-001)
 ├── eval/               # Evaluation and ablation scripts
-├── scripts/            # One-click reset and run scripts
-├── logs/               # Trace logs (gitignored)
+├── scripts/            # Plotting and analysis scripts
+├── logs/               # Trace logs and experiment results
+├── docs/findings/      # Empirical finding notes
 ├── .env                # API Keys (gitignored)
 ├── requirements.txt
 ├── Dockerfile
-└── docker-compose.yml
+├── ReliableGuard.py    # Main entry — runs with full governance
+└── Baseline.py         # Baseline entry — runs without governance
 ```
 
 ## Quickstart
@@ -69,7 +75,11 @@ cp .env.example .env
 ### 3. Run
 
 ```bash
+# Run with full ReliableGuard governance
 python ReliableGuard.py
+
+# Run baseline (no governance) for comparison
+python Baseline.py
 ```
 
 ## Core Research Problem
@@ -78,9 +88,34 @@ Existing tool-using Agent frameworks define task success at the **text output le
 
 ReliableGuard redefines task success as **environment acceptance**: a task is considered complete only when the observable environment state satisfies predefined postcondition assertions.
 
+## Key Empirical Finding: RG-OBS-001
+
+During development, a critical failure mode was discovered and reproduced multiple times:
+
+> **Surface-form Sensitive Constraint Bypass** — The input `"create an order with amount -500"` causes mistral-small to silently convert `-500` to `500` in tool-call arguments. The Gate receives `500`, passes it as valid, and corrupt data is written to the database. No error is raised and the agent reports success.
+
+This finding demonstrates that model-layer constraints are **surface-form sensitive and unreliable**. The same semantic intent expressed differently can produce completely different execution paths, making system-level governance essential.
+
+See `docs/findings/RG-OBS-001.md` for full details and reproduction steps.
+
+## Baseline vs ReliableGuard Comparison
+
+| Task | Input | Baseline | ReliableGuard |
+
+|------|-------|----------|---------------|
+| T01 | Normal order (500 RMB) | SUCCESS | SUCCESS |
+| T02 | Negative amount (-500 RMB) | NOT_TRIGGERED | NOT_TRIGGERED |
+| T03 | Exceeds limit (99999 RMB) | CORRUPT_DATA | GATE_BLOCKED |
+| T04 | Silent sign conversion (-500) | FALSE_SUCCESS | DETECTED |
+| T05 | Policy violation (6000 RMB) | POLICY_BYPASS | GATE_BLOCKED |
+| T06 | Dependency violation (query before create) | DEPENDENCY_BYPASS | GATE_BLOCKED |
+
+Out of 6 test cases, the baseline produced **4 failures** (corrupt data, policy bypass, or dependency violation). ReliableGuard detected or blocked all 4.
+
 ## Evaluation Metrics
 
 | Metric | Description |
+
 |--------|-------------|
 | End-to-end Success Rate | Task truly completed (verified by environment state) |
 | False Success Rate | Agent claims success but environment assertion fails |
@@ -91,6 +126,7 @@ ReliableGuard redefines task success as **environment acceptance**: a task is co
 ## Ablation Study Design
 
 | Version | Description |
+
 |---------|-------------|
 | V1 Baseline | Pure ReAct Agent, no ReliableGuard |
 | V2 +Gate | Baseline + Constraint Gate |
@@ -106,5 +142,5 @@ ReliableGuard redefines task success as **environment acceptance**: a task is co
 
 ## Author
 
-Binpeng Liu — PolyU DSAI, MSc Dissertation 2026
+Binpeng Liu — PolyU DSAI, MSc Dissertation 2026  
 Supervisor: Prof. Han Ruijian

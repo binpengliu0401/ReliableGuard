@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from src.config.tool_config import TOOL_CONFIG
 
 
 @dataclass
@@ -7,43 +8,12 @@ class GateResult:
     reason: str = ""
 
 
-# Define the defination of every tool's schema rule
-TOOL_SCHEMAS = {
-    "create_order": {
-        "required": ["amount"],
-        "rules": {
-            "amount": {
-                "type": float,
-                "min": 0.01,
-                "max": 10000,
-            }
-        },
-        "policies": [
-            {
-                "condition": lambda args: args.get("amount", 0) > 5000, 
-                "reason": "amount exceeds 5000, requires approval before order creation"
-            }
-        ]
-    },
-    "get_order_status": {
-        "required": ["order_id"],
-        "rules": {
-            "order_id": {
-                "type": int,
-                "min": 1,
-            }
-        },
-        "dependencies": ["create_order"]
-    },
-}
-
-
 def validate(func_name: str, func_args: dict, executed_tools: list[str] = []) -> GateResult:
     # If tool does not in schema defination, pass
-    if func_name not in TOOL_SCHEMAS:
+    if func_name not in TOOL_CONFIG:
         return GateResult(allowed=True, reason="tools not in schema, passthrough")
-
-    schema = TOOL_SCHEMAS[func_name]
+    
+    schema = TOOL_CONFIG[func_name]
 
     # check necessary parameters
     for field in schema["required"]:
