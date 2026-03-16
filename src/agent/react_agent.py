@@ -10,6 +10,11 @@ from src.verifier.state_tracker import take_snapshot, compute_diff
 from src.verifier.verifier import verify
 from src.tools.order_tools import cursor
 from src.verifier.verifier import verify, VerifierResult
+from src.recovery.failure_classifier import (
+    classify_gate_failure,
+    classify_verifier_failure,
+)
+from src.recovery.recovery_controller import recover, BudgetTracker, RecoveryAction
 
 
 def run_agent(msg: str):
@@ -28,6 +33,9 @@ def run_agent(msg: str):
 
     # Record successfully excuted tools
     executed_tools: list[str] = []
+
+    # Create bugdet tracker per task
+    budget = BudgetTracker()
 
     # Initial Mistral.ai Client
     load_dotenv()
@@ -52,6 +60,15 @@ def run_agent(msg: str):
 
             if not gate_result.allowed:
                 print(f"[GATE]    BLOCKED - {gate_result.reason}")
+                # Classify and recover
+                failure = classify_gate_failure(gate_result, func_name)
+                recovery_result = recover(failure, budget=budget)
+                print(
+                    f"[RECOVERY]    {recovery_result.action.value} — {recovery_result.detail}"
+                )
+                test_result["recovery_action"] = recovery_result.action.value
+                test_result["recovery_detail"] = recovery_result.detail
+
                 test_result["tool_called"] = True
                 test_result["gate_blocked"] = True
                 test_result["gate_reason"] = gate_result.reason
@@ -67,6 +84,9 @@ def run_agent(msg: str):
                 continue
 
             print(f"[GATE]     PASSED — args={func_args}")
+
+            # Track tool call in budget
+            budget.record_tool_call()
 
             # snapshot before status
             snapshot_before = take_snapshot(cursor)
@@ -108,6 +128,22 @@ def run_agent(msg: str):
                     f"[VERIFIER]    {verifier_result.verdict} — {verifier_result.evidence}"
                 )
                 test_result["verifier_verdict"] = verifier_result.verdict
+
+                # If verifier failed, classify and recover
+                if not verifier_result.passed:
+                    failure = classify_verifier_failure(verifier_result)
+                    recovery_result = recover(failure, diff=diff, budget=budget)
+                    print(
+                        f"[RECOVERY]    {recovery_result.action.value} — {recovery_result.detail}"
+                    )
+                    test_result["recovery_action"] = recovery_result.action.value
+                    test_result["recovery_detail"] = recovery_result.detail
+                    # Overwrite tool result so LLM sees the recovery outcome
+                    result = {
+                        "error": recovery_result.detail,
+                        "action_taken": recovery_result.action.value,
+                        "system_note": "The corrupted record has been rolled back and deleted from the database. No order exists from this operation.",
+                    }
 
             test_result["tool_called"] = True
             test_result["args_passed"] = func_args

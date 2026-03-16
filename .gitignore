@@ -1,8 +1,10 @@
 .venv/
 __pycache__/
-.env
-*.db
 *.pyc
+.env
+.env.*
+*.db
+*.sqlite3
 
 # ignore large or sensitive files
 logs/*.txt
@@ -12,3 +14,19 @@ logs/*.txt
 
 # macOS
 .DS_Store
+.DS_Store?
+
+# logs
+logs/
+*.log
+.cache/
+tmp/
+temp/
+
+# test
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.tox/
+

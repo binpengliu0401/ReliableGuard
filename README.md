@@ -101,7 +101,6 @@ See `docs/findings/RG-OBS-001.md` for full details and reproduction steps.
 ## Baseline vs ReliableGuard Comparison
 
 | Task | Input | Baseline | ReliableGuard |
-
 |------|-------|----------|---------------|
 | T01 | Normal order (500 RMB) | SUCCESS | SUCCESS |
 | T02 | Negative amount (-500 RMB) | NOT_TRIGGERED | NOT_TRIGGERED |
@@ -115,7 +114,6 @@ Out of 6 test cases, the baseline produced **4 failures** (corrupt data, policy 
 ## Evaluation Metrics
 
 | Metric | Description |
-
 |--------|-------------|
 | End-to-end Success Rate | Task truly completed (verified by environment state) |
 | False Success Rate | Agent claims success but environment assertion fails |
@@ -126,7 +124,6 @@ Out of 6 test cases, the baseline produced **4 failures** (corrupt data, policy 
 ## Ablation Study Design
 
 | Version | Description |
-
 |---------|-------------|
 | V1 Baseline | Pure ReAct Agent, no ReliableGuard |
 | V2 +Gate | Baseline + Constraint Gate |
