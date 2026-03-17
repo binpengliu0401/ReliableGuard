@@ -112,7 +112,7 @@ def recover(
             detail=f"FALSE_SUCCESS detected but no diff availble for rollback: {failure.reason}",
         )
 
-    if failure.failure_type == FailureType.FALSE_SUCCESS:
+    if failure.failure_type == FailureType.VERIFY_FAIL:
         # v0 allow one retry if budget permits
         if budget and budget.can_retry():
             budget.record_retry()

@@ -1,4 +1,4 @@
-from src.agent.react_agent import run_agent
+from src.agent.langgraph_agent import run_agent
 from tasks.obs001_tasks import TASKS
 from src.db.reset_env import reset_env
 
@@ -10,20 +10,20 @@ if __name__ == "__main__":
     for task in TASKS:
         result = run_agent(task["input"])
 
-        # conclusion
-        verdict = result.get("verifier_verdict", "N/A")
-        gate_blocked = result.get("gate_blocked", False)
-        tool_called = result.get("tool_called", False)
+        gate_status = result.get("gate_status")
+        verifier_status = result.get("verifier_status")
+        recovery_action = result.get("recovery_action")
+        tool_call = result.get("tool_call")
 
-        if not tool_called:
+        if tool_call is None:
             status = "NOT_TRIGGERED"
-        elif gate_blocked:
-            status = "GATE_BLOCKED"
-        elif verdict == "FALSE_SUCCESS":
-            status = "FALSE_SUCCESS"
-        elif verdict == "SUCCESS":
+        elif gate_status == "BLOCKED":
+            status = f"GATE_BLOCKED — {result.get('gate_detail', '')}"
+        elif recovery_action == "rollback":
+            status = f"FALSE_SUCCESS — {result.get('verifier_detail', '')}"
+        elif verifier_status == "PASSED":
             status = "SUCCESS"
         else:
             status = "UNKNOWN"
 
-        print(f"[RESULT]    {task['id']} - {status}\n")
+        print(f"[RESULT]    {task['id']} — {status}\n")

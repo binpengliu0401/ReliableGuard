@@ -1,3 +1,5 @@
+MAX_RETRIES = 3
+
 TOOL_CONFIG = {
     "create_order": {
         # Gate: Schema
@@ -10,27 +12,34 @@ TOOL_CONFIG = {
             }
         },
         # Gate: Policy
-        "policies":[
+        "policies": [
             {
                 "condition": lambda args: args.get("amount", 0) > 5000,
-                "reason": "amount exceeds 5000, requires approval before order creation"
+                "reason": "amount exceeds 5000, requires approval before order creation",
             }
         ],
         # Gate: Dependency
-        "dependencies":[],
+        "dependencies": [],
         # Verifier: Postcondition assertions
-        "assertions":[
+        "assertions": [
             {
                 "name": "order_created",
                 "check": lambda diff, args: diff.order_created,
-                "failure": "No new order found in DB after execution"
+                "failure": "No new order found in DB after execution",
             },
             {
                 "name": "status_is_pending",
-                "check": lambda diff, args: diff.new_order is not None and diff.new_order["status"] == "pending",
-                "failure": "Order status is not pending"
+                "check": lambda diff, args: diff.new_order is not None
+                and diff.new_order["status"] == "pending",
+                "failure": "Order status is not pending",
             },
-        ]
+            {
+                "name": "amount_is_positive",
+                "check": lambda diff, args: diff.new_order is not None
+                and diff.new_order["amount"] > 0,
+                "failure": "Order amount in DB is not positive",
+            },
+        ],
     },
     "get_order_status": {
         "required": ["order_id"],
@@ -42,6 +51,6 @@ TOOL_CONFIG = {
         },
         "policies": [],
         "dependencies": ["create_order"],
-        "assertions": []
+        "assertions": [],
     },
 }
