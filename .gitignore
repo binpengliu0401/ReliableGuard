@@ -29,4 +29,5 @@ temp/
 .coverage
 htmlcov/
 .tox/
+test_qwen.py
 

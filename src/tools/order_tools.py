@@ -20,30 +20,32 @@ def get_order_status(order_id):
 
 
 tools = [
-    Tool(
-        function=Function(
-            name="create_order",
-            description="Creat An Order",
-            parameters={
+    {
+        "type": "function",
+        "function": {
+            "name": "create_order",
+            "description": "Creat An Order",
+            "parameters": {
                 "type": "object",
                 "properties": {
                     "amount": {"type": "number", "description": "Order Amount"}
                 },
                 "required": ["amount"],
             },
-        )
-    ),
-    Tool(
-        function=Function(
-            name="get_order_status",
-            description="Check Order Status",
-            parameters={
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_order_status",
+            "description": "Check Order Status",
+            "parameters": {
                 "type": "object",
                 "properties": {
                     "order_id": {"type": "integer", "description": "Order ID"}
                 },
                 "required": ["order_id"],
             },
-        )
-    ),
+        },
+    },
 ]

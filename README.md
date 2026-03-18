@@ -12,10 +12,9 @@ ReliableGuard is a reliability enhancement layer for tool-using AI Agents. Witho
 
 ## Project Status
 
-> Work in Progress — Gate v1 + Verifier v0 + Recovery v0 complete
+> Work in Progress — Gate v1 + Verifier v0 + Recovery v0 + LangGraph refactor complete
 
 - [x] Project structure initialized
-- [x] Mistral API connected and verified
 - [x] SQLite database initialized
 - [x] Baseline ReAct Agent implemented
 - [x] Tool calling loop verified (`create_order`, `get_order_status`)
@@ -26,10 +25,11 @@ ReliableGuard is a reliability enhancement layer for tool-using AI Agents. Witho
 - [x] Baseline vs ReliableGuard comparison experiment
 - [x] Recovery v0: Failure classifier + recovery controller + loop guard
 - [x] Recovery-to-LLM feedback with business context injection
+- [x] LangGraph refactoring (StateGraph-based control flow)
+- [x] LLM backend upgrade — Qwen-plus via OpenAI-compatible API
+- [x] Scenario document v0.1 (17 scenarios, F0–F5 failure mode coverage)
 - [ ] Verifier v1: General assertion templates
 - [ ] Recovery v1: Deterministic param fix + semantic-level retry
-- [ ] LangGraph refactoring
-- [ ] LLM backend upgrade (Gemini Flash / Qwen-plus)
 - [ ] Benchmark scoring system (Outcome Score per task)
 - [ ] Ablation experiments (4 versions × 5 metrics)
 
@@ -38,7 +38,7 @@ ReliableGuard is a reliability enhancement layer for tool-using AI Agents. Witho
 ```
 RELIABLE_GUARD/
 ├── src/
-│   ├── agent/          # ReAct Agent (with and without ReliableGuard)
+│   ├── agent/          # LangGraph Agent (StateGraph-based)
 │   ├── gate/           # Constraint Gate (Schema / Policy / Dependency)
 │   ├── verifier/       # Environment Verifier + State Tracker
 │   ├── recovery/       # Failure Classifier + Recovery Controller + Loop Guard
@@ -63,7 +63,7 @@ RELIABLE_GUARD/
 ### 1. Clone and install dependencies
 
 ```bash
-git clone https://github.com/your-username/reliable_guard.git
+git clone https://github.com/binpengliu0401/ReliableGuard.git
 cd reliable_guard
 python -m venv .venv
 source .venv/bin/activate
@@ -74,7 +74,7 @@ pip install -r requirements.txt
 
 ```bash
 cp .env.example .env
-# Edit .env and add your MISTRAL_API_KEY
+# Edit .env and add your LLM_API_KEY (Qwen-plus via DashScope)
 ```
 
 ### 3. Run
@@ -109,7 +109,7 @@ Recovery results, including business context, are fed back to the LLM so its fin
 
 > The input `"create an order with amount -500"` causes mistral-small to silently convert `-500` to `500` in tool-call arguments. The Gate receives `500`, passes it as valid, and corrupt data is written to the database. No error is raised and the agent reports success. The Verifier detects this as FALSE_SUCCESS by comparing user intent signals against database state.
 
-This finding demonstrates that model-layer constraints are surface-form sensitive and unreliable. See `docs/findings/RG-OBS-001.md` for full details.
+This finding demonstrates that model-layer constraints are surface-form sensitive and unreliable. Qwen-plus does not exhibit this behavior for the same input — it refuses the request directly (NOT_TRIGGERED) rather than silently correcting the value. This cross-model difference directly supports the model-agnostic design claim and the necessity of the Verifier layer. See `docs/findings/RG-OBS-001.md` for full details.
 
 ### RG-DESIGN-001: Recovery-to-LLM Feedback Requires Business Context
 
@@ -130,6 +130,15 @@ See `docs/findings/RG-DESIGN-001.md` for full details.
 
 Out of 6 test cases, the baseline produced **4 failures**. ReliableGuard detected or blocked all 4, and for T04 performed automatic rollback of corrupted data.
 
+Note: T01–T06 results above were produced with mistral-small. Qwen-plus produces identical results for T01–T03 and T05–T06. T02 behavior differs: Qwen-plus returns NOT_TRIGGERED where mistral-small triggered FALSE_SUCCESS, reflecting different model-level handling of semantically invalid inputs.
+
+## LLM Backend
+
+| Backend | Status | Notes |
+|---------|--------|-------|
+| mistral-small-latest | Replaced | Original backend, T01–T06 verified |
+| qwen-plus | Active | Via DashScope OpenAI-compatible API, T01–T06 verified |
+
 ## Evaluation Metrics
 
 | Metric | Description |
@@ -149,6 +158,20 @@ Out of 6 test cases, the baseline produced **4 failures**. ReliableGuard detecte
 | V3 +Verifier | V2 + Environment Verifier |
 | V4 Full | V3 + Recovery Controller |
 
+## Scenario Coverage
+
+17 core scenarios defined across 6 failure mode categories:
+
+| Category | Count | Description |
+|----------|-------|-------------|
+| F0 Happy Path | 2 | Normal completion, single-step and full 4-step workflow |
+| F1 Schema Violation | 3 | Missing field, wrong type, out-of-range value |
+| F2 Policy Violation | 3 | Negative amount, refund exceeds original, cancelled order operation |
+| F3 Dependency Violation | 3 | Wrong order, non-existent resource, duplicate operation |
+| F4-A False Success (model-triggered) | 2 | Silent model correction of invalid parameters |
+| F4-B False Success (structural) | 2 | Tool returns ok but environment state not updated |
+| F5 Partial Completion | 2 | Multi-step flow terminates prematurely |
+
 ## References
 
 - Yao et al. (2023). ReAct: Synergizing Reasoning and Acting in Language Models.
@@ -160,5 +183,5 @@ Out of 6 test cases, the baseline produced **4 failures**. ReliableGuard detecte
 
 ## Author
 
-Binpeng Liu — PolyU DSAI, MSc Dissertation 2026
+Binpeng Liu — PolyU DSAI, MSc Dissertation 2026  
 Supervisor: Prof. Han Ruijian

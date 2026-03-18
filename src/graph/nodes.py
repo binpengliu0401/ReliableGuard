@@ -1,6 +1,9 @@
 import json
 from datetime import datetime
-from mistralai.models import ToolMessage
+
+# from mistralai.models import ToolMessage
+# from mistralai import Mistral
+from openai import OpenAI
 from src.graph.state import AgentState, ToolCallInfo, TraceEntry
 from src.gate.shcema_validator import validate as gate_validate, GateResult
 from src.recovery.failure_classifier import (
@@ -9,16 +12,15 @@ from src.recovery.failure_classifier import (
 )
 from src.recovery.recovery_controller import BudgetTracker, recover
 from src.tools.order_tools import tools, create_order, get_order_status
-from src.config.tool_config import MAX_RETRIES
+from src.config.tool_config import MAX_RETRIES, LLM_MODEL, LLM_BASE_URL
 from src.verifier.verifier import verify
 from src.verifier.state_tracker import take_snapshot, compute_diff
 import os
-from mistralai import Mistral
 from dotenv import load_dotenv
 from src.tools.order_tools import cursor
 
 load_dotenv()
-_client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+_client = OpenAI(api_key=os.getenv("LLM_API_KEY"), base_url=LLM_BASE_URL)
 
 
 def _trace(state: AgentState, node: str, event: str, detail: str) -> None:
@@ -29,10 +31,10 @@ def _trace(state: AgentState, node: str, event: str, detail: str) -> None:
 
 # plan_node
 def plan_node(state: AgentState) -> AgentState:
-    response = _client.chat.complete(
-        model="mistral-small-latest",
+    response = _client.chat.completions.create(
+        model=LLM_MODEL,
         messages=state["messages"],
-        tools=tools,
+        tools=tools,  # type: ignore
         tool_choice="auto",
     )
 
@@ -49,7 +51,7 @@ def plan_node(state: AgentState) -> AgentState:
     tc = tool_calls[0]
     state["tool_call"] = ToolCallInfo(
         tool_call_id=tc.id,  # type: ignore
-        func_name=tc.function.name,
+        func_name=tc.function.name,  # type: ignore
         func_args=json.loads(tc.function.arguments),  # type: ignore
     )
 
@@ -57,7 +59,7 @@ def plan_node(state: AgentState) -> AgentState:
         state,
         "PLAN_NODE",
         "TOOL_CALL",
-        f"{tc.function.name}({state['tool_call']['func_args']})",
+        f"{tc.function.name}({state['tool_call']['func_args']})",  # type: ignore
     )
     return state
 
@@ -95,10 +97,11 @@ def execute_node(state: AgentState) -> AgentState:
     _trace(state, "execute_node", "EXECUTED", f"{func_name} - {result}")
 
     state["messages"].append(
-        ToolMessage(
-            tool_call_id=tc["tool_call_id"],  # type: ignore
-            content=json.dumps(result),
-        )
+        {
+            "role": "tool",
+            "tool_call_id": tc["tool_call_id"],  # type: ignore
+            "content": json.dumps(result),
+        }
     )
 
     return state
@@ -116,10 +119,10 @@ def verify_node(state: AgentState) -> AgentState:
         _trace(state, "verify_node", "PASSED", verifier_result.evidence)  # type: ignore
 
         # get final answer from LLM
-        final = _client.chat.complete(
-            model="mistral-small-latest", messages=state["messages"]
+        final = _client.chat.completions.create(
+            model=LLM_MODEL, messages=state["messages"]
         )
-        state["final_answer"] = final.choices[0].message.content  # type: ignore
+        state["final_answer"] = final.choices[0].message.content
         _trace(state, "verify_node", "FINAL_ANSWER", state["final_answer"])  # type: ignore
     else:
         state["verifier_status"] = "FAILED"

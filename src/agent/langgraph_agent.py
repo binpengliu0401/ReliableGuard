@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-from mistralai.models import UserMessage
 from langgraph.graph import StateGraph, END
 from src.graph.state import AgentState
 from src.graph.nodes import (
@@ -45,7 +44,7 @@ def run_agent(msg: str) -> dict:
     print(f"[INPUT]    {msg}")
 
     initial_state: AgentState = {
-        "messages": [UserMessage(content=msg)],
+        "messages": [{"role": "user", "content": msg}],
         "tool_call": None,
         "gate_status": None,
         "gate_detail": None,
@@ -58,7 +57,7 @@ def run_agent(msg: str) -> dict:
         "final_answer": None,
         "snapshot_before": None,
         "diff": None,
-    } # type: ignore
+    }  # type: ignore
 
     app = build_graph()
     final_state = app.invoke(initial_state)
