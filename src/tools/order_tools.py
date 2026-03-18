@@ -1,5 +1,4 @@
 from src.db.init_db import init_db
-from mistralai.models import Tool, Function
 
 cursor, conn = init_db()
 

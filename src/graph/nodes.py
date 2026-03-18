@@ -161,11 +161,33 @@ def recovery_node(state: AgentState) -> AgentState:
 
     if recovery_result.action.value == "retry":
         state["retry_count"] += 1
-        state["message"].append(  # type: ignore
+        state["messages"].append(  # type: ignore
             {
                 "role": "user",
                 "content": f"[SYSTEM RECOVERY] Previous attempt failed: {recovery_result.detail}. Please try again with corrected parameters.",
             }
         )
+    elif recovery_result.action.value == "terminate":
+        clean_messages = [
+            m
+            for m in state["messages"]
+            if not (hasattr(m, "tool_calls") and m.tool_calls)
+            and not (isinstance(m, dict) and m.get("role") == "tool")
+        ]
+        rejection_prompt = clean_messages + [
+            {
+                "role": "user",
+                "content": (
+                    f"The system has rejected this request. Reason: {recovery_result.detail}. "
+                    f"Please explain this to the user in a helpful and concise way. "
+                    f"Do not suggest any workaround that bypasses this constraint."
+                ),
+            }
+        ]
+        final = _client.chat.completions.create(
+            model=LLM_MODEL, messages=rejection_prompt # type: ignore
+        )
+        state["final_answer"] = final.choices[0].message.content
+        _trace(state, "recovery_node", "FINAL_ANSWER", state["final_answer"])  # type: ignore
 
     return state
