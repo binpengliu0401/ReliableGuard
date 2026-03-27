@@ -27,5 +27,5 @@ def after_recovery(state: AgentState) -> str:
 
         if retry_count >= MAX_RETRIES:
             return "end"
-        return "plane"
+        return "plan"
     return "end"

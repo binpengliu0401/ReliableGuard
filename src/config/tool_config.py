@@ -1,7 +1,7 @@
 MAX_RETRIES = 3
 
-LLM_MODEL = "qwen3.5-flash-2026-02-23"
-LLM_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+# LLM_MODEL = "qwen3.5-flash-2026-02-23"
+# LLM_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 TOOL_CONFIG = {
     "create_order": {

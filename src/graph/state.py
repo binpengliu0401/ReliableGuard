@@ -44,3 +44,5 @@ class AgentState(TypedDict):
     snapshot_before: Any
     snapshot_after: Any
     diff: Any
+    executed_tools: list[str]
+    config: Any

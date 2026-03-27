@@ -84,7 +84,7 @@ def recover(
         return RecoveryResult(
             action=RecoveryAction.TERMINATE,
             success=False,
-            detail=f"Schema violation, auto-excution not support in v0: {failure.reason}",
+            detail=f"Dependency violation, prerequisite step not executed: {failure.reason}",
         )
 
     # Verifier Failure

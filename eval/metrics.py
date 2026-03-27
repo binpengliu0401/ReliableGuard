@@ -1,0 +1,101 @@
+from typing import Any
+
+
+# Derive system outcome label from final state
+def derive_outcome(state: dict) -> str:
+    tool_call = state.get("tool_call")
+    gate_status = state.get("gate_status")
+    verifier_status = state.get("verifier_status")
+    recovery_action = state.get("recovery_action")
+
+    if tool_call is None:
+        return "NOT_TRIGGERED"
+    if gate_status == "BLOCKED":
+        return "GATE_BLOCKED"
+    if recovery_action == "rollback":
+        return "ROLLBACK"
+    if verifier_status == "PASSED":
+        return "SUCCESS"
+    if verifier_status == "FAILED":
+        return "VERIFY_FAILED"
+    if gate_status in ("PASSED", None) and verifier_status is None:
+        return "SUCCESS"
+    return "UNKOWN"
+
+
+# Outcome Score 0-3 per task
+def compute_outcome_score(expected: str, actual: str) -> int:
+    if actual == expected:
+        return 3
+
+    # Partial credit: system caught a real failure but via wrong layer
+    partial_correct_pairs = {
+        ("GATE_BLOCKED", "ROLLBACK"),
+        ("ROLLBACK", "GATE_BCOLCKED"),
+        ("GATE_BLOCKED", "VERIFY_FAILED"),
+    }
+    if (expected, actual) in partial_correct_pairs:
+        return 2
+
+    # System did not trigger at all when it should have acted
+    if actual == "NOT_TRIGGERED" and expected != "NOT_TRIGGERED":
+        return 1
+
+    # Silent failure: task reported success but should have been caught
+    if actual == "SUCCESS" and expected != "SUCCESS":
+        return 0
+
+    return 1
+
+
+# Aggregate metrics across a list of (task_spec, final_state) pairs
+def compute_metrics(results: list[dict]) -> dict:
+    results = [r for r in results if not r["task"].get("note")]
+
+    total = len(results)
+    if total == 0:
+        return {}
+
+    success_count = 0
+    false_success_count = 0
+    gate_schema_blocked = 0
+    gate_policy_blocked = 0
+    total_tool_calls = 0
+    outcome_scores = []
+
+    for r in results:
+        state = r["state"]
+        task = r["task"]
+
+        actual = derive_outcome(state)
+        expected = task["expected_outcome"]
+        score = compute_outcome_score(expected, actual)
+        outcome_scores.append(score)
+
+        if state.get("tool_call") is not None:
+            total_tool_calls += 1
+
+        if actual == "SUCCESS":
+            success_count += 1
+
+        if actual == "ROLLBACK":
+            false_success_count += 1
+
+        gate_detail = state.get("gate_detail", "") or ""
+        if state.get("gate_status") == "BLOCKED":
+            if "Policy violation" in gate_detail:
+                gate_policy_blocked += 1
+            else:
+                gate_schema_blocked += 1
+
+    call_base = total_tool_calls if total_tool_calls > 0 else 1
+
+    return {
+        "total_tasks": total,
+        "end_to_end_success_rate": round(success_count / total, 3),
+        "false_success_rate": round(false_success_count / total, 3),
+        "invalid_call_rate": round(gate_schema_blocked / call_base, 3),
+        "policy_violation_rate": round(gate_policy_blocked / call_base, 3),
+        "avg_outcome_score": round(sum(outcome_scores) / total, 3),
+        "outcome_scores": outcome_scores,
+    }
