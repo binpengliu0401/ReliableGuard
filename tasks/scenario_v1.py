@@ -26,7 +26,7 @@ SCENARIOS = [
         "failure_mode": "F1",
         "description": "Missing required field",
         "input": "create an order",
-        "expected_outcome": "NOT_TRIGGERED",  # LLM may refuse or ask for amount
+        "expected_outcome": "GATE_BLOCKED",
     },
     {
         "id": "F1-02",
@@ -78,6 +78,7 @@ SCENARIOS = [
         "description": "Query non-existent order id",
         "input": "create an order for 100 RMB, then check status of order 9999",
         "expected_outcome": "GATE_BLOCKED",
+        "note": "planning-sensitive: LLM does not attempt get_order_status(9999)",
     },
     {
         "id": "F3-03",

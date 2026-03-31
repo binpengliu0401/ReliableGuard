@@ -90,14 +90,6 @@ def run_agent(msg: str, config: AblationConfig = VERSIONS["V4_Full"]) -> dict:
     print(f"\n{'='*50}")
     print(f"[INPUT]    {msg}")
 
-    import os
-    from openai import OpenAI
-
-    client = OpenAI(
-        api_key=os.getenv("LLM_API_KEY"),
-        base_url=config.llm_base_url,
-    )
-
     initial_state: AgentState = {
         "messages": [
             {

@@ -1,9 +1,13 @@
 import csv
 import os
-from tasks.scenario_generator import SCENARIOS
 from eval.ablation_runner import run_version
 from eval.metrics import compute_metrics
 from src.config.ablation_config import VERSIONS, with_gpt4o_mini
+from tasks.scenario_v1 import SCENARIOS as SCENARIOS_V1
+from tasks.scenario_generator import SCENARIOS as SCENARIOS_GEN
+import json
+
+safe_scenarios = SCENARIOS_V1 + SCENARIOS_GEN
 
 VERSIONS_TO_RUN = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
 GPT_VERSION_KEY = "V4_Full_GPT4oMini"
@@ -11,29 +15,35 @@ GPT_VERSION_KEY = "V4_Full_GPT4oMini"
 
 def run_benchmark(output_csv: str = "logs/benchmark_results.csv"):
     all_version_metrics = {}
-
-    SKIP_IDS = {"F3-02", "F5-01", "F5-02"}
-    safe_scenarios = [s for s in SCENARIOS if s["id"] not in SKIP_IDS]
+    all_results = {}
+    safe_scenarios = SCENARIOS_V1 + SCENARIOS_GEN
 
     # Qwen
     for version_key in VERSIONS_TO_RUN:
         results = run_version(version_key, safe_scenarios, verbose=True)
         metrics = compute_metrics(results)
         all_version_metrics[version_key] = metrics
+        all_results[version_key] = results
 
     # GPT-4o-mini V4_Full
-    gpt_config = with_gpt4o_mini(VERSIONS["V4_Full"])
-    results_gpt = run_version(
-        GPT_VERSION_KEY,
-        safe_scenarios,
-        verbose=True,
-        config_override=gpt_config,  # type: ignore
-    )
-    metrics_gpt = compute_metrics(results_gpt)
-    all_version_metrics[GPT_VERSION_KEY] = metrics_gpt
+    # gpt_config = with_gpt4o_mini(VERSIONS["V4_Full"])
+    # results_gpt = run_version(
+    #     GPT_VERSION_KEY,
+    #     safe_scenarios,
+    #     verbose=True,
+    #     config_override=gpt_config,  # type: ignore
+    # )
+    # metrics_gpt = compute_metrics(results_gpt)
+    # all_version_metrics[GPT_VERSION_KEY] = metrics_gpt
 
-    _print_summary(all_version_metrics)
-    _export_csv(all_version_metrics, output_csv)
+    _print_summary(all_version_metrics)  # type: ignore
+    _export_csv(all_version_metrics, output_csv)  # type: ignore
+    with open("logs/benchmark_raw.json", "w") as f:
+        raw = {
+            v: [{"task": r["task"], "state": r["state"]} for r in all_results[v]]
+            for v in all_results
+        }
+        json.dump(raw, f, default=str)
 
 
 def _print_summary(all_metrics: dict):

@@ -6,7 +6,7 @@ TOOL_CONFIG = {
         "required": ["amount"],
         "rules": {
             "amount": {
-                "type": int,
+                "type": float,
                 "min": 0.01,
                 "max": 10000,
             }

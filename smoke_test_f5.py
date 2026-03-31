@@ -13,10 +13,10 @@ from src.config.ablation_config import VERSIONS
 config = VERSIONS["V4_Full"]
 
 # Single F5 scenario: create then confirm
-scenario_input = "create an order for 200 RMB, confirm it, then refund it with reason: changed my mind"
+scenario_input = "please confirm order 9999"
 
 print("=" * 60)
-print("SMOKE TEST: F5 create → confirm")
+print("SMOKE TEST: F3 dependency violation - confirm without create")
 print(f"INPUT: {scenario_input}")
 print("=" * 60)
 

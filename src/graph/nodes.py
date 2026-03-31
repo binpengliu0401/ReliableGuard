@@ -28,7 +28,7 @@ load_dotenv()
 
 def _get_client(config):
 
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = os.getenv("LLM_API_KEY")
 
     return OpenAI(api_key=api_key, base_url=config.llm_base_url)
 

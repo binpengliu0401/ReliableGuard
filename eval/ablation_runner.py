@@ -19,7 +19,21 @@ def run_version(
     reset_env()
 
     for task in scenarios:
-        state = run_agent(task["input"], config=config)
+        try:
+            state = run_agent(task["input"], config=config)
+        except Exception as e:
+            error_label = type(e).__name__
+            print(f"[ERROR] {task['id']} | {error_label}: {e}")
+            results.append(
+                {
+                    "task": task,
+                    "state": None,
+                    "version": version_key,
+                    "error": error_label,
+                }
+            )
+            continue
+
         results.append({"task": task, "state": state, "version": version_key})
 
         if verbose:

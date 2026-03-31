@@ -3,13 +3,24 @@ from typing import Any
 
 # Derive system outcome label from final state
 def derive_outcome(state: dict) -> str:
+    if state is None:
+        return "ERROR"
+
     tool_call = state.get("tool_call")
     gate_status = state.get("gate_status")
     verifier_status = state.get("verifier_status")
     recovery_action = state.get("recovery_action")
+    executed_tools = state.get("executed_tools", [])
 
+    # Multi-turn completed: tools were executed, last plan found no more calls
+    if tool_call is None and executed_tools:
+        if verifier_status == "PASSED" or verifier_status is None:
+            return "SUCCESS"
+
+    # Single-turn: no tool was ever called
     if tool_call is None:
         return "NOT_TRIGGERED"
+
     if gate_status == "BLOCKED":
         return "GATE_BLOCKED"
     if recovery_action == "rollback":
@@ -25,6 +36,9 @@ def derive_outcome(state: dict) -> str:
 
 # Outcome Score 0-3 per task
 def compute_outcome_score(expected: str, actual: str) -> int:
+    if actual == "ERROR":
+        return 0
+
     if actual == expected:
         return 3
 
@@ -72,17 +86,20 @@ def compute_metrics(results: list[dict]) -> dict:
         score = compute_outcome_score(expected, actual)
         outcome_scores.append(score)
 
-        if state.get("tool_call") is not None:
-            total_tool_calls += 1
+        if state is not None:
+            # execute + gate
+            total_tool_calls += len(state.get("executed_tools", []))
+            if state.get("gate_status") == "BLOCKED":
+                total_tool_calls += 1
 
         if actual == "SUCCESS":
             success_count += 1
 
-        if actual == "ROLLBACK":
+        if actual == "SUCCESS" and expected != "SUCCESS":
             false_success_count += 1
 
-        gate_detail = state.get("gate_detail", "") or ""
-        if state.get("gate_status") == "BLOCKED":
+        gate_detail = (state.get("gate_detail", "") if state else "") or ""
+        if state is not None and state.get("gate_status") == "BLOCKED":
             if "Policy violation" in gate_detail:
                 gate_policy_blocked += 1
             else:
