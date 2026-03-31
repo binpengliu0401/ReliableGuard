@@ -20,7 +20,7 @@ def derive_outcome(state: dict) -> str:
         return "VERIFY_FAILED"
     if gate_status in ("PASSED", None) and verifier_status is None:
         return "SUCCESS"
-    return "UNKOWN"
+    return "UNKNOWN"
 
 
 # Outcome Score 0-3 per task
@@ -31,7 +31,7 @@ def compute_outcome_score(expected: str, actual: str) -> int:
     # Partial credit: system caught a real failure but via wrong layer
     partial_correct_pairs = {
         ("GATE_BLOCKED", "ROLLBACK"),
-        ("ROLLBACK", "GATE_BCOLCKED"),
+        ("ROLLBACK", "GATE_BLOCKED"),
         ("GATE_BLOCKED", "VERIFY_FAILED"),
     }
     if (expected, actual) in partial_correct_pairs:

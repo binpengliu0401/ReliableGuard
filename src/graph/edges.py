@@ -16,7 +16,7 @@ def after_gate(state: AgentState) -> str:
 def after_verify(state: AgentState) -> str:
     if state.get("verifier_status") == "FAILED":
         return "recovery"
-    return "end"
+    return "plan"
 
 
 def after_recovery(state: AgentState) -> str:

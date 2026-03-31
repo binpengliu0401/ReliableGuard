@@ -1,8 +1,5 @@
 MAX_RETRIES = 3
 
-# LLM_MODEL = "qwen3.5-flash-2026-02-23"
-# LLM_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-
 TOOL_CONFIG = {
     "create_order": {
         # Gate: Schema
@@ -55,5 +52,62 @@ TOOL_CONFIG = {
         "policies": [],
         "dependencies": ["create_order"],
         "assertions": [],
+    },
+    "confirm_order": {
+        "required": ["order_id"],
+        "rules": {
+            "order_id": {
+                "type": int,
+                "min": 1,
+            }
+        },
+        "policies": [],
+        "dependencies": ["create_order"],
+        "assertions": [
+            {
+                "name": "order_confirmed",
+                "check": lambda diff, args: diff.order_confirmed,
+                "failure": "Order status did not transition to confirmed in DB",
+            },
+            {
+                "name": "updated_order_matches",
+                "check": lambda diff, args: diff.updated_order is not None
+                and diff.updated_order["id"] == args.get("order_id"),
+                "failure": "Confirmed order ID in DB does not match requested order_id",
+            },
+        ],
+    },
+    "refund_order": {
+        "required": ["order_id", "reason"],
+        "rules": {
+            "order_id": {
+                "type": int,
+                "min": 1,
+            },
+            "reason": {
+                "type": str,
+            },
+        },
+        "policies": [
+            {
+                "condition": lambda args: not args.get("reason", "").strip(),
+                "reason": "refund reason must be a non-empty string",
+            }
+        ],
+        "dependencies": ["confirm_order"],
+        "assertions": [
+            {
+                "name": "order_refunded",
+                "check": lambda diff, args: diff.order_refunded,
+                "failure": "Order status did not transition to refunded in DB",
+            },
+            {
+                "name": "refund_reason_written",
+                "check": lambda diff, args: diff.updated_order is not None
+                and diff.updated_order.get("refund_reason") is not None
+                and diff.updated_order["refund_reason"].strip() != "",
+                "failure": "refund_reason not written to DB",
+            },
+        ],
     },
 }

@@ -11,11 +11,17 @@ from src.recovery.failure_classifier import (
     classify_verifier_failure,
 )
 from src.recovery.recovery_controller import BudgetTracker, recover
-from src.tools.order_tools import tools, create_order, get_order_status
+from src.tools.order_service import (
+    tools,
+    create_order,
+    get_order_status,
+    confirm_order,
+    refund_order,
+    cursor,
+)
 from src.config.tool_config import MAX_RETRIES
 from src.verifier.verifier import verify
 from src.verifier.state_tracker import take_snapshot, compute_diff
-from src.tools.order_tools import cursor
 
 load_dotenv()
 
@@ -50,8 +56,8 @@ def plan_node(state: AgentState) -> AgentState:
     tool_calls = msg.tool_calls
     if not tool_calls:
         state["tool_call"] = None
-        state["final_answer"] = None
-        _trace(state, "plan_node", "NOT_TRIGGERED", "model to call tool")
+        state["final_answer"] = msg.content
+        _trace(state, "plan_node", "COMPLETED", msg.content or "no further tool calls")
         return state
 
     tc = tool_calls[0]
@@ -63,7 +69,7 @@ def plan_node(state: AgentState) -> AgentState:
 
     _trace(
         state,
-        "PLAN_NODE",
+        "plan_node",
         "TOOL_CALL",
         f"{tc.function.name}({state['tool_call']['func_args']})",  # type: ignore
     )
@@ -98,6 +104,10 @@ def execute_node(state: AgentState) -> AgentState:
         result = create_order(**func_args)
     elif func_name == "get_order_status":
         result = get_order_status(**func_args)
+    elif func_name == "confirm_order":
+        result = confirm_order(**func_args)
+    elif func_name == "refund_order":
+        result = refund_order(**func_args)
     else:
         result = {"error": f"unknown tool: {func_name}"}
 
@@ -130,19 +140,6 @@ def verify_node(state: AgentState) -> AgentState:
         state["verifier_detail"] = verifier_result.evidence
         _trace(state, "verify_node", "PASSED", verifier_result.evidence)
 
-        # clean message
-        clean_messages = [
-            m
-            for m in state["messages"]
-            if not (hasattr(m, "tool_calls") and m.tool_calls)
-            and not (isinstance(m, dict) and m.get("role") == "tool")
-        ]
-        final = client.chat.completions.create(
-            model=config.llm_model,
-            messages=clean_messages,  # type: ignore
-        )
-        state["final_answer"] = final.choices[0].message.content
-        _trace(state, "verify_node", "FINAL_ANSWER", state["final_answer"])  # type: ignore
     else:
         state["verifier_status"] = "FAILED"
         state["verifier_detail"] = verifier_result.evidence

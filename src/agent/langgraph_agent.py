@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
 from src.graph.state import AgentState
-from src.graph.edges import after_plan, after_gate, after_verify, after_recovery
 from src.config.ablation_config import AblationConfig, VERSIONS
 from src.graph.nodes import (
     plan_node,
@@ -12,13 +11,22 @@ from src.graph.nodes import (
 )
 
 load_dotenv()
+_graph_cache: dict = {}
 
 
 def build_graph(config: AblationConfig = VERSIONS["V4_Full"], client=None):
+    cache_key = (
+        config.use_gate,
+        config.use_verifier,
+        config.use_recovery,
+        config.llm_model,
+    )
+    if cache_key in _graph_cache:
+        return _graph_cache[cache_key]
 
     graph = StateGraph(AgentState)
 
-    # 始终注册所有节点
+    # Register all nodes
     graph.add_node("plan", plan_node)
     graph.add_node("gate", gate_node)
     graph.add_node("execute", execute_node)
@@ -28,67 +36,54 @@ def build_graph(config: AblationConfig = VERSIONS["V4_Full"], client=None):
     graph.set_entry_point("plan")
 
     # plan → gate or execute or end
-    def after_plan(state: AgentState) -> str:
+    def _after_plan(state: AgentState) -> str:
         if state.get("tool_call") is None:
             return "end"
         return "gate" if config.use_gate else "execute"
 
     graph.add_conditional_edges(
         "plan",
-        after_plan,
+        _after_plan,
         {"gate": "gate", "execute": "execute", "end": END},
     )
 
     # gate → execute or recovery or end
-    def after_gate(state: AgentState) -> str:
+    def _after_gate(state: AgentState) -> str:
         if state.get("gate_status") == "BLOCKED":
             return "recovery" if config.use_recovery else "end"
         return "execute"
 
     graph.add_conditional_edges(
         "gate",
-        after_gate,
+        _after_gate,
         {"execute": "execute", "recovery": "recovery", "end": END},
     )
 
     # execute → verify or end
-    def after_execute(state: AgentState) -> str:
+    def _after_execute(state: AgentState) -> str:
         return "verify" if config.use_verifier else "end"
 
     graph.add_conditional_edges(
         "execute",
-        after_execute,
+        _after_execute,
         {"verify": "verify", "end": END},
     )
 
-    # verify → recovery or end
-    def after_verify(state: AgentState) -> str:
+    # verify → recovery or plan or end
+    def _after_verify(state: AgentState) -> str:
         if state.get("verifier_status") == "FAILED":
             return "recovery" if config.use_recovery else "end"
-        return "end"
+        return "plan"
 
     graph.add_conditional_edges(
         "verify",
-        after_verify,
-        {"recovery": "recovery", "end": END},
+        _after_verify,
+        {"recovery": "recovery", "plan": "plan", "end": END},
     )
 
-    # recovery → plan or end
-    def after_recovery(state: AgentState) -> str:
-        action = state.get("recovery_action")
-        if action == "retry":
-            if state.get("retry_count", 0) >= MAX_RETRIES:  # type: ignore
-                return "end"
-            return "plan"
-        return "end"
-
-    graph.add_conditional_edges(
-        "recovery",
-        after_recovery,
-        {"plan": "plan", "end": END},
-    )
-
-    return graph.compile()
+    compiled = graph.compile()
+    _graph_cache[cache_key] = compiled
+    return compiled
 
 
 def run_agent(msg: str, config: AblationConfig = VERSIONS["V4_Full"]) -> dict:
@@ -104,7 +99,18 @@ def run_agent(msg: str, config: AblationConfig = VERSIONS["V4_Full"]) -> dict:
     )
 
     initial_state: AgentState = {
-        "messages": [{"role": "user", "content": msg}],
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are an autonomous order management agent. "
+                    "When the user gives you a multi-step instruction, execute all steps "
+                    "sequentially without asking for confirmation between steps. "
+                    "Use the available tools to complete the full request."
+                ),
+            },
+            {"role": "user", "content": msg},
+        ],
         "tool_call": None,
         "gate_status": None,
         "gate_detail": None,

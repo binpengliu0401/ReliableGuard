@@ -1,6 +1,6 @@
 import csv
 import os
-from tasks.scenario_v1 import SCENARIOS
+from tasks.scenario_generator import SCENARIOS
 from eval.ablation_runner import run_version
 from eval.metrics import compute_metrics
 from src.config.ablation_config import VERSIONS, with_gpt4o_mini

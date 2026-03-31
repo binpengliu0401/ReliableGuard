@@ -3,7 +3,7 @@ from dataclasses import dataclass
 QWEN_PLUS_MODEL = "qwen/qwen-plus"
 QWEN_PLUS_BASE_URL = "https://openrouter.ai/api/v1"
 
-GPT4O_MINI_MODEL = "openai/gpt-5.3-codex"
+GPT4O_MINI_MODEL = "openai/gpt-5.4-mini"
 GPT4O_MINI_BASE_URL = "https://openrouter.ai/api/v1"
 
 

@@ -3,12 +3,12 @@ from mistralai.models import UserMessage, ToolMessage
 from mistralai import Mistral
 import os
 from typing import Any
-from src.tools.order_tools import tools, create_order, get_order_status
+from src.tools.order_service import tools, create_order, get_order_status
 import json
 from src.gate.shcema_validator import validate as gate_validate
 from src.verifier.state_tracker import take_snapshot, compute_diff
 from src.verifier.verifier import verify
-from src.tools.order_tools import cursor
+from src.tools.order_service import cursor
 from src.verifier.verifier import verify, VerifierResult
 from src.recovery.failure_classifier import (
     classify_gate_failure,
