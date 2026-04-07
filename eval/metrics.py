@@ -116,3 +116,64 @@ def compute_metrics(results: list[dict]) -> dict:
         "avg_outcome_score": round(sum(outcome_scores) / total, 3),
         "outcome_scores": outcome_scores,
     }
+
+
+def derive_failure_type(state: dict | None, expected: str, actual: str) -> str:
+    if state is None:
+        return "runtime_error"
+
+    if actual == expected:
+        return "none"
+
+    gate_status = state.get("gate_status")
+    gate_detail = (state.get("gate_detail", "") or "").lower()
+    verifier_status = state.get("verifier_status")
+    recovery_action = state.get("recovery_action")
+
+    if gate_status == "BLOCKED":
+        if "policy violation" in gate_detail or "dependency" in gate_detail:
+            return "rules_violation"
+        return "invalid_call"
+
+    if verifier_status == "FAILED":
+        return "verification_failed"
+
+    if recovery_action == "rollback":
+        return "rollback"
+
+    if actual == "NOT_TRIGGERED":
+        return "not_triggered"
+
+    if actual == "SUCCESS" and expected != "SUCCESS":
+        return "false_success"
+
+    return "unknown"
+
+
+def build_result_row(
+    task: dict, state: dict | None, version: str, error: str | None = None
+) -> dict:
+    actual = derive_outcome(state)  # type: ignore
+    expected = task["expected_outcome"]
+    score = compute_outcome_score(expected, actual)
+
+    executed_tools = []
+    if state is not None:
+        executed_tools = state.get("executed_tools", []) or []
+
+    return {
+        "scenario_id": task.get("id"),
+        "domain": task.get("domain", "unknown"),
+        "version": version,
+        "expected_outcome": expected,
+        "actual_outcome": actual,
+        "pass_fail": actual == expected,
+        "outcome_score": score,
+        "failure_type": derive_failure_type(state, expected, actual),
+        "tool_calls": len(executed_tools),
+        "gate_status": state.get("gate_status") if state else None,
+        "gate_detail": state.get("gate_detail") if state else None,
+        "verifier_status": state.get("verifier_status") if state else None,
+        "recovery_action": state.get("recovery_action") if state else None,
+        "error": error,
+    }

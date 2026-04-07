@@ -1,6 +1,7 @@
 from src.config.ablation_config import AblationConfig, VERSIONS
 from src.agent.langgraph_agent import run_agent
 from src.db.reset_env import reset_env
+from eval.metrics import derive_outcome, build_result_row
 
 
 def run_version(
@@ -21,28 +22,43 @@ def run_version(
     for task in scenarios:
         try:
             state = run_agent(task["input"], config=config)
+            row = build_result_row(
+                task=task, state=state, version=version_key, error=None
+            )
+
+            results.append(
+                {
+                    "task": task,
+                    "state": state,
+                    "version": version_key,
+                    "error": None,
+                    "scored_row": row,
+                }
+            )
+
+            if verbose:
+                actual = row["actual_outcome"]
+                expected = row["expected_outcome"]
+                match = "OK" if actual == expected else "MISMATCH"
+                print(f"[{match}] {task['id']} | expected={expected} actual={actual}")
+
         except Exception as e:
             error_label = type(e).__name__
             print(f"[ERROR] {task['id']} | {error_label}: {e}")
+
+            row = build_result_row(
+                task=task, state=None, version=version_key, error=error_label
+            )
+
             results.append(
                 {
                     "task": task,
                     "state": None,
                     "version": version_key,
                     "error": error_label,
+                    "scored_row": row,
                 }
             )
-            continue
-
-        results.append({"task": task, "state": state, "version": version_key})
-
-        if verbose:
-            from eval.metrics import derive_outcome
-
-            actual = derive_outcome(state)
-            expected = task["expected_outcome"]
-            match = "OK" if actual == expected else "MISMATCH"
-            print(f"[{match}] {task['id']} | expected={expected} actual={actual}")
 
     return results
 

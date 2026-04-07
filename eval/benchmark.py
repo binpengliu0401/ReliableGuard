@@ -16,7 +16,7 @@ GPT_VERSION_KEY = "V4_Full_GPT4oMini"
 def run_benchmark(output_csv: str = "logs/benchmark_results.csv"):
     all_version_metrics = {}
     all_results = {}
-    safe_scenarios = SCENARIOS_V1 + SCENARIOS_GEN
+    safe_scenarios = (SCENARIOS_V1 + SCENARIOS_GEN)[:10]
 
     # Qwen
     for version_key in VERSIONS_TO_RUN:
@@ -36,8 +36,9 @@ def run_benchmark(output_csv: str = "logs/benchmark_results.csv"):
     # metrics_gpt = compute_metrics(results_gpt)
     # all_version_metrics[GPT_VERSION_KEY] = metrics_gpt
 
-    _print_summary(all_version_metrics)  # type: ignore
-    _export_csv(all_version_metrics, output_csv)  # type: ignore
+    _print_summary(all_version_metrics)
+    _export_csv(all_version_metrics, output_csv)
+    _export_scenario_results(all_results, "logs/scenario_results.csv")
     with open("logs/benchmark_raw.json", "w") as f:
         raw = {
             v: [{"task": r["task"], "state": r["state"]} for r in all_results[v]]
@@ -94,6 +95,32 @@ def _export_csv(all_metrics: dict, path: str):
             writer.writerow(row)
 
     print(f"\n[BENCHMARK] Results exported to {path}")
+
+
+def _export_scenario_results(
+    all_results: dict, path: str = "logs/scenario_results.csv"
+):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    rows = []
+    for version_key, version_results in all_results.items():
+        for r in version_results:
+            row = r.get("scored_row")
+            if row:
+                rows.append(row)
+
+    if not rows:
+        print("[BENCHMARK] No scenario rows to export.")
+        return
+
+    fieldnames = list(rows[0].keys())
+
+    with open(path, "w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"[BENCHMARK] Scenario-level results exported to {path}")
 
 
 if __name__ == "__main__":

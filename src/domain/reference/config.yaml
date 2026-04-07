@@ -1,67 +1,99 @@
 tools:
   parse_pdf:
     required:
-      - name: pdf_path
+      - pdf_path
+      - paper_id
+    rules:
+      pdf_path:
         type: str
-      - name: paper_id
+      paper_id:
         type: str
-    rules: []
     policies: []
     dependencies: []
     assertions:
-      - parse_pdf_wrote_references
+      - name: parse_pdf_wrote_references
+        failure: "No references were written to DB after parse_pdf"
 
   verify_doi:
     required:
-      - name: ref_id
-        type: int
-      - name: doi
-        type: str
+      - ref_id
+      - doi
     rules:
-      - field: doi
+      ref_id:
+        type: int
+        min: 1
+      doi:
         type: str
         min_length: 5
     policies:
-      - batch_size_limit
+      - name: batch_size_limit
+        reason: "batch size exceeds maximum allowed limit"
     dependencies:
       - parse_pdf
     assertions:
-      - doi_status_not_pending
+      - name: doi_status_not_pending
+        failure: "doi_status still pending after verify_doi"
 
   verify_authors:
     required:
-      - name: ref_id
+      - ref_id
+      - title
+      - authors
+    rules:
+      ref_id:
         type: int
-      - name: title
+        min: 1
+      title:
         type: str
-      - name: authors
+        min_length: 1
+      authors:
         type: list
-    rules: []
     policies:
-      - batch_size_limit
+      - name: batch_size_limit
+        reason: "batch size exceeds maximum allowed limit"
     dependencies:
       - parse_pdf
     assertions:
-      - authors_status_not_pending
+      - name: authors_status_not_pending
+        failure: "authors_status still pending after verify_authors"
 
   verify_journal:
     required:
-      - name: ref_id
-        type: int
-      - name: doi
-        type: str
-      - name: journal
-        type: str
+      - ref_id
+      - doi
+      - journal
     rules:
-      - field: doi
+      ref_id:
+        type: int
+        min: 1
+      doi:
         type: str
         min_length: 5
+      journal:
+        type: str
+        min_length: 1
     policies:
-      - batch_size_limit
-      - doi_required_for_journal
+      - name: batch_size_limit
+        reason: "batch size exceeds maximum allowed limit"
+      - name: doi_required_for_journal
+        reason: "verify_journal requires a non-empty doi"
     dependencies:
       - parse_pdf
       - verify_doi
     assertions:
-      - verify_journal_doi_status_verified
-      - journal_status_not_pending
+      - name: verify_journal_doi_status_verified
+        failure: "doi_status must be verified before verify_journal"
+      - name: journal_status_not_pending
+        failure: "journal_status still pending after verify_journal"
+
+  list_references:
+    schema:
+      type: object
+      properties:
+        paper_id:
+          type: string
+      required:
+        - paper_id
+    policies: []
+    dependencies: []
+    assertions: []

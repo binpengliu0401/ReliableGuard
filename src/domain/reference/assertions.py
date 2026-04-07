@@ -1,21 +1,35 @@
-import json
 from src.domain.registry import assertion
+
+
+def _table_exists(conn, table_name: str) -> bool:
+    row = conn.execute(
+        """
+        SELECT name
+        FROM sqlite_master
+        WHERE type='table' AND name=?
+        """,
+        (table_name,),
+    ).fetchone()
+    return row is not None
 
 
 @assertion("parse_pdf_wrote_references")
 def parse_pdf_wrote_references(
-    func_name: str, func_args: dict, conn
+    tool_name: str, tool_args: dict, conn
 ) -> tuple[bool, str]:
-    """
-    After parse_pdf: references table must have >= 1 row for this paper_id.
-    """
-    if func_name != "parse_pdf":
+    if tool_name != "parse_pdf":
         return True, ""
-    paper_id = func_args.get("paper_id")
+
+    if not _table_exists(conn, "references"):
+        return False, 'parse_pdf_wrote_references: table "references" does not exist.'
+
+    paper_id = tool_args.get("paper_id")
     row = conn.execute(
-        "SELECT COUNT(*) as cnt FROM references WHERE paper_id = ?", (paper_id,)
+        'SELECT COUNT(*) as cnt FROM "references" WHERE paper_id = ?',
+        (paper_id,),
     ).fetchone()
     count = row["cnt"] if row else 0
+
     if count == 0:
         return (
             False,
@@ -25,16 +39,19 @@ def parse_pdf_wrote_references(
 
 
 @assertion("doi_status_not_pending")
-def doi_status_not_pending(func_name: str, func_args: dict, conn) -> tuple[bool, str]:
-    """
-    After verify_doi: doi_status must be 'verified' or 'failed', not 'pending'.
-    """
-    if func_name != "verify_doi":
+def doi_status_not_pending(tool_name: str, tool_args: dict, conn) -> tuple[bool, str]:
+    if tool_name != "verify_doi":
         return True, ""
-    ref_id = func_args.get("ref_id")
+
+    if not _table_exists(conn, "references"):
+        return False, 'doi_status_not_pending: table "references" does not exist.'
+
+    ref_id = tool_args.get("ref_id")
     row = conn.execute(
-        "SELECT doi_status FROM references WHERE ref_id = ?", (ref_id,)
+        'SELECT doi_status FROM "references" WHERE ref_id = ?',
+        (ref_id,),
     ).fetchone()
+
     if row is None:
         return False, f"doi_status_not_pending: ref_id={ref_id} not found in DB."
     if row["doi_status"] == "pending":
@@ -47,17 +64,20 @@ def doi_status_not_pending(func_name: str, func_args: dict, conn) -> tuple[bool,
 
 @assertion("authors_status_not_pending")
 def authors_status_not_pending(
-    func_name: str, func_args: dict, conn
+    tool_name: str, tool_args: dict, conn
 ) -> tuple[bool, str]:
-    """
-    After verify_authors: authors_status must be 'verified' or 'failed', not 'pending'.
-    """
-    if func_name != "verify_authors":
+    if tool_name != "verify_authors":
         return True, ""
-    ref_id = func_args.get("ref_id")
+
+    if not _table_exists(conn, "references"):
+        return False, 'authors_status_not_pending: table "references" does not exist.'
+
+    ref_id = tool_args.get("ref_id")
     row = conn.execute(
-        "SELECT authors_status FROM references WHERE ref_id = ?", (ref_id,)
+        'SELECT authors_status FROM "references" WHERE ref_id = ?',
+        (ref_id,),
     ).fetchone()
+
     if row is None:
         return False, f"authors_status_not_pending: ref_id={ref_id} not found in DB."
     if row["authors_status"] == "pending":
@@ -70,17 +90,20 @@ def authors_status_not_pending(
 
 @assertion("journal_status_not_pending")
 def journal_status_not_pending(
-    func_name: str, func_args: dict, conn
+    tool_name: str, tool_args: dict, conn
 ) -> tuple[bool, str]:
-    """
-    After verify_journal: journal_status must be 'verified' or 'failed', not 'pending'.
-    """
-    if func_name != "verify_journal":
+    if tool_name != "verify_journal":
         return True, ""
-    ref_id = func_args.get("ref_id")
+
+    if not _table_exists(conn, "references"):
+        return False, 'journal_status_not_pending: table "references" does not exist.'
+
+    ref_id = tool_args.get("ref_id")
     row = conn.execute(
-        "SELECT journal_status FROM references WHERE ref_id = ?", (ref_id,)
+        'SELECT journal_status FROM "references" WHERE ref_id = ?',
+        (ref_id,),
     ).fetchone()
+
     if row is None:
         return False, f"journal_status_not_pending: ref_id={ref_id} not found in DB."
     if row["journal_status"] == "pending":
@@ -93,18 +116,23 @@ def journal_status_not_pending(
 
 @assertion("verify_journal_doi_status_verified")
 def verify_journal_doi_status_verified(
-    func_name: str, func_args: dict, conn
+    tool_name: str, tool_args: dict, conn
 ) -> tuple[bool, str]:
-    """
-    Before verify_journal runs its write, doi_status must already be verified.
-    Catches dependency violation: verify_journal called before verify_doi passed.
-    """
-    if func_name != "verify_journal":
+    if tool_name != "verify_journal":
         return True, ""
-    ref_id = func_args.get("ref_id")
+
+    if not _table_exists(conn, "references"):
+        return (
+            False,
+            'verify_journal_doi_status_verified: table "references" does not exist.',
+        )
+
+    ref_id = tool_args.get("ref_id")
     row = conn.execute(
-        "SELECT doi_status FROM references WHERE ref_id = ?", (ref_id,)
+        'SELECT doi_status FROM "references" WHERE ref_id = ?',
+        (ref_id,),
     ).fetchone()
+
     if row is None:
         return False, f"verify_journal_doi_status_verified: ref_id={ref_id} not found."
     if row["doi_status"] != "verified":

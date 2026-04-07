@@ -1,14 +1,70 @@
 import json
 import sqlite3
-import os
 from typing import Any
-from src.utils.db import get_db_path  # type: ignore
+
+REFERENCE_DB_PATH = "references.db"
 
 
 def _get_conn() -> sqlite3.Connection:
-    conn = sqlite3.connect(get_db_path())
+    conn = sqlite3.connect(REFERENCE_DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def init_reference_db() -> sqlite3.Connection:
+    conn = _get_conn()
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS papers (
+            paper_id TEXT PRIMARY KEY,
+            pdf_path TEXT NOT NULL,
+            status TEXT DEFAULT 'pending'
+        )
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS "references" (
+            ref_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            paper_id TEXT NOT NULL,
+            title TEXT,
+            authors TEXT,
+            doi TEXT,
+            journal TEXT,
+            year INTEGER,
+            doi_status TEXT DEFAULT 'pending',
+            authors_status TEXT DEFAULT 'pending',
+            journal_status TEXT DEFAULT 'pending',
+            FOREIGN KEY (paper_id) REFERENCES papers(paper_id)
+        )
+        """
+    )
+
+    conn.commit()
+    return conn
+
+
+def _row_to_reference_dict(row: sqlite3.Row) -> dict[str, Any]:
+    authors_raw = row["authors"]
+    try:
+        authors = json.loads(authors_raw) if authors_raw else []
+    except Exception:
+        authors = []
+
+    return {
+        "ref_id": row["ref_id"],
+        "paper_id": row["paper_id"],
+        "title": row["title"],
+        "authors": authors,
+        "doi": row["doi"],
+        "journal": row["journal"],
+        "year": row["year"],
+        "doi_status": row["doi_status"],
+        "authors_status": row["authors_status"],
+        "journal_status": row["journal_status"],
+    }
 
 
 # Tool 1: parse pdf
@@ -17,31 +73,48 @@ def parse_pdf(pdf_path: str, paper_id: str) -> dict[str, Any]:
 
     refs = get_references_from_pdf(pdf_path)
 
-    if not refs:
-        return {
-            "success": False,
-            "paper_id": paper_id,
-            "ref_count": 0,
-            "error": "No references extracted from PDF.",
-        }
-
-    conn = _get_conn()
+    conn = init_reference_db()
     try:
-        # Upsert paper record
         conn.execute(
             """
             INSERT INTO papers (paper_id, pdf_path, status)
             VALUES (?, ?, 'processing')
-            ON CONFLICT(paper_id) DO UPDATE SET status='processing'
+            ON CONFLICT(paper_id) DO UPDATE SET
+                pdf_path=excluded.pdf_path,
+                status='processing'
             """,
             (paper_id, pdf_path),
         )
 
-        # Insert reference rows (all statuses = pending)
+        conn.execute(
+            """
+            DELETE FROM "references"
+            WHERE paper_id = ?
+            """,
+            (paper_id,),
+        )
+
+        if not refs:
+            conn.execute(
+                """
+                UPDATE papers
+                SET status = 'failed'
+                WHERE paper_id = ?
+                """,
+                (paper_id,),
+            )
+            conn.commit()
+            return {
+                "success": False,
+                "paper_id": paper_id,
+                "ref_count": 0,
+                "error": "No references extracted from PDF.",
+            }
+
         for ref in refs:
             conn.execute(
                 """
-                INSERT INTO references (
+                INSERT INTO "references" (
                     paper_id, title, authors, doi, journal, year,
                     doi_status, authors_status, journal_status
                 ) VALUES (?, ?, ?, ?, ?, ?, 'pending', 'pending', 'pending')
@@ -49,13 +122,21 @@ def parse_pdf(pdf_path: str, paper_id: str) -> dict[str, Any]:
                 (
                     paper_id,
                     ref.get("title", ""),
-                    json.dumps(ref.get("authors", [])),
+                    json.dumps(ref.get("authors", []), ensure_ascii=False),
                     ref.get("doi"),
                     ref.get("journal", ""),
                     ref.get("year"),
                 ),
             )
 
+        conn.execute(
+            """
+            UPDATE papers
+            SET status = 'parsed'
+            WHERE paper_id = ?
+            """,
+            (paper_id,),
+        )
         conn.commit()
     finally:
         conn.close()
@@ -64,11 +145,38 @@ def parse_pdf(pdf_path: str, paper_id: str) -> dict[str, Any]:
         "success": True,
         "paper_id": paper_id,
         "ref_count": len(refs),
-        "status": "pending",
+        "status": "parsed",
     }
 
 
-# Tool 2: verify_doi
+# Tool 2: list references for a paper
+def list_references(paper_id: str) -> dict[str, Any]:
+    conn = init_reference_db()
+    try:
+        rows = conn.execute(
+            """
+            SELECT ref_id, paper_id, title, authors, doi, journal, year,
+                   doi_status, authors_status, journal_status
+            FROM "references"
+            WHERE paper_id = ?
+            ORDER BY ref_id ASC
+            """,
+            (paper_id,),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    references = [_row_to_reference_dict(row) for row in rows]
+
+    return {
+        "success": True,
+        "paper_id": paper_id,
+        "count": len(references),
+        "references": references,
+    }
+
+
+# Tool 3: verify_doi
 def verify_doi(ref_id: int, doi: str) -> dict[str, Any]:
     from src.domain.reference.api_client import query_doi
 
@@ -79,10 +187,10 @@ def verify_doi(ref_id: int, doi: str) -> dict[str, Any]:
     doi_status = "verified" if (exists and matches) else "failed"
     canonical_metadata = result.get("metadata", {})
 
-    conn = _get_conn()
+    conn = init_reference_db()
     try:
         conn.execute(
-            "UPDATE references SET doi_status = ? WHERE ref_id = ?",
+            'UPDATE "references" SET doi_status = ? WHERE ref_id = ?',
             (doi_status, ref_id),
         )
         conn.commit()
@@ -99,7 +207,7 @@ def verify_doi(ref_id: int, doi: str) -> dict[str, Any]:
     }
 
 
-# Tool 3: verify_authors
+# Tool 4: verify_authors
 def verify_authors(ref_id: int, title: str, authors: list[str]) -> dict[str, Any]:
     from src.domain.reference.api_client import query_authors
 
@@ -109,10 +217,10 @@ def verify_authors(ref_id: int, title: str, authors: list[str]) -> dict[str, Any
     matches = result.get("found", False) and (expected == authors)
     authors_status = "verified" if matches else "failed"
 
-    conn = _get_conn()
+    conn = init_reference_db()
     try:
         conn.execute(
-            "UPDATE references SET authors_status = ? WHERE ref_id = ?",
+            'UPDATE "references" SET authors_status = ? WHERE ref_id = ?',
             (authors_status, ref_id),
         )
         conn.commit()
@@ -128,17 +236,10 @@ def verify_authors(ref_id: int, title: str, authors: list[str]) -> dict[str, Any
     }
 
 
-# Tool 4: verify_journal
+# Tool 5: verify_journal
 def verify_journal(ref_id: int, doi: str, journal: str) -> dict[str, Any]:
-    """
-    Verify journal name using canonical metadata from CrossRef.
-    Depends on verify_doi having run first (doi_status != pending).
-    Updates journal_status in DB.
-    Returns: { ref_id, journal_status, expected_journal, provided_journal }
-    """
     from src.domain.reference.api_client import query_doi
 
-    # Re-use CrossRef metadata (cached in mock; live makes same call)
     result = query_doi(doi)
     expected_journal = result.get("metadata", {}).get("journal", "")
 
@@ -148,10 +249,10 @@ def verify_journal(ref_id: int, doi: str, journal: str) -> dict[str, Any]:
     )
     journal_status = "verified" if matches else "failed"
 
-    conn = _get_conn()
+    conn = init_reference_db()
     try:
         conn.execute(
-            "UPDATE references SET journal_status = ? WHERE ref_id = ?",
+            'UPDATE "references" SET journal_status = ? WHERE ref_id = ?',
             (journal_status, ref_id),
         )
         conn.commit()
@@ -167,9 +268,123 @@ def verify_journal(ref_id: int, doi: str, journal: str) -> dict[str, Any]:
     }
 
 
-# Tool registry
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "parse_pdf",
+            "description": "Parse a PDF file and extract references into the database.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "pdf_path": {
+                        "type": "string",
+                        "description": "Path to the PDF file to parse",
+                    },
+                    "paper_id": {
+                        "type": "string",
+                        "description": "Unique paper identifier used to store extracted references",
+                    },
+                },
+                "required": ["pdf_path", "paper_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_references",
+            "description": "List all extracted references for a given paper_id, including ref_id and parsed metadata needed for later verification.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "paper_id": {
+                        "type": "string",
+                        "description": "Paper identifier used when storing extracted references",
+                    }
+                },
+                "required": ["paper_id"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "verify_doi",
+            "description": "Verify whether a DOI exists and matches the extracted reference.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ref_id": {
+                        "type": "integer",
+                        "description": "Reference ID in the database",
+                    },
+                    "doi": {
+                        "type": "string",
+                        "description": "DOI string to verify",
+                    },
+                },
+                "required": ["ref_id", "doi"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "verify_authors",
+            "description": "Verify whether the provided author list matches the reference title.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ref_id": {
+                        "type": "integer",
+                        "description": "Reference ID in the database",
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Reference title",
+                    },
+                    "authors": {
+                        "type": "array",
+                        "description": "List of authors extracted from the reference",
+                        "items": {"type": "string"},
+                    },
+                },
+                "required": ["ref_id", "title", "authors"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "verify_journal",
+            "description": "Verify whether the provided journal name matches the canonical journal metadata of the DOI.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ref_id": {
+                        "type": "integer",
+                        "description": "Reference ID in the database",
+                    },
+                    "doi": {
+                        "type": "string",
+                        "description": "DOI string used to retrieve canonical metadata",
+                    },
+                    "journal": {
+                        "type": "string",
+                        "description": "Extracted journal name to verify",
+                    },
+                },
+                "required": ["ref_id", "doi", "journal"],
+            },
+        },
+    },
+]
+
+
 TOOL_REGISTRY = {
     "parse_pdf": parse_pdf,
+    "list_references": list_references,
     "verify_doi": verify_doi,
     "verify_authors": verify_authors,
     "verify_journal": verify_journal,

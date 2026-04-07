@@ -7,6 +7,7 @@ _TYPE_MAP = {
     "int": int,
     "str": str,
     "bool": bool,
+    "list": list,
 }
 
 
@@ -32,7 +33,8 @@ def load_tool_config(config_path: str | Path) -> dict:
         for p in cfg.get("policies", []):
             policies.append(
                 {
-                    "condition": get_policy(p["name"]),
+                    "name": p["name"],
+                    "check": get_policy(p["name"]),
                     "reason": p["reason"],
                 }
             )

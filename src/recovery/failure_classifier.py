@@ -1,6 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
-from src.gate.shcema_validator import GateResult
+from src.gate.validator import GateResult
 from src.verifier.verifier import VerifierResult
 
 
