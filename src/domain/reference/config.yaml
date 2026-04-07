@@ -1,0 +1,67 @@
+tools:
+  parse_pdf:
+    required:
+      - name: pdf_path
+        type: str
+      - name: paper_id
+        type: str
+    rules: []
+    policies: []
+    dependencies: []
+    assertions:
+      - parse_pdf_wrote_references
+
+  verify_doi:
+    required:
+      - name: ref_id
+        type: int
+      - name: doi
+        type: str
+    rules:
+      - field: doi
+        type: str
+        min_length: 5
+    policies:
+      - batch_size_limit
+    dependencies:
+      - parse_pdf
+    assertions:
+      - doi_status_not_pending
+
+  verify_authors:
+    required:
+      - name: ref_id
+        type: int
+      - name: title
+        type: str
+      - name: authors
+        type: list
+    rules: []
+    policies:
+      - batch_size_limit
+    dependencies:
+      - parse_pdf
+    assertions:
+      - authors_status_not_pending
+
+  verify_journal:
+    required:
+      - name: ref_id
+        type: int
+      - name: doi
+        type: str
+      - name: journal
+        type: str
+    rules:
+      - field: doi
+        type: str
+        min_length: 5
+    policies:
+      - batch_size_limit
+      - doi_required_for_journal
+    dependencies:
+      - parse_pdf
+      - verify_doi
+    assertions:
+      - verify_journal_doi_status_verified
+      - journal_status_not_pending

@@ -1,6 +1,6 @@
-from src.agent.react_agent_baseline import run_baseline
+from legacy.agent.react_agent_baseline import run_baseline
 from src.db.reset_env import reset_env
-from tasks.obs001_tasks import TASKS
+from legacy.tasks.obs001_tasks import TASKS
 
 if __name__ == "__main__":
     reset_env()
