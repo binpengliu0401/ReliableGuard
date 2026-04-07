@@ -1,18 +1,21 @@
 from dataclasses import dataclass
 from src.verifier.state_tracker import StateDiff
-from src.config.tool_config import TOOL_CONFIG
 
 
 @dataclass
 class VerifierResult:
     passed: bool
-    verdict: str  # "SUCCESS" / "FAIL_SUCCESS" / "UNVERIFIED"
+    verdict: str
     evidence: str
 
 
-def verify(func_name: str, func_args: dict, diff: StateDiff) -> VerifierResult:
-
-    config = TOOL_CONFIG.get(func_name, {})
+def verify(
+    func_name: str,
+    func_args: dict,
+    diff: StateDiff,
+    tool_config: dict,
+) -> VerifierResult:
+    config = tool_config.get(func_name, {})
     assertions = config.get("assertions", [])
 
     if not assertions:
@@ -27,6 +30,7 @@ def verify(func_name: str, func_args: dict, diff: StateDiff) -> VerifierResult:
                 verdict="FALSE_SUCCESS",
                 evidence=f"Assertion '{assertion['name']}' failed: {assertion['failure']}",
             )
+
     return VerifierResult(
         passed=True, verdict="SUCCESS", evidence="All assertions passed"
     )

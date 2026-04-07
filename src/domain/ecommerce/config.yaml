@@ -1,0 +1,69 @@
+tools:
+  create_order:
+    required:
+      - amount
+    rules:
+      amount:
+        type: float
+        min: 0.01
+        max: 10000
+    policies:
+      - name: amount_requires_approval
+        reason: "amount exceeds 5000, requires approval before order creation"
+    dependencies: []
+    assertions:
+      - name: order_created
+        failure: "No new order found in DB after execution"
+      - name: status_is_pending
+        failure: "Order status is not pending"
+      - name: amount_is_positive
+        failure: "Order amount in DB is not positive"
+
+  get_order_status:
+    required:
+      - order_id
+    rules:
+      order_id:
+        type: int
+        min: 1
+    policies: []
+    dependencies:
+      - create_order
+    assertions: []
+
+  confirm_order:
+    required:
+      - order_id
+    rules:
+      order_id:
+        type: int
+        min: 1
+    policies: []
+    dependencies:
+      - create_order
+    assertions:
+      - name: order_confirmed
+        failure: "Order status did not transition to confirmed in DB"
+      - name: updated_order_matches
+        failure: "Confirmed order ID in DB does not match requested order_id"
+
+  refund_order:
+    required:
+      - order_id
+      - reason
+    rules:
+      order_id:
+        type: int
+        min: 1
+      reason:
+        type: str
+    policies:
+      - name: refund_reason_not_empty
+        reason: "refund reason must be a non-empty string"
+    dependencies:
+      - confirm_order
+    assertions:
+      - name: order_refunded
+        failure: "Order status did not transition to refunded in DB"
+      - name: refund_reason_written
+        failure: "refund_reason not written to DB"

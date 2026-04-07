@@ -412,8 +412,15 @@ SCENARIOS = generate_all()
 
 
 if __name__ == "__main__":
+    import json
     from collections import Counter
+
     counts = Counter(s["failure_mode"] for s in SCENARIOS)
     print(f"Total scenarios: {len(SCENARIOS)}")
     for mode, n in sorted(counts.items()):
         print(f"  {mode}: {n}")
+
+    output_path = "tasks/scenarios.json"
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(SCENARIOS, f, ensure_ascii=False, indent=2)
+    print(f"Saved {len(SCENARIOS)} scenarios to {output_path}")

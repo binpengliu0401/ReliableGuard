@@ -45,3 +45,32 @@ def run_version(
             print(f"[{match}] {task['id']} | expected={expected} actual={actual}")
 
     return results
+
+
+if __name__ == "__main__":
+    import argparse
+    import json
+    from eval.metrics import compute_metrics
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--scenarios", type=int, default=10, help="Number of scenarios to run"
+    )
+    parser.add_argument(
+        "--input", type=str, default="tasks/scenarios.json", help="Scenarios file"
+    )
+    parser.add_argument(
+        "--versions", nargs="+", default=list(VERSIONS.keys()), help="Versions to run"
+    )
+    args = parser.parse_args()
+
+    with open(args.input, "r", encoding="utf-8") as f:
+        all_scenarios = json.load(f)
+    scenarios = all_scenarios[: args.scenarios]
+
+    print(f"Running {len(scenarios)} scenarios on versions: {args.versions}")
+
+    for version_key in args.versions:
+        results = run_version(version_key, scenarios)
+        metrics = compute_metrics(results)
+        print(f"\n[METRICS] {version_key}: {metrics}")

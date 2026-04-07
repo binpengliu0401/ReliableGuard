@@ -129,3 +129,10 @@ tools = [
         },
     },
 ]
+
+TOOL_REGISTRY = {
+    "create_order": create_order,
+    "get_order_status": get_order_status,
+    "confirm_order": confirm_order,
+    "refund_order": refund_order,
+}

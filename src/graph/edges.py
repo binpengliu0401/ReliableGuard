@@ -23,8 +23,7 @@ def after_recovery(state: AgentState) -> str:
     action = state.get("recovery_action")
     if action == "retry":
         retry_count = state.get("retry_count", 0)
-        from src.config.tool_config import MAX_RETRIES
-
+        MAX_RETRIES = 3
         if retry_count >= MAX_RETRIES:
             return "end"
         return "plan"

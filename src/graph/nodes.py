@@ -1,3 +1,6 @@
+import src.domain.ecommerce.policies
+import src.domain.ecommerce.assertions
+
 import json
 import os
 
@@ -11,17 +14,19 @@ from src.recovery.failure_classifier import (
     classify_verifier_failure,
 )
 from src.recovery.recovery_controller import BudgetTracker, recover
-from src.tools.order_service import (
-    tools,
-    create_order,
-    get_order_status,
-    confirm_order,
-    refund_order,
-    cursor,
-)
-from src.config.tool_config import MAX_RETRIES
 from src.verifier.verifier import verify
 from src.verifier.state_tracker import take_snapshot, compute_diff
+import src.domain.ecommerce
+from pathlib import Path
+from src.domain.loader import load_tool_config
+from src.tools.order_service import tools, TOOL_REGISTRY, cursor
+
+_TOOL_CONFIG = load_tool_config(
+    Path(__file__).parent.parent / "domain" / "ecommerce" / "config.yaml"
+)
+
+
+MAX_RETRIES = 3
 
 load_dotenv()
 
@@ -79,7 +84,9 @@ def plan_node(state: AgentState) -> AgentState:
 def gate_node(state: AgentState) -> AgentState:
     tc = state["tool_call"]
     executed_tools = state.get("executed_tools", [])
-    gate_result = gate_validate(tc["func_name"], tc["func_args"], executed_tools)  # type: ignore
+    gate_result = gate_validate(
+        tc["func_name"], tc["func_args"], executed_tools, _TOOL_CONFIG  # type: ignore
+    )
 
     if gate_result.allowed:
         state["gate_status"] = "PASSED"
@@ -100,16 +107,10 @@ def execute_node(state: AgentState) -> AgentState:
 
     state["snapshot_before"] = take_snapshot(cursor)
 
-    if func_name == "create_order":
-        result = create_order(**func_args)
-    elif func_name == "get_order_status":
-        result = get_order_status(**func_args)
-    elif func_name == "confirm_order":
-        result = confirm_order(**func_args)
-    elif func_name == "refund_order":
-        result = refund_order(**func_args)
-    else:
-        result = {"error": f"unknown tool: {func_name}"}
+    result = TOOL_REGISTRY.get(
+        func_name,
+        lambda **kw: {"error": f"unknown tool: {func_name}"},
+    )(**func_args)
 
     state["executed_tools"] = state.get("executed_tools", []) + [func_name]
 
@@ -133,7 +134,7 @@ def verify_node(state: AgentState) -> AgentState:
     tc = state["tool_call"]
     snapshot_after = take_snapshot(cursor)
     diff = compute_diff(state["snapshot_before"], snapshot_after)
-    verifier_result = verify(tc["func_name"], tc["func_args"], diff)  # type: ignore
+    verifier_result = verify(tc["func_name"], tc["func_args"], diff, _TOOL_CONFIG)  # type: ignore
 
     if verifier_result.passed:
         state["verifier_status"] = "PASSED"
