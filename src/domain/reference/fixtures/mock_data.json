@@ -1,145 +1,88 @@
 {
-    "pdfs": {
-        "paper_valid.pdf": {
-            "references": [
-                {
-                    "title": "Attention Is All You Need",
-                    "authors": [
-                        "Ashish Vaswani",
-                        "Noam Shazeer",
-                        "Niki Parmar"
-                    ],
-                    "doi": "10.48550/arXiv.1706.03762",
-                    "journal": "arXiv",
-                    "year": 2017
-                },
-                {
-                    "title": "BERT: Pre-training of Deep Bidirectional Transformers",
-                    "authors": [
-                        "Jacob Devlin",
-                        "Ming-Wei Chang",
-                        "Kenton Lee"
-                    ],
-                    "doi": "10.18653/v1/N19-1423",
-                    "journal": "NAACL",
-                    "year": 2019
-                }
-            ]
-        },
-        "paper_nonexistent_doi.pdf": {
-            "references": [
-                {
-                    "title": "A Fake Paper That Does Not Exist",
-                    "authors": [
-                        "Ghost Author"
-                    ],
-                    "doi": "10.99999/fake.0000",
-                    "journal": "Phantom Journal",
-                    "year": 2023
-                }
-            ]
-        },
-        "paper_wrong_doi.pdf": {
-            "references": [
-                {
-                    "title": "Attention Is All You Need",
-                    "authors": [
-                        "Ashish Vaswani",
-                        "Noam Shazeer",
-                        "Niki Parmar"
-                    ],
-                    "doi": "10.18653/v1/N19-1423",
-                    "journal": "arXiv",
-                    "year": 2017
-                }
-            ]
-        },
-        "paper_wrong_authors.pdf": {
-            "references": [
-                {
-                    "title": "BERT: Pre-training of Deep Bidirectional Transformers",
-                    "authors": [
-                        "Kenton Lee",
-                        "Jacob Devlin",
-                        "Ming-Wei Chang"
-                    ],
-                    "doi": "10.18653/v1/N19-1423",
-                    "journal": "NAACL",
-                    "year": 2019
-                }
-            ]
-        },
-        "paper_wrong_journal.pdf": {
-            "references": [
-                {
-                    "title": "Attention Is All You Need",
-                    "authors": [
-                        "Ashish Vaswani",
-                        "Noam Shazeer",
-                        "Niki Parmar"
-                    ],
-                    "doi": "10.48550/arXiv.1706.03762",
-                    "journal": "Nature",
-                    "year": 2017
-                }
-            ]
+  "pdfs": {
+    "paper_f0.pdf": {
+      "references": [
+        {
+          "title": "Attention Is All You Need",
+          "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"],
+          "doi": "10.48550/arXiv.1706.03762",
+          "journal": "arXiv",
+          "year": 2017
         }
+      ]
     },
-    "dois": {
-        "10.48550/arXiv.1706.03762": {
-            "exists": true,
-            "matches": true,
-            "metadata": {
-                "title": "Attention Is All You Need",
-                "journal": "arXiv",
-                "authors": [
-                    "Ashish Vaswani",
-                    "Noam Shazeer",
-                    "Niki Parmar"
-                ],
-                "year": 2017
-            }
-        },
-        "10.18653/v1/N19-1423": {
-            "exists": true,
-            "matches": true,
-            "metadata": {
-                "title": "BERT: Pre-training of Deep Bidirectional Transformers",
-                "journal": "NAACL",
-                "authors": [
-                    "Jacob Devlin",
-                    "Ming-Wei Chang",
-                    "Kenton Lee"
-                ],
-                "year": 2019
-            }
-        },
-        "10.99999/fake.0000": {
-            "exists": false,
-            "matches": false,
-            "metadata": {}
+    "paper_f2.pdf": {
+      "references": [
+        {
+          "title": "BERT: Pre-training of Deep Bidirectional Transformers",
+          "authors": ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee"],
+          "doi": "10.18653/v1/N19-1423",
+          "journal": "NAACL",
+          "year": 2019
         }
+      ]
     },
-    "authors": {
-        "attention is all you need": {
-            "found": true,
-            "authors": [
-                "Ashish Vaswani",
-                "Noam Shazeer",
-                "Niki Parmar"
-            ]
-        },
-        "bert: pre-training of deep bidirectional transformers": {
-            "found": true,
-            "authors": [
-                "Jacob Devlin",
-                "Ming-Wei Chang",
-                "Kenton Lee"
-            ]
-        },
-        "a fake paper that does not exist": {
-            "found": false,
-            "authors": []
+    "paper_nonexistent_doi.pdf": {
+      "references": [
+        {
+          "title": "A Fake Paper That Does Not Exist",
+          "authors": ["Ghost Author"],
+          "doi": "10.99999/fake.0000",
+          "journal": "Phantom Journal",
+          "year": 2023
         }
+      ]
+    },
+    "paper_nodoi.pdf": {
+      "references": [
+        {
+          "title": "A Study Without DOI",
+          "authors": ["Unknown Author"],
+          "doi": "",
+          "journal": "Journal of Unknown",
+          "year": 2022
+        }
+      ]
+    },
+    "paper_f4.pdf": {
+      "references": []
     }
+  },
+  "dois": {
+    "10.48550/arXiv.1706.03762": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Attention Is All You Need",
+        "journal": "arXiv",
+        "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"],
+        "year": 2017
+      }
+    },
+    "10.18653/v1/N19-1423": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "BERT: Pre-training of Deep Bidirectional Transformers",
+        "journal": "NAACL",
+        "authors": ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee"],
+        "year": 2019
+      }
+    },
+    "10.99999/fake.0000": {
+      "exists": false,
+      "matches": false,
+      "metadata": {}
+    }
+  },
+  "authors": {
+    "attention is all you need": {
+      "found": true,
+      "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"]
+    },
+    "bert: pre-training of deep bidirectional transformers": {
+      "found": true,
+      "authors": ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee"]
+    }
+  }
 }

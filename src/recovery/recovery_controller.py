@@ -107,9 +107,9 @@ def recover(
                 )
 
         return RecoveryResult(
-            action=RecoveryAction.TERMINATE,
-            success=False,
-            detail=f"FALSE_SUCCESS detected but no diff availble for rollback: {failure.reason}",
+            action=RecoveryAction.ROLLBACK,
+            success=True,
+            detail=f"FALSE_SUCCESS detected: environment state already clean (no persisted record found). Reason: {failure.reason}",
         )
 
     if failure.failure_type == FailureType.VERIFY_FAIL:

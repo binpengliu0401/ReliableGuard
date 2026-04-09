@@ -14,6 +14,7 @@ def validate(
     func_args: dict,
     executed_tools: list[str],
     tool_config: dict,
+    context: dict | None = None,
 ) -> GateResult:
     if func_name not in tool_config:
         return GateResult(
@@ -95,18 +96,7 @@ def validate(
                     ),
                 )
 
-    # 3. policies
-    for policy in config.get("policies", []):
-        ok, policy_reason = policy["check"](func_name, func_args)
-        if not ok:
-            return GateResult(
-                allowed=False,
-                category="POLICY_VIOLATION",
-                subtype=policy["name"],
-                reason=policy_reason or f"policy violation: {policy['reason']}",
-            )
-
-    # 4. dependencies
+    # 3. dependencies
     for dep in config.get("dependencies", []):
         if dep not in executed_tools:
             return GateResult(
@@ -114,6 +104,21 @@ def validate(
                 category="DEPENDENCY_VIOLATION",
                 subtype="MISSING_PREREQUISITE_TOOL",
                 reason=f"'{dep}' must be executed before '{func_name}'",
+            )
+
+    # 4. policies
+    for policy in config.get("policies", []):
+        check_fn = policy["check"]
+        if check_fn.__code__.co_argcount >= 3:
+            ok, policy_reason = check_fn(func_name, func_args, context)
+        else:
+            ok, policy_reason = check_fn(func_name, func_args)
+        if not ok:
+            return GateResult(
+                allowed=False,
+                category="POLICY_VIOLATION",
+                subtype=policy["name"],
+                reason=policy_reason or f"policy violation: {policy['reason']}",
             )
 
     return GateResult(

@@ -14,6 +14,8 @@ def derive_outcome(state: dict) -> str:
 
     # Multi-turn completed: tools were executed, last plan found no more calls
     if tool_call is None and executed_tools:
+        if verifier_status == "PASSED" and recovery_action == "retry":
+            return "RECOVERY_SUCCESS"
         if verifier_status == "PASSED" or verifier_status is None:
             return "SUCCESS"
 
@@ -25,6 +27,8 @@ def derive_outcome(state: dict) -> str:
         return "GATE_BLOCKED"
     if recovery_action == "rollback":
         return "ROLLBACK"
+    if verifier_status == "PASSED" and recovery_action == "retry":
+        return "RECOVERY_SUCCESS"
     if verifier_status == "PASSED":
         return "SUCCESS"
     if verifier_status == "FAILED":
@@ -64,8 +68,6 @@ def compute_outcome_score(expected: str, actual: str) -> int:
 
 # Aggregate metrics across a list of (task_spec, final_state) pairs
 def compute_metrics(results: list[dict]) -> dict:
-    results = [r for r in results if not r["task"].get("note")]
-
     total = len(results)
     if total == 0:
         return {}
@@ -74,6 +76,8 @@ def compute_metrics(results: list[dict]) -> dict:
     false_success_count = 0
     gate_schema_blocked = 0
     gate_policy_blocked = 0
+    recovery_triggered = 0
+    recovery_resolved = 0
     total_tool_calls = 0
     outcome_scores = []
 
@@ -92,20 +96,31 @@ def compute_metrics(results: list[dict]) -> dict:
             if state.get("gate_status") == "BLOCKED":
                 total_tool_calls += 1
 
+            recovery_action = state.get("recovery_action")
+            verifier_status = state.get("verifier_status")
+            if recovery_action is not None:
+                recovery_triggered += 1
+            if recovery_action == "retry" and verifier_status == "PASSED":
+                recovery_resolved += 1
+
         if actual == "SUCCESS":
             success_count += 1
 
         if actual == "SUCCESS" and expected != "SUCCESS":
             false_success_count += 1
 
-        gate_detail = (state.get("gate_detail", "") if state else "") or ""
         if state is not None and state.get("gate_status") == "BLOCKED":
-            if "Policy violation" in gate_detail:
+            if state.get("gate_category") == "POLICY_VIOLATION":
                 gate_policy_blocked += 1
-            else:
+            elif state.get("gate_status") == "BLOCKED":
                 gate_schema_blocked += 1
 
     call_base = total_tool_calls if total_tool_calls > 0 else 1
+    recovery_resolution_rate = (
+        round(recovery_resolved / recovery_triggered, 3)
+        if recovery_triggered > 0
+        else 0.0
+    )
 
     return {
         "total_tasks": total,
@@ -113,6 +128,7 @@ def compute_metrics(results: list[dict]) -> dict:
         "false_success_rate": round(false_success_count / total, 3),
         "invalid_call_rate": round(gate_schema_blocked / call_base, 3),
         "policy_violation_rate": round(gate_policy_blocked / call_base, 3),
+        "recovery_resolution_rate": recovery_resolution_rate,
         "avg_outcome_score": round(sum(outcome_scores) / total, 3),
         "outcome_scores": outcome_scores,
     }
@@ -121,6 +137,9 @@ def compute_metrics(results: list[dict]) -> dict:
 def derive_failure_type(state: dict | None, expected: str, actual: str) -> str:
     if state is None:
         return "runtime_error"
+
+    if actual == "RECOVERY_SUCCESS":
+        return "none"
 
     if actual == expected:
         return "none"
@@ -172,6 +191,7 @@ def build_result_row(
         "failure_type": derive_failure_type(state, expected, actual),
         "tool_calls": len(executed_tools),
         "gate_status": state.get("gate_status") if state else None,
+        "gate_category": state.get("gate_category") if state else None,
         "gate_detail": state.get("gate_detail") if state else None,
         "verifier_status": state.get("verifier_status") if state else None,
         "recovery_action": state.get("recovery_action") if state else None,

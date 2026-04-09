@@ -63,6 +63,7 @@ def _print_summary(all_metrics: dict):
         ("false_success_rate", "False Success Rate"),
         ("invalid_call_rate", "Invalid Call Rate"),
         ("policy_violation_rate", "Policy Violation Rate"),
+        ("recovery_resolution_rate", "Recovery Resolution Rate"),
         ("avg_outcome_score", "Avg Outcome Score"),
     ]
 
@@ -84,6 +85,7 @@ def _export_csv(all_metrics: dict, path: str):
         "false_success_rate",
         "invalid_call_rate",
         "policy_violation_rate",
+        "recovery_resolution_rate",
         "avg_outcome_score",
     ]
 

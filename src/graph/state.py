@@ -20,8 +20,10 @@ class AgentState(TypedDict):
 
     gate_status: Optional[str]
     gate_detail: Optional[str]
+    gate_category: Optional[str]
 
     verifier_status: Optional[str]
+    verifier_verdict: Optional[str]
     verifier_detail: Optional[str]
 
     recovery_action: Optional[str]
@@ -42,3 +44,4 @@ class AgentState(TypedDict):
     domain: str
     tool_config: dict
     verifier_context: Any
+    inject_false_success: bool

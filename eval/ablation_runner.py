@@ -17,11 +17,21 @@ def run_version(
     print(f"# VERSION: {config.version_name}")
     print(f"{'#'*60}")
 
-    reset_env()
-
     for task in scenarios:
+        domain = task.get("domain", "ecommerce")
+        if domain == "ecommerce":
+            reset_env()
+        else:
+            from src.db.reset_reference_env import reset_reference_env
+
+            reset_reference_env()
         try:
-            state = run_agent(task["input"], config=config)
+            state = run_agent(
+                task["input"],
+                domain=domain,
+                config=config,
+                inject_false_success=task.get("note") == "f4b_injection",
+            )
             row = build_result_row(
                 task=task, state=state, version=version_key, error=None
             )
@@ -66,6 +76,8 @@ def run_version(
 if __name__ == "__main__":
     import argparse
     import json
+    import os
+    import random
     from eval.metrics import compute_metrics
 
     parser = argparse.ArgumentParser()
@@ -78,15 +90,55 @@ if __name__ == "__main__":
     parser.add_argument(
         "--versions", nargs="+", default=list(VERSIONS.keys()), help="Versions to run"
     )
+    parser.add_argument(
+        "--stratified",
+        action="store_true",
+        help="Sample evenly across failure categories F0-F5 using scenario id prefix",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="logs/ablation_metrics.json",
+        help="Output file for metrics",
+    )
     args = parser.parse_args()
 
     with open(args.input, "r", encoding="utf-8") as f:
         all_scenarios = json.load(f)
-    scenarios = all_scenarios[: args.scenarios]
+
+    if args.stratified:
+        categories = [f"F{i}" for i in range(6)]
+        quota = args.scenarios // len(categories)
+        grouped = {cat: [] for cat in categories}
+
+        for scenario in all_scenarios:
+            scenario_id = str(scenario.get("id", ""))
+            for cat in categories:
+                if scenario_id.startswith(cat):
+                    grouped[cat].append(scenario)
+                    break
+
+        rng = random.Random(42)
+        scenarios = []
+        for cat in categories:
+            candidates = grouped[cat]
+            if len(candidates) <= quota:
+                scenarios.extend(candidates)
+            else:
+                scenarios.extend(rng.sample(candidates, quota))
+    else:
+        scenarios = all_scenarios[: args.scenarios]
 
     print(f"Running {len(scenarios)} scenarios on versions: {args.versions}")
 
+    all_metrics = {}
     for version_key in args.versions:
         results = run_version(version_key, scenarios)
         metrics = compute_metrics(results)
+        all_metrics[version_key] = metrics
         print(f"\n[METRICS] {version_key}: {metrics}")
+
+    os.makedirs(os.path.dirname(args.output), exist_ok=True)
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(all_metrics, f, indent=2, ensure_ascii=False)
+    print(f"\n[SAVED] Metrics written to {args.output}")

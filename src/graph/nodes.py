@@ -26,6 +26,7 @@ import src.domain.reference.assertions
 from src.tools.order_service import tools as ecommerce_tools
 from src.tools.order_service import TOOL_REGISTRY as ECOMMERCE_TOOL_REGISTRY
 from src.tools.order_service import cursor as ecommerce_cursor
+from src.tools.order_service import conn as ecommerce_conn
 from src.verifier.ecommerce_state_tracker import (
     take_snapshot as ecommerce_take_snapshot,
     compute_diff as ecommerce_compute_diff,
@@ -139,17 +140,29 @@ def gate_node(state: AgentState) -> AgentState:
     executed_tools = state.get("executed_tools", [])
 
     tool_config = state["tool_config"]
+    context = None
+    if state["domain"] == "reference":
+        context = {"db_conn": state.get("verifier_context")}
+    elif state["domain"] == "ecommerce":
+        context = {"db_conn": ecommerce_conn}
+
     gate_result = gate_validate(
-        tc["func_name"], tc["func_args"], executed_tools, tool_config  # type: ignore
+        tc["func_name"],  # type: ignore
+        tc["func_args"],  # type: ignore
+        executed_tools,
+        tool_config,
+        context=context,
     )
 
     if gate_result.allowed:
         state["gate_status"] = "PASSED"
         state["gate_detail"] = gate_result.reason
+        state["gate_category"] = gate_result.category
         _trace(state, "gate_node", "PASSED", f"args={tc['func_args']}")  # type: ignore
     else:
         state["gate_status"] = "BLOCKED"
         state["gate_detail"] = gate_result.reason
+        state["gate_category"] = gate_result.category
         _trace(state, "gate_node", "BLOCKED", gate_result.reason)
 
     return state
@@ -173,6 +186,27 @@ def execute_node(state: AgentState) -> AgentState:
         func_name,
         lambda **kw: {"error": f"unknown tool: {func_name}"},
     )(**func_args)
+
+    if state.get("inject_false_success") and domain == "ecommerce":
+        snapshot_before = state.get("snapshot_before")
+        before_count = (
+            snapshot_before.order_count if snapshot_before is not None else 0
+        )
+        after_count = ecommerce_cursor.execute("SELECT COUNT(*) FROM orders").fetchone()[0]  # type: ignore
+
+        if after_count > before_count:
+            last_row = ecommerce_cursor.execute(
+                "SELECT id FROM orders ORDER BY id DESC LIMIT 1"
+            ).fetchone()
+            if last_row is not None:
+                ecommerce_cursor.execute("DELETE FROM orders WHERE id = ?", (last_row[0],))  # type: ignore
+                ecommerce_conn.commit()
+                _trace(
+                    state,
+                    "execute_node",
+                    "F4B_INJECTION",
+                    f"Removed inserted order id={last_row[0]}",
+                )
 
     state["executed_tools"] = state.get("executed_tools", []) + [func_name]
 
@@ -213,12 +247,23 @@ def verify_node(state: AgentState) -> AgentState:
             context=state["verifier_context"],
         )
 
+    if state.get("inject_false_success") and not verifier_result.passed:
+        from src.verifier.verifier import VerifierResult
+
+        verifier_result = VerifierResult(
+            passed=False,
+            verdict="FALSE_SUCCESS",
+            evidence=verifier_result.evidence,
+            failed_assertions=verifier_result.failed_assertions,
+        )
+
     if verifier_result.passed:
         state["verifier_status"] = "PASSED"
         state["verifier_detail"] = verifier_result.evidence
         _trace(state, "verify_node", "PASSED", verifier_result.evidence)
     else:
         state["verifier_status"] = "FAILED"
+        state["verifier_verdict"] = verifier_result.verdict
         state["verifier_detail"] = verifier_result.evidence
         _trace(state, "verify_node", "FAILED", verifier_result.evidence)
 
@@ -243,7 +288,7 @@ def recovery_node(state: AgentState) -> AgentState:
 
         verifier_result = VerifierResult(
             passed=False,
-            verdict=state["verifier_status"],  # type: ignore
+            verdict=state.get("verifier_verdict") or state["verifier_status"],  # type: ignore
             evidence=state["verifier_detail"],  # type: ignore
             failed_assertions=[],
         )

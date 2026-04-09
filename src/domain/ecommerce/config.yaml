@@ -29,7 +29,6 @@ tools:
     policies: []
     dependencies:
       - create_order
-    assertions: []
 
   confirm_order:
     required:

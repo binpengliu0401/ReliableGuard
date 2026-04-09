@@ -1,0 +1,18 @@
+{
+  "V3_Verifier": {
+    "total_tasks": 5,
+    "end_to_end_success_rate": 0.2,
+    "false_success_rate": 0.0,
+    "invalid_call_rate": 0.182,
+    "policy_violation_rate": 0.091,
+    "recovery_resolution_rate": 0.0,
+    "avg_outcome_score": 3.0,
+    "outcome_scores": [
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  }
+}

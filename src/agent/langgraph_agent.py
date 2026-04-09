@@ -106,6 +106,7 @@ def run_agent(
     *,
     domain: str = "ecommerce",
     config: AblationConfig = VERSIONS["V4_Full"],
+    inject_false_success: bool = False,
 ) -> dict:
     print(f"\n{'='*50}")
     print(f"[DOMAIN]   {domain}")
@@ -122,7 +123,9 @@ def run_agent(
         "tool_call": None,
         "gate_status": None,
         "gate_detail": None,
+        "gate_category": None,
         "verifier_status": None,
+        "verifier_verdict": None,
         "verifier_detail": None,
         "recovery_action": None,
         "recovery_detail": None,
@@ -137,6 +140,7 @@ def run_agent(
         "domain": domain,
         "tool_config": {},
         "verifier_context": None,
+        "inject_false_success": inject_false_success,
     }  # type: ignore
 
     from src.graph.nodes import _prepare_execution_context
