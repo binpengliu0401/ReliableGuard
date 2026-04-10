@@ -24,7 +24,8 @@ tools:
         min: 1
       doi:
         type: str
-        min_length: 5
+        min_length: 8
+        pattern: "^10\\."
     policies:
       - name: batch_size_limit
         reason: "batch size exceeds maximum allowed limit"
@@ -33,8 +34,10 @@ tools:
     dependencies:
       - parse_pdf
     assertions:
-      - name: doi_status_not_pending
-        failure: "doi_status still pending after verify_doi"
+      - name: doi_status_updated
+        failure: "doi_status_updated: doi_status is still pending for ref_id={ref_id}, verify_doi was not executed or did not update the record."
+      - name: doi_status_verified
+        failure: "doi_status_verified: doi_status is not verified after verify_doi."
 
   verify_authors:
     required:
@@ -58,8 +61,10 @@ tools:
     dependencies:
       - parse_pdf
     assertions:
-      - name: authors_status_not_pending
-        failure: "authors_status still pending after verify_authors"
+      - name: authors_status_updated
+        failure: "authors_status_updated: authors_status is still pending for ref_id={ref_id}, verify_authors was not executed or did not update the record."
+      - name: authors_status_verified
+        failure: "authors_status_verified: authors_status is not verified after verify_authors."
 
   verify_journal:
     required:
@@ -89,8 +94,10 @@ tools:
     assertions:
       - name: verify_journal_doi_status_verified
         failure: "doi_status must be verified before verify_journal"
-      - name: journal_status_not_pending
-        failure: "journal_status still pending after verify_journal"
+      - name: journal_status_updated
+        failure: "journal_status_updated: journal_status is still pending for ref_id={ref_id}, verify_journal was not executed or did not update the record."
+      - name: journal_status_verified
+        failure: "journal_status_verified: journal_status is not verified after verify_journal."
 
   list_references:
     required:

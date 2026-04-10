@@ -4,7 +4,7 @@ from eval.ablation_runner import run_version
 from eval.metrics import compute_metrics
 from src.config.ablation_config import VERSIONS, with_gpt4o_mini
 from tasks.scenario_v1 import SCENARIOS as SCENARIOS_V1
-from tasks.scenario_generator import SCENARIOS as SCENARIOS_GEN
+from tasks.ecommerce_scenario_generator import SCENARIOS as SCENARIOS_GEN
 import json
 
 safe_scenarios = SCENARIOS_V1 + SCENARIOS_GEN

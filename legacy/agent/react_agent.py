@@ -46,7 +46,7 @@ def run_agent(msg: str):
     response = client.chat.complete(
         model="mistral-small-latest",
         messages=messages,
-        tools=tools, # type: ignore
+        tools=tools,  # type: ignore
         tool_choice="auto",  # type: ignore
     )
 

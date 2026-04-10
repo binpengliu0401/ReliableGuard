@@ -31,7 +31,7 @@ def run_baseline(msg: str):
     if tool_calls:
         for tool_call in tool_calls:
             func_name = tool_call.function.name
-            func_args = json.loads(tool_call.function.arguments) # type: ignore
+            func_args = json.loads(tool_call.function.arguments)  # type: ignore
             
             # Excute directly, no Gate and Verifier
             if func_name == "create_order":
@@ -39,7 +39,7 @@ def run_baseline(msg: str):
             elif func_name == "get_order_status":
                 exec_result = get_order_status(**func_args)
             
-            print(f"[EXECUTOR] {func_name}({func_args}) => {exec_result}") # type: ignore
+            print(f"[EXECUTOR] {func_name}({func_args}) => {exec_result}")  # type: ignore
             
             result["tool_called"] = True
             result["args_passed"] = func_args
@@ -49,7 +49,7 @@ def run_baseline(msg: str):
             message.append(
                 ToolMessage(
                     tool_call_id=tool_call.id,
-                    content=json.dumps(exec_result), # type: ignore
+                    content=json.dumps(exec_result),  # type: ignore
                 )
             )
         

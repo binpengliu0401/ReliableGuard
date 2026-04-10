@@ -11,6 +11,7 @@ class FailureType(Enum):
     GATE_DEPENDENCY_BLOCKED = "gate_dependency_blocked"
     FALSE_SUCCESS = "false_success"
     VERIFY_FAIL = "verify_fail"
+    REFERENCE_DOI_FAILED = "reference_doi_failed"
 
 
 # Structured failure information passed to recovery controller
@@ -56,6 +57,26 @@ def classify_verifier_failure(verifier_result: VerifierResult) -> FailurePacket:
             failure_type=FailureType.FALSE_SUCCESS,
             source="verifier",
             reason=verifier_result.evidence,
+        )
+
+    verdict_message = (
+        f"{verifier_result.verdict} {verifier_result.evidence}".lower()
+    )
+    if (
+        "doi_status_verified" in verdict_message
+        or "doi_status=failed" in verdict_message
+    ):
+        return FailurePacket(
+            failure_type=FailureType.REFERENCE_DOI_FAILED,
+            source="verifier",
+            reason=(
+                "DOI verification failed: the DOI does not exist or does not match "
+                "the reference metadata."
+            ),
+            context={
+                "verifier_verdict": verifier_result.verdict,
+                "verifier_evidence": verifier_result.evidence,
+            },
         )
 
     return FailurePacket(

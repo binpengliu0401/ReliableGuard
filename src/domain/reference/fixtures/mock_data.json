@@ -33,10 +33,21 @@
         }
       ]
     },
+    "paper_invaliddoi.pdf": {
+      "references": [
+        {
+          "title": "A Paper With Invalid DOI Format",
+          "authors": ["Test Author"],
+          "doi": "invalid-doi-format",
+          "journal": "Test Journal",
+          "year": 2023
+        }
+      ]
+    },
     "paper_nodoi.pdf": {
       "references": [
         {
-          "title": "A Study Without DOI",
+          "title": "A Paper With No DOI",
           "authors": ["Unknown Author"],
           "doi": "",
           "journal": "Journal of Unknown",

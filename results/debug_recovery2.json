@@ -1,0 +1,23 @@
+{
+  "V4_Full": {
+    "total_tasks": 10,
+    "end_to_end_success_rate": 0.3,
+    "false_success_rate": 0.3,
+    "invalid_call_rate": 0.0,
+    "policy_violation_rate": 0.267,
+    "recovery_resolution_rate": 0.0,
+    "avg_outcome_score": 1.2,
+    "outcome_scores": [
+      0,
+      3,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      3
+    ]
+  }
+}

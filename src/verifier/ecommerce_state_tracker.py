@@ -6,7 +6,8 @@ from typing import Any
 class Snapshot:
     order_count: int
     last_order: dict | None 
-    all_orders: dict[int, dict]  # id → {id, amount, status, refund_reason}
+    # id → {id, amount, status, refund_reason}
+    all_orders: dict[int, dict]
 
 
 @dataclass

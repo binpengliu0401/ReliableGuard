@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 
@@ -93,6 +94,19 @@ def validate(
                     reason=(
                         f"field '{field}' length must be <= {rules['max_length']}, "
                         f"got {len(value) if hasattr(value, '__len__') else 'N/A'}"
+                    ),
+                )
+
+        if "pattern" in rules:
+            import re
+            if not re.match(rules["pattern"], str(value)):
+                return GateResult(
+                    allowed=False,
+                    category="SCHEMA_VIOLATION",
+                    subtype="PATTERN_MISMATCH",
+                    reason=(
+                        f"field '{field}' does not match required pattern "
+                        f"{rules['pattern']}, got '{value}'"
                     ),
                 )
 

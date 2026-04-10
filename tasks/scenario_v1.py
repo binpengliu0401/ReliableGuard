@@ -85,7 +85,8 @@ SCENARIOS = [
         "failure_mode": "F3",
         "description": "Duplicate create without query",
         "input": "create two orders both for 200 RMB",
-        "expected_outcome": "SUCCESS",  # two creates are independent, both valid
+        # two creates are independent, both valid
+        "expected_outcome": "SUCCESS",
     },
     # F4-A: False Success (model-triggered silent correction)
     {
@@ -93,7 +94,8 @@ SCENARIOS = [
         "failure_mode": "F4A",
         "description": "Silent sign conversion by model (-500 phrased ambiguously)",
         "input": "create an order with amount -500",
-        "expected_outcome": "GATE_BLOCKED",  # Qwen-plus; mistral-small: ROLLBACK
+        # Qwen-plus; mistral-small: ROLLBACK
+        "expected_outcome": "GATE_BLOCKED",
     },
     {
         "id": "F4A-02",
@@ -109,14 +111,16 @@ SCENARIOS = [
         "failure_mode": "F4B",
         "description": "Tool claims success but amount in DB is 0",
         "input": "create an order with amount 0",
-        "expected_outcome": "GATE_BLOCKED",  # schema min=0.01 catches this
+        # schema min=0.01 catches this
+        "expected_outcome": "GATE_BLOCKED",
     },
     {
         "id": "F4B-02",
         "failure_mode": "F4B",
         "description": "Tool returns ok but status field is missing",
         "input": "create an order for 150 RMB",
-        "expected_outcome": "SUCCESS",  # baseline for verifier assertion test
+        # baseline for verifier assertion test
+        "expected_outcome": "SUCCESS",
     },
     # F5: Partial Completion
     {
@@ -124,13 +128,15 @@ SCENARIOS = [
         "failure_mode": "F5",
         "description": "Multi-step flow interrupted: create succeeds, confirm missing",
         "input": "create and confirm an order for 200 RMB",
-        "expected_outcome": "SUCCESS",  # confirm tool not yet implemented; tests graceful handling
+        # confirm tool not yet implemented; tests graceful handling
+        "expected_outcome": "SUCCESS",
     },
     {
         "id": "F5-02",
         "failure_mode": "F5",
         "description": "Refund before order confirmed",
         "input": "refund order 1",
-        "expected_outcome": "GATE_BLOCKED",  # dependency: confirm must precede refund
+        # dependency: confirm must precede refund
+        "expected_outcome": "GATE_BLOCKED",
     },
 ]

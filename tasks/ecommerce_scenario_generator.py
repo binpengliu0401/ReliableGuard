@@ -1,14 +1,12 @@
-"""
-Distribution:
-    F0  Happy Path                200
-    F1  Schema Violation          300
-    F2  Policy Violation          200
-    F3  Dependency Violation      150
-    F4-B Structural FALSE_SUCCESS  50  (note=f4b_injection, excluded from main metrics)
-    F5  Partial Completion        100
-    ─────────────────────────────────
-    Total                        1000
-"""
+# Distribution:
+# F0  Happy Path                200
+# F1  Schema Violation          300
+# F2  Policy Violation          200
+# F3  Dependency Violation      150
+# F4-B Structural FALSE_SUCCESS  50  (note=f4b_injection, excluded from main metrics)
+# F5  Partial Completion        100
+# ─────────────────────────────────
+# Total                        1000
 
 import random
 from itertools import cycle
@@ -327,13 +325,11 @@ def generate_f3(count: int) -> list[dict]:
 
 
 def generate_f4b(count: int) -> list[dict]:
-    """
-    Structural FALSE_SUCCESS scenarios.
-    Requires mock injection in the benchmark runner:
-    tool returns success without committing to DB.
-    Filtered from main ablation metrics via note field.
-    Used for separate robustness analysis.
-    """
+    # Structural FALSE_SUCCESS scenarios.
+    # Requires mock injection in the benchmark runner:
+    # tool returns success without committing to DB.
+    # Filtered from main ablation metrics via note field.
+    # Used for separate robustness analysis.
     scenarios = []
     templates_f4b = cycle(F4B_TEMPLATES)
     for i in range(count):
@@ -390,7 +386,7 @@ def generate_f5(count: int) -> list[dict]:
 
 # Entry Point
 
-def generate_all(
+def generate_all_ecommerce(
     f0_count: int = 200,
     f1_count: int = 300,
     f2_count: int = 200,
@@ -408,7 +404,7 @@ def generate_all(
     return all_scenarios
 
 
-SCENARIOS = generate_all()
+SCENARIOS = generate_all_ecommerce()
 
 
 if __name__ == "__main__":
@@ -420,7 +416,7 @@ if __name__ == "__main__":
     for mode, n in sorted(counts.items()):
         print(f"  {mode}: {n}")
 
-    output_path = "tasks/scenarios.json"
+    output_path = "tasks/ecommerce_scenarios.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(SCENARIOS, f, ensure_ascii=False, indent=2)
     print(f"Saved {len(SCENARIOS)} scenarios to {output_path}")

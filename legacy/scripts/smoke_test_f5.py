@@ -1,9 +1,6 @@
-"""
-smoke_test_f5.py
-
-Validates the create → confirm chain (F5) end-to-end.
-Run from project root: python smoke_test_f5.py
-"""
+# smoke_test_f5.py
+# Validates the create → confirm chain (F5) end-to-end.
+# Run from project root: python smoke_test_f5.py
 
 from src.db.reset_env import reset_env
 from src.agent.langgraph_agent import run_agent

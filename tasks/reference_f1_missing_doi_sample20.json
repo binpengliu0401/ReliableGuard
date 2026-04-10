@@ -1,0 +1,162 @@
+[
+  {
+    "id": "REF-F1-G-136-S01",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-137-S02",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-138-S03",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-139-S04",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-140-S05",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-141-S06",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-142-S07",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-143-S08",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-144-S09",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-145-S10",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-146-S11",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-147-S12",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-148-S13",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-149-S14",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-150-S15",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-136-S16",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-137-S17",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-138-S18",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-139-S19",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-140-S20",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  }
+]

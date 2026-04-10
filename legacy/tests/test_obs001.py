@@ -1,7 +1,5 @@
-"""
-RG-OBS-001: Surface-form Sensitive Constraint Bypass
-Multi-run stability test for the target input.
-"""
+# RG-OBS-001: Surface-form Sensitive Constraint Bypass
+# Multi-run stability test for the target input.
 import json
 import sys
 import os

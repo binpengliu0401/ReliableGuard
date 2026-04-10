@@ -2,8 +2,8 @@ from src.tools.order_service import cursor, conn
 
 
 def reset_env():
-    cursor.execute("DELETE FROM orders") # type: ignore
-    cursor.execute("DELETE FROM sqlite_sequence WHERE name='orders'") # type: ignore
+    cursor.execute("DELETE FROM orders")  # type: ignore
+    cursor.execute("DELETE FROM sqlite_sequence WHERE name='orders'")  # type: ignore
     conn.commit()
     print("[ENV]    Reset complete - orders table cleared, ID sequence reset")
 

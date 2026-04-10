@@ -1,0 +1,4452 @@
+[
+  {
+    "id": "REF-F0-G-001",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-002",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-003",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-004",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-005",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-006",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-007",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-008",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-009",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-010",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-011",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-012",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-013",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-014",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-015",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-016",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-017",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-018",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-019",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-020",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-021",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-022",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-023",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-024",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-025",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-026",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-027",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-028",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-029",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-030",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-031",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-032",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-033",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-034",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-035",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-036",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-037",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-038",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-039",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-040",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-041",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-042",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-043",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-044",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-045",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-046",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-047",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-048",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-049",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-050",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-051",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-052",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-053",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-054",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-055",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Please parse 'paper_f0.pdf' with paper_id 'paper_f0', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-056",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "I need you to parse 'paper_f2.pdf' as paper 'paper_f2', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-057",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-058",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Please parse 'paper_f2.pdf' with paper_id 'paper_f2', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-059",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f0.pdf",
+    "input": "I need you to parse 'paper_f0.pdf' as paper 'paper_f0', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-060",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' as 'paper_f2'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-061",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-062",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-063",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-064",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-065",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-066",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-067",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-068",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-069",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-070",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-071",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-072",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-073",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-074",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-075",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-076",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-077",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-078",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-079",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-080",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-081",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-082",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-083",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-084",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-085",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-086",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-087",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-088",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-089",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-090",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-091",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-092",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-093",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-094",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-095",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-096",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-097",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-098",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Load paper 'paper_f2.pdf' with id 'paper_f2'. List references and run full verification including DOI, authors, and journal using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-099",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f0.pdf",
+    "input": "Please process 'paper_f0.pdf' as 'paper_f0': parse it, list references, then verify DOI, authors, and journal for the first reference using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-100",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: full verification pipeline for paper_f2.pdf",
+    "input": "Parse 'paper_f2.pdf' stored as 'paper_f2'. List references. Then fully verify the first reference: DOI, authors, and journal, using the actual ref_id.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F1-G-001",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_doi with ref_id=0 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-002",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=0 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-003",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_doi(ref_id=0, doi='10.48550/arXiv.1706.03762').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-004",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_doi with ref_id=-1 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-005",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=-1 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-006",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_doi(ref_id=-1, doi='10.18653/v1/N19-1423').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-007",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_authors with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-008",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-009",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_authors(ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-010",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_authors with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-011",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-012",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_authors(ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-013",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_journal with ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-014",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=0, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-015",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_journal(ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-016",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_journal with ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-017",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=-1, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-018",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_journal(ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-019",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_doi with ref_id=0 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-020",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=0 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-021",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_doi(ref_id=0, doi='10.48550/arXiv.1706.03762').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-022",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_doi with ref_id=-1 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-023",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=-1 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-024",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_doi(ref_id=-1, doi='10.18653/v1/N19-1423').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-025",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_authors with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-026",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-027",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_authors(ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-028",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_authors with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-029",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-030",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_authors(ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-031",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_journal with ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-032",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=0, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-033",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_journal(ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-034",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_journal with ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-035",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=-1, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-036",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_journal(ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-037",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_doi with ref_id=0 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-038",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=0 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-039",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_doi(ref_id=0, doi='10.48550/arXiv.1706.03762').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-040",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_doi with ref_id=-1 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-041",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=-1 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-042",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_doi(ref_id=-1, doi='10.18653/v1/N19-1423').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-043",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_authors with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-044",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-045",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_authors(ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-046",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_authors with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-047",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-048",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_authors(ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-049",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_journal with ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-050",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=0, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-051",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_journal(ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-052",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_journal with ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-053",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=-1, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-054",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_journal(ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-055",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_doi with ref_id=0 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-056",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=0 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-057",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_doi(ref_id=0, doi='10.48550/arXiv.1706.03762').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-058",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_doi with ref_id=-1 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-059",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=-1 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-060",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_doi(ref_id=-1, doi='10.18653/v1/N19-1423').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-061",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_authors with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-062",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-063",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_authors(ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-064",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_authors with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-065",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-066",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_authors(ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-067",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_journal with ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-068",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=0, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-069",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_journal(ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-070",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_journal with ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-071",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=-1, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-072",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_journal(ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-073",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_doi with ref_id=0 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-074",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=0 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-075",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_doi(ref_id=0, doi='10.48550/arXiv.1706.03762').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-076",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_doi with ref_id=-1 and doi='10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-077",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=-1 and doi='10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-078",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_doi(ref_id=-1, doi='10.18653/v1/N19-1423').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-079",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_authors with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-080",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-081",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_authors(ref_id=0, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-082",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_authors with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-083",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_authors now with ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.'].",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-084",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_authors(ref_id=-1, title='Attention Is All You Need', authors=['Vaswani, A.', 'Shazeer, N.']).",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-085",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_journal with ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-086",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=0, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-087",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Use verify_journal(ref_id=0, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-088",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Call verify_journal with ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-089",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Execute verify_journal now with ref_id=-1, doi='10.48550/arXiv.1706.03762', journal='Proceedings of NAACL'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-090",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=-1 below minimum 1",
+    "input": "Use verify_journal(ref_id=-1, doi='10.18653/v1/N19-1423', journal='Proceedings of NAACL').",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-091",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-092",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-093",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-094",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-095",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-096",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-097",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-098",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-099",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-100",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-101",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-102",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-103",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-104",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-105",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-106",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-107",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-108",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-109",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-110",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-111",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-112",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-113",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-114",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-115",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-116",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-117",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-118",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-119",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-120",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-121",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-122",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-123",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-124",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-125",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-126",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-127",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-128",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-129",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-130",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-131",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-132",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-133",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Please parse 'paper_invaliddoi.pdf' with paper_id 'paper_invaliddoi', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-134",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "I need you to parse 'paper_invaliddoi.pdf' as paper 'paper_invaliddoi', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-135",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi does not match required pattern ^10\\.",
+    "input": "Parse 'paper_invaliddoi.pdf' as 'paper_invaliddoi'. List its references. Verify the DOI and authors for each using the actual ref_id from the result.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-136",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-137",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-138",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-139",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-140",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-141",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-142",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-143",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-144",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-145",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-146",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-147",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-148",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Please parse 'paper_nodoi.pdf' with paper_id 'paper_nodoi', then list references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-149",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "I need you to parse 'paper_nodoi.pdf' as paper 'paper_nodoi', list all references, and then call verify_doi with doi='' for the first ref_id returned.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-150",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: doi is empty string (min_length=8 not satisfied)",
+    "input": "Parse 'paper_nodoi.pdf' as 'paper_nodoi'. List its references. Then verify the DOI by calling verify_doi with doi='' and the ref_id returned from list_references.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-001",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0000'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-002",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0001'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-003",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0002' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-004",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.88888/ghost.1234', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-005",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.77777/phantom.5678'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-006",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0000'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-007",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0001' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-008",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0002', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-009",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.88888/ghost.1234'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-010",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.77777/phantom.5678'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-011",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0000' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-012",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0001', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-013",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0002'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-014",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.88888/ghost.1234'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-015",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.77777/phantom.5678' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-016",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0000', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-017",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0001'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-018",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0002'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-019",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.88888/ghost.1234' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-020",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.77777/phantom.5678', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-021",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0000'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-022",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0001'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-023",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0002' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-024",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.88888/ghost.1234', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-025",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.77777/phantom.5678'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-026",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0000'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-027",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0001' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-028",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0002', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-029",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.88888/ghost.1234'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-030",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.77777/phantom.5678'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-031",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0000' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-032",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0001', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-033",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0002'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-034",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.88888/ghost.1234'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-035",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.77777/phantom.5678' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-036",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0000', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-037",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0001'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-038",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0002'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-039",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.88888/ghost.1234' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-040",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.77777/phantom.5678', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-041",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0000'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-042",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0001'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-043",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0002' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-044",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.88888/ghost.1234', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-045",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.77777/phantom.5678'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-046",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0000'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-047",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0001' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-048",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0002', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-049",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.88888/ghost.1234'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-050",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.77777/phantom.5678'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-051",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.99999/fake.0000' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-052",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0001', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-053",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0002'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-054",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.88888/ghost.1234'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-055",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.77777/phantom.5678' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-056",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.99999/fake.0000', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-057",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0001'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-058",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'paper_nonexistent_doi.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0002'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-059",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'paper_nonexistent_doi.pdf' with paper_id 'paper_nondoi'. Retrieve references. Call verify_doi with doi '10.88888/ghost.1234' for the first reference. Then call verify_journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-060",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Process 'paper_nonexistent_doi.pdf' as 'paper_nondoi': parse, list references, verify doi '10.77777/phantom.5678', then verify journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-061",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=99 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 99 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-062",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=100 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 100.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-063",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=200 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 200.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-064",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=500 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 500.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-065",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=999 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 999 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-066",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=9999 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 9999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-067",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=99 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 99.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-068",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=100 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 100.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-069",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=200 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 200 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-070",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=500 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 500.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-071",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=999 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-072",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=9999 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 9999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-073",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=99 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 99 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-074",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=100 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 100.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-075",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=200 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 200.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-076",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=500 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 500.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-077",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=999 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 999 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-078",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=9999 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 9999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-079",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=99 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 99.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-080",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=100 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 100.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-081",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=200 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 200 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-082",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=500 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 500.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-083",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=999 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-084",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=9999 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 9999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-085",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=99 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 99 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-086",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=100 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 100.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-087",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=200 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 200.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-088",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=500 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 500.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-089",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=999 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 999 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-090",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=9999 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 9999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-091",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=99 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 99.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-092",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=100 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 100.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-093",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=200 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 200 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-094",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=500 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 500.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-095",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=999 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-096",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=9999 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 9999.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-097",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=99 does not exist in refs table",
+    "input": "Parse the paper at path 'paper_f0.pdf' with paper_id 'paper_f0'. Then verify the DOI for reference 99 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-098",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=100 does not exist in refs table",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Then verify doi '10.18653/v1/N19-1423' for reference id 100.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-099",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=200 does not exist in refs table",
+    "input": "Parse 'paper_f0.pdf' with paper_id 'paper_f0', then check DOI for reference 200.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-100",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: ref_id=500 does not exist in refs table",
+    "input": "Process paper 'paper_f2.pdf' as 'paper_f2'. Verify DOI '10.18653/v1/N19-1423' for reference 500.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-001",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-002",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-003",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-004",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-005",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-006",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-007",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-008",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-009",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-010",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-011",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-012",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-013",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-014",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-015",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-016",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-017",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-018",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-019",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-020",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-021",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-022",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-023",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-024",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-025",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-026",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-027",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-028",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-029",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-030",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-031",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-032",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-033",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-034",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-035",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-036",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-037",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-038",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-039",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-040",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-041",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-042",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-043",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-044",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-045",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-046",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-047",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-048",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-049",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-050",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-051",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-052",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-053",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-054",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-055",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-056",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-057",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-058",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-059",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-060",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-061",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-062",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-063",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-064",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-065",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-066",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-067",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-068",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-069",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-070",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-071",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-072",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-073",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-074",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-075",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-076",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-077",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-078",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-079",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-080",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-081",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-082",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-083",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-084",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-085",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-086",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-087",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-088",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-089",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-090",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-091",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.48550/arXiv.1706.03762'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-092",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/N19-1423' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-093",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please verify doi '10.48550/arXiv.1706.03762' for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-094",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run DOI verification for reference 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-095",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify authors for reference 1 with title 'Attention Is All You Need'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-096",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check authors for reference id 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-097",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify journal for reference 1 using doi '10.48550/arXiv.1706.03762'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-098",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Please check journal for reference id 1 with doi '10.18653/v1/N19-1423'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-099",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify doi '10.48550/arXiv.1706.03762' for ref 1 directly.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-100",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Run author check for reference 1.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F4-G-001",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse the paper at path 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-002",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-003",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Please parse 'paper_f4.pdf' and store as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-004",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse PDF 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-005",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Process 'paper_f4.pdf' as paper 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-006",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "I need you to parse 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-007",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Run parse_pdf on 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-008",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Extract references from 'paper_f4.pdf', paper_id is 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-009",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse and store 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-010",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load the paper 'paper_f4.pdf' into the system as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-011",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse the paper at path 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-012",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-013",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Please parse 'paper_f4.pdf' and store as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-014",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse PDF 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-015",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Process 'paper_f4.pdf' as paper 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-016",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "I need you to parse 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-017",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Run parse_pdf on 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-018",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Extract references from 'paper_f4.pdf', paper_id is 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-019",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse and store 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-020",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load the paper 'paper_f4.pdf' into the system as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-021",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse the paper at path 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-022",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-023",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Please parse 'paper_f4.pdf' and store as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-024",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse PDF 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-025",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Process 'paper_f4.pdf' as paper 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-026",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "I need you to parse 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-027",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Run parse_pdf on 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-028",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Extract references from 'paper_f4.pdf', paper_id is 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-029",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse and store 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-030",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load the paper 'paper_f4.pdf' into the system as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-031",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse the paper at path 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-032",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-033",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Please parse 'paper_f4.pdf' and store as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-034",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse PDF 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-035",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Process 'paper_f4.pdf' as paper 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-036",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "I need you to parse 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-037",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Run parse_pdf on 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-038",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Extract references from 'paper_f4.pdf', paper_id is 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-039",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse and store 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-040",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load the paper 'paper_f4.pdf' into the system as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-041",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse the paper at path 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-042",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-043",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Please parse 'paper_f4.pdf' and store as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-044",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse PDF 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-045",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Process 'paper_f4.pdf' as paper 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-046",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "I need you to parse 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-047",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Run parse_pdf on 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-048",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Extract references from 'paper_f4.pdf', paper_id is 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-049",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse and store 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-050",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load the paper 'paper_f4.pdf' into the system as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F5-G-001",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-002",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-003",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-004",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-005",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-006",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-007",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-008",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-009",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-010",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-011",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-012",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-013",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-014",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-015",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-016",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-017",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-018",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-019",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-020",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-021",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-022",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-023",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-024",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-025",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-026",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-027",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-028",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-029",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-030",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-031",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-032",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-033",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-034",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-035",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-036",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-037",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-038",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-039",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-040",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-041",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-042",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-043",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-044",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-045",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-046",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-047",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Process 'paper_f0.pdf' as 'paper_f0': parse, list references, verify DOI and authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-048",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Parse paper 'paper_f2.pdf' with id 'paper_f2'. List references and verify both DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-049",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f0.pdf",
+    "input": "Parse 'paper_f0.pdf' as 'paper_f0'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-050",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for paper_f2.pdf",
+    "input": "Load 'paper_f2.pdf' as 'paper_f2'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  }
+]

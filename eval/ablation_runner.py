@@ -85,7 +85,16 @@ if __name__ == "__main__":
         "--scenarios", type=int, default=10, help="Number of scenarios to run"
     )
     parser.add_argument(
-        "--input", type=str, default="tasks/scenarios.json", help="Scenarios file"
+        "--skip",
+        type=int,
+        default=0,
+        help="Number of scenarios to skip from the start of input file before sampling",
+    )
+    parser.add_argument(
+        "--input",
+        type=str,
+        default="tasks/ecommerce_scenarios.json",
+        help="Scenarios file",
     )
     parser.add_argument(
         "--versions", nargs="+", default=list(VERSIONS.keys()), help="Versions to run"
@@ -105,13 +114,14 @@ if __name__ == "__main__":
 
     with open(args.input, "r", encoding="utf-8") as f:
         all_scenarios = json.load(f)
+    source_scenarios = all_scenarios[args.skip :]
 
     if args.stratified:
         categories = [f"F{i}" for i in range(6)]
         quota = args.scenarios // len(categories)
         grouped = {cat: [] for cat in categories}
 
-        for scenario in all_scenarios:
+        for scenario in source_scenarios:
             scenario_id = str(scenario.get("id", ""))
             for cat in categories:
                 if scenario_id.startswith(cat):
@@ -127,7 +137,7 @@ if __name__ == "__main__":
             else:
                 scenarios.extend(rng.sample(candidates, quota))
     else:
-        scenarios = all_scenarios[: args.scenarios]
+        scenarios = source_scenarios[: args.scenarios]
 
     print(f"Running {len(scenarios)} scenarios on versions: {args.versions}")
 
