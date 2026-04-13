@@ -8,6 +8,7 @@ from eval.metrics import compute_metrics
 from src.config.ablation_config import VERSIONS, with_gpt4o_mini
 from tasks.scenario_v1 import SCENARIOS as SCENARIOS_V1
 from tasks.ecommerce_scenario_generator import SCENARIOS as SCENARIOS_GEN
+from tasks.reference_scenario_generator import SCENARIOS as SCENARIOS_REF
 
 VERSIONS_TO_RUN = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
 GPT_VERSION_KEY = "V4_Full_GPT4oMini"
@@ -19,7 +20,7 @@ def _load_adversarial_scenarios(path: str = "tasks/adversarial_scenarios.json"):
 
 
 def _select_scenarios(mode: str):
-    main_scenarios = SCENARIOS_V1 + SCENARIOS_GEN
+    main_scenarios = SCENARIOS_V1 + SCENARIOS_GEN + SCENARIOS_REF
     if mode == "main":
         return main_scenarios
     if mode == "adversarial":

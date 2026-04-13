@@ -48,6 +48,12 @@ class SchemaValidator:
                         "allowed": False,
                         "reason": f"parameter '{field_name}' must be str",
                     }
+            elif declared_type is list:
+                if not isinstance(value, list):
+                    return {
+                        "allowed": False,
+                        "reason": f"parameter '{field_name}' must be list",
+                    }
             else:
                 return {
                     "allowed": False,
