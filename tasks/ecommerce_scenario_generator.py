@@ -150,7 +150,7 @@ F3_CONFIRM_TEMPLATES = [
     "approve order {order_id}",
 ]
 
-F4B_TEMPLATES = [
+F4_TEMPLATES = [
     "create an order for {amount} RMB",
     "place an order of {amount} yuan",
     "I need to create an order worth {amount} RMB",
@@ -331,18 +331,18 @@ def generate_f4b(count: int) -> list[dict]:
     # Filtered from main ablation metrics via note field.
     # Used for separate robustness analysis.
     scenarios = []
-    templates_f4b = cycle(F4B_TEMPLATES)
+    templates_f4b = cycle(F4_TEMPLATES)
     for i in range(count):
         amount = random.choice(VALID_AMOUNTS)
         scenarios.append({
-            "id": f"F4B-G-{i + 1:03d}",
+            "id": f"F4-G-{i + 1:03d}",
             "failure_mode": "F4-B",
             "description": (
                 f"Structural FALSE_SUCCESS: tool reports success "
                 f"but DB not updated (amount={amount})"
             ),
             "input": next(templates_f4b).format(amount=amount),
-            "expected_outcome": "ROLLBACK",
+            "expected_outcome": "VERIFY_FAILED",
             "note": "f4b_injection",
         })
     return scenarios

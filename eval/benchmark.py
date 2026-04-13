@@ -1,43 +1,64 @@
+import argparse
 import csv
+import json
 import os
+
 from eval.ablation_runner import run_version
 from eval.metrics import compute_metrics
 from src.config.ablation_config import VERSIONS, with_gpt4o_mini
 from tasks.scenario_v1 import SCENARIOS as SCENARIOS_V1
 from tasks.ecommerce_scenario_generator import SCENARIOS as SCENARIOS_GEN
-import json
-
-safe_scenarios = SCENARIOS_V1 + SCENARIOS_GEN
 
 VERSIONS_TO_RUN = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
 GPT_VERSION_KEY = "V4_Full_GPT4oMini"
 
 
-def run_benchmark(output_csv: str = "logs/benchmark_results.csv"):
+def _load_adversarial_scenarios(path: str = "tasks/adversarial_scenarios.json"):
+    with open(path, "r") as f:
+        return json.load(f)
+
+
+def _select_scenarios(mode: str):
+    main_scenarios = SCENARIOS_V1 + SCENARIOS_GEN
+    if mode == "main":
+        return main_scenarios
+    if mode == "adversarial":
+        return _load_adversarial_scenarios()
+    return main_scenarios + _load_adversarial_scenarios()
+
+
+def run_benchmark(
+    scenarios,
+    output_csv: str = "logs/benchmark_results.csv",
+    model: str = "qwen",
+):
     all_version_metrics = {}
     all_results = {}
-    safe_scenarios = (SCENARIOS_V1 + SCENARIOS_GEN)[:10]
+    versions_run = []
 
-    # Qwen
-    for version_key in VERSIONS_TO_RUN:
-        results = run_version(version_key, safe_scenarios, verbose=True)
-        metrics = compute_metrics(results)
-        all_version_metrics[version_key] = metrics
-        all_results[version_key] = results
+    if model in ("qwen", "both"):
+        for version_key in VERSIONS_TO_RUN:
+            results = run_version(version_key, scenarios, verbose=True)
+            metrics = compute_metrics(results)
+            all_version_metrics[version_key] = metrics
+            all_results[version_key] = results
+            versions_run.append(version_key)
 
-    # GPT-4o-mini V4_Full
-    # gpt_config = with_gpt4o_mini(VERSIONS["V4_Full"])
-    # results_gpt = run_version(
-    #     GPT_VERSION_KEY,
-    #     safe_scenarios,
-    #     verbose=True,
-    #     config_override=gpt_config,  # type: ignore
-    # )
-    # metrics_gpt = compute_metrics(results_gpt)
-    # all_version_metrics[GPT_VERSION_KEY] = metrics_gpt
+    if model in ("gpt", "both"):
+        gpt_config = with_gpt4o_mini(VERSIONS["V4_Full"])
+        results_gpt = run_version(
+            GPT_VERSION_KEY,
+            scenarios,
+            verbose=True,
+            config_override=gpt_config,  # type: ignore
+        )
+        metrics_gpt = compute_metrics(results_gpt)
+        all_version_metrics[GPT_VERSION_KEY] = metrics_gpt
+        all_results[GPT_VERSION_KEY] = results_gpt
+        versions_run.append(GPT_VERSION_KEY)
 
-    _print_summary(all_version_metrics)
-    _export_csv(all_version_metrics, output_csv)
+    _print_summary(all_version_metrics, versions_run)  # type: ignore
+    _export_csv(all_version_metrics, output_csv, versions_run)  # type: ignore
     _export_scenario_results(all_results, "logs/scenario_results.csv")
     with open("logs/benchmark_raw.json", "w") as f:
         raw = {
@@ -47,14 +68,13 @@ def run_benchmark(output_csv: str = "logs/benchmark_results.csv"):
         json.dump(raw, f, default=str)
 
 
-def _print_summary(all_metrics: dict):
-    all_versions = VERSIONS_TO_RUN + [GPT_VERSION_KEY]
+def _print_summary(all_metrics: dict, versions: list[str]):
 
     print(f"\n{'='*86}")
     print(f"{'BENCHMARK SUMMARY':^86}")
     print(f"{'='*86}")
 
-    header = f"{'Metric':<30}" + "".join(f"{v:<16}" for v in all_versions)
+    header = f"{'Metric':<30}" + "".join(f"{v:<16}" for v in versions)
     print(header)
     print("-" * 86)
 
@@ -69,7 +89,7 @@ def _print_summary(all_metrics: dict):
 
     for key, label in metric_keys:
         row = f"{label:<30}"
-        for version in all_versions:
+        for version in versions:
             val = all_metrics.get(version, {}).get(key, "-")
             row += f"{str(val):<16}"
         print(row)
@@ -77,8 +97,7 @@ def _print_summary(all_metrics: dict):
     print("=" * 86)
 
 
-def _export_csv(all_metrics: dict, path: str):
-    all_versions = VERSIONS_TO_RUN + [GPT_VERSION_KEY]
+def _export_csv(all_metrics: dict, path: str, versions: list[str]):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     metric_keys = [
         "end_to_end_success_rate",
@@ -91,9 +110,9 @@ def _export_csv(all_metrics: dict, path: str):
 
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["metric"] + all_versions)
+        writer.writerow(["metric"] + versions)
         for key in metric_keys:
-            row = [key] + [all_metrics.get(v, {}).get(key, "") for v in all_versions]
+            row = [key] + [all_metrics.get(v, {}).get(key, "") for v in versions]
             writer.writerow(row)
 
     print(f"\n[BENCHMARK] Results exported to {path}")
@@ -126,4 +145,26 @@ def _export_scenario_results(
 
 
 if __name__ == "__main__":
-    run_benchmark()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--scenarios",
+        choices=["main", "adversarial", "both"],
+        default="main",
+    )
+    parser.add_argument(
+        "--model",
+        choices=["qwen", "gpt", "both"],
+        default="qwen",
+    )
+    parser.add_argument(
+        "--output_csv",
+        default="logs/benchmark_results.csv",
+    )
+    args = parser.parse_args()
+
+    selected_scenarios = _select_scenarios(args.scenarios)
+    run_benchmark(
+        scenarios=selected_scenarios,
+        output_csv=args.output_csv,
+        model=args.model,
+    )
