@@ -40,7 +40,7 @@ ReliableGuard/
 |   |-- domain/            # Domain-specific policies/assertions/configs
 |   |-- tools/             # Tool definitions and executors
 |   |-- db/                # DB initialization and reset
-|   `-- config/            # Ablation and runtime config
+|   |-- config/            # Ablation and runtime config
 |-- tasks/                 # Scenario datasets
 |-- eval/                  # Ablation runner and metrics
 |-- scripts/               # Utility scripts
@@ -48,7 +48,7 @@ ReliableGuard/
 |-- results/               # Experiment outputs
 |-- logs/                  # Runtime traces and logs
 |-- ReliableGuard.py       # Unified entry point
-`-- requirements.txt
+|-- requirements.txt
 ```
 
 ## Quickstart
