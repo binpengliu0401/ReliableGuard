@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
-from src.gate.validator import GateResult
-from src.verifier.verifier import VerifierResult
+from src.reliableguard.gate.validator import GateResult
+from src.reliableguard.verifier.verifier import VerifierResult
 
 
 # Standardized failure types for recovery strategy mapping

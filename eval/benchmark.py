@@ -7,8 +7,8 @@ from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from datetime import datetime
 
 from eval.ablation_runner import run_version
+from eval.config.ablation_versions import VERSIONS, with_deepseek
 from eval.metrics import compute_metrics
-from src.config.ablation_config import VERSIONS, with_deepseek
 
 VERSIONS_TO_RUN = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
 

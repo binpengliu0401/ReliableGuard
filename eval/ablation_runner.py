@@ -1,5 +1,6 @@
-from src.config.ablation_config import AblationConfig, VERSIONS
+from eval.config.ablation_versions import VERSIONS
 from src.agent.langgraph_agent import run_agent
+from src.config.runtime_config import RuntimeConfig
 from src.db.reset_env import reset_env
 from eval.metrics import derive_outcome, build_result_row
 
@@ -8,7 +9,7 @@ def run_version(
     version_key: str,
     scenarios: list[dict],
     verbose: bool = True,
-    config_override: AblationConfig = None,  # type: ignore
+    config_override: RuntimeConfig | None = None,
 ) -> list[dict]:
     config = config_override if config_override else VERSIONS[version_key]
     results = []

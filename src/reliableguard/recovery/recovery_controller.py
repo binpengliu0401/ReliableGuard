@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
-from src.recovery.failure_classifier import FailurePacket, FailureType
-from src.tools.order_service import cursor, conn
+from src.reliableguard.recovery.failure_classifier import FailurePacket, FailureType
+from src.domain.ecommerce.tools import cursor, conn
 
 
 class RecoveryAction(Enum):

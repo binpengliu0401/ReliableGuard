@@ -1,4 +1,4 @@
-from src.tools.order_service import cursor, conn
+from src.domain.ecommerce.tools import cursor, conn
 
 
 def reset_env():

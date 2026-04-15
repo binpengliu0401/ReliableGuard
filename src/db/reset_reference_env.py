@@ -1,4 +1,4 @@
-from src.tools.reference_service import init_reference_db
+from src.domain.reference.tools import init_reference_db
 
 
 def reset_reference_env():

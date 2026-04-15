@@ -34,15 +34,13 @@ ReliableGuard/
 |-- src/
 |   |-- agent/             # Official LangGraph agent runtime
 |   |-- graph/             # StateGraph nodes and control flow
-|   |-- gate/              # Constraint Gate
-|   |-- verifier/          # Environment Verifier + state tracker
-|   |-- recovery/          # Failure classifier + recovery controller
-|   |-- domain/            # Domain-specific policies/assertions/configs
-|   |-- tools/             # Tool definitions and executors
+|   |-- reliableguard/     # Constraint Gate / Verifier / Recovery modules
+|   |-- domain/            # Domain-specific policies/assertions/tools/configs
 |   |-- db/                # DB initialization and reset
-|   |-- config/            # Ablation and runtime config
+|   |-- config/            # Runtime config
 |-- tasks/                 # Scenario datasets
-|-- eval/                  # Ablation runner and metrics
+|-- eval/                  # Evaluation runners, metrics, and ablation presets
+|   |-- config/            # Ablation version presets
 |-- scripts/               # Utility scripts
 |-- docs/findings/         # Empirical findings and design notes
 |-- results/               # Experiment outputs
@@ -81,9 +79,20 @@ Create a `.env` file in project root and set `OPENROUTER_API_KEY`.
 
 ### 3. Run the unified runtime
 
-```powershell
-python ReliableGuard.py
+```bash
+python ReliableGuard.py --domain ecommerce --input "Please create an order with amount 100." --model qwen --version V4_Full --reset
 ```
+
+Reference example:
+
+```bash
+python ReliableGuard.py --domain reference --input "Please parse the PDF at \"data/paper_f0.pdf\" with paper_id \"paper_ref_valid_001\"." --model deepseek --version V4_Full --reset
+```
+
+Useful flags:
+
+- `--verbose`: show internal runtime logs
+- `--full-result`: print full raw agent state (default prints concise result only)
 
 ## Evaluation
 

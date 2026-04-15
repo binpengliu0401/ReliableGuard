@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
 from src.graph.state import AgentState
-from src.config.ablation_config import AblationConfig, VERSIONS
+from src.config.runtime_config import RuntimeConfig, DEFAULT_RUNTIME_CONFIG
 from src.graph.nodes import (
     plan_node,
     gate_node,
@@ -14,7 +14,7 @@ load_dotenv()
 _graph_cache: dict = {}
 
 
-def build_graph(config: AblationConfig = VERSIONS["V4_Full"], client=None):
+def build_graph(config: RuntimeConfig = DEFAULT_RUNTIME_CONFIG, client=None):
     cache_key = (
         config.use_gate,
         config.use_verifier,
@@ -105,7 +105,7 @@ def run_agent(
     msg: str,
     *,
     domain: str = "ecommerce",
-    config: AblationConfig = VERSIONS["V4_Full"],
+    config: RuntimeConfig = DEFAULT_RUNTIME_CONFIG,
     inject_false_success: bool = False,
 ) -> dict:
     print(f"\n{'='*50}")

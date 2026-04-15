@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from src.graph.state import AgentState, ToolCallInfo, TraceEntry
-from src.gate.validator import validate as gate_validate, GateResult
-from src.recovery.failure_classifier import (
+from src.reliableguard.gate.validator import validate as gate_validate, GateResult
+from src.reliableguard.recovery.failure_classifier import (
     classify_gate_failure,
     classify_verifier_failure,
 )
-from src.recovery.recovery_controller import BudgetTracker, recover
-from src.verifier.verifier import verify
+from src.reliableguard.recovery.recovery_controller import BudgetTracker, recover
+from src.reliableguard.verifier.verifier import verify
 
 from src.domain.loader import load_tool_config
 
@@ -23,11 +23,11 @@ import src.domain.reference.policies
 import src.domain.reference.assertions
 
 # ecommerce runtime
-from src.tools.order_service import tools as ecommerce_tools
-from src.tools.order_service import TOOL_REGISTRY as ECOMMERCE_TOOL_REGISTRY
-from src.tools.order_service import cursor as ecommerce_cursor
-from src.tools.order_service import conn as ecommerce_conn
-from src.verifier.ecommerce_state_tracker import (
+from src.domain.ecommerce.tools import tools as ecommerce_tools
+from src.domain.ecommerce.tools import TOOL_REGISTRY as ECOMMERCE_TOOL_REGISTRY
+from src.domain.ecommerce.tools import cursor as ecommerce_cursor
+from src.domain.ecommerce.tools import conn as ecommerce_conn
+from src.reliableguard.verifier.ecommerce_state_tracker import (
     take_snapshot as ecommerce_take_snapshot,
     compute_diff as ecommerce_compute_diff,
 )
@@ -65,7 +65,7 @@ def _get_domain_resources(domain: str):
         }
 
     if domain == "reference":
-        from src.tools.reference_service import tools, TOOL_REGISTRY
+        from src.domain.reference.tools import tools, TOOL_REGISTRY
 
         return {
             "tool_config": _REFERENCE_TOOL_CONFIG,
@@ -85,7 +85,7 @@ def _prepare_execution_context(state: AgentState) -> None:
         return
 
     if domain == "reference":
-        from src.tools.reference_service import init_reference_db
+        from src.domain.reference.tools import init_reference_db
 
         conn = init_reference_db()
         state["verifier_context"] = conn
@@ -261,7 +261,7 @@ def verify_node(state: AgentState) -> AgentState:
         )
 
     if state.get("inject_false_success") and not verifier_result.passed:
-        from src.verifier.verifier import VerifierResult
+        from src.reliableguard.verifier.verifier import VerifierResult
 
         verifier_result = VerifierResult(
             passed=False,
@@ -297,7 +297,7 @@ def recovery_node(state: AgentState) -> AgentState:
         )
         failure = classify_gate_failure(gate_result, state["tool_call"]["func_name"])  # type: ignore
     else:
-        from src.verifier.verifier import VerifierResult
+        from src.reliableguard.verifier.verifier import VerifierResult
 
         verifier_result = VerifierResult(
             passed=False,
