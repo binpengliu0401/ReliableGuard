@@ -112,6 +112,15 @@ Benchmark outputs:
 - Ablation summary: `results/{model}/ablation.csv`
 - Runtime log (append): `logs/{model}_run.log`
 
+## Scenario Regeneration
+
+Regenerate scenario datasets into `tasks/`:
+
+```powershell
+python scripts/ecommerce_scenario_generator.py
+python scripts/reference_scenario_generator.py
+```
+
 ## Core Research Problem
 
 Existing tool-using agent frameworks often define task success at the text output level: the agent claims completion, but the actual environment state (database, filesystem, API side-effects) may not match the intended outcome.
