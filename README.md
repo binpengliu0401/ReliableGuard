@@ -20,7 +20,7 @@ ReliableGuard is a reliability enhancement layer for tool-using AI agents. Witho
 - [x] Recovery controller (failure classification + retry/terminate/rollback)
 - [x] Ecommerce domain integrated
 - [x] Reference domain integrated
-- [x] Scenario generators for both domains
+- [x] Curated scenario datasets for both domains
 - [x] Ablation runner and benchmark metric pipeline
 - [ ] Verifier v1: more generalized assertion templates
 - [ ] Recovery v1: deterministic parameter repair policies
@@ -41,7 +41,7 @@ ReliableGuard/
 |   |-- tools/             # Tool definitions and executors
 |   |-- db/                # DB initialization and reset
 |   `-- config/            # Ablation and runtime config
-|-- tasks/                 # Scenario generators and generated scenario sets
+|-- tasks/                 # Scenario datasets
 |-- eval/                  # Ablation runner and metrics
 |-- scripts/               # Utility scripts
 |-- docs/findings/         # Empirical findings and design notes
@@ -99,6 +99,19 @@ Run from an offset using `--skip`:
 python -m eval.ablation_runner --input tasks/reference_scenarios.json --scenarios 20 --skip 100 --versions V3_Verifier --output results/reference_sample_skip100.json
 ```
 
+Run benchmark on all main scenarios with a selected model backend:
+
+```powershell
+python -m eval.benchmark --scenarios main --model qwen
+python -m eval.benchmark --scenarios main --model deepseek
+```
+
+Benchmark outputs:
+
+- Scenario-level details: `results/{model}/scenario_results.csv`
+- Ablation summary: `results/{model}/ablation.csv`
+- Runtime log (append): `logs/{model}_run.log`
+
 ## Core Research Problem
 
 Existing tool-using agent frameworks often define task success at the text output level: the agent claims completion, but the actual environment state (database, filesystem, API side-effects) may not match the intended outcome.
@@ -140,7 +153,7 @@ Current generated scenario sets:
 | Backend | Status | Notes |
 |---|---|---|
 | qwen/qwen-plus | Active | OpenRouter backend via OpenAI-compatible API |
-| mistral-small-latest | Archived | Used in earlier ReAct prototype phase |
+| deepseek/deepseek-chat-v3-0324 | Active | OpenRouter backend via OpenAI-compatible API |
 
 ## References
 
