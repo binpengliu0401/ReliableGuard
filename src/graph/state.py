@@ -45,3 +45,6 @@ class AgentState(TypedDict):
     tool_config: dict
     verifier_context: Any
     inject_false_success: bool
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int

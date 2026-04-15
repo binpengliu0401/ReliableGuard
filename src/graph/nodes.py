@@ -46,7 +46,7 @@ _REFERENCE_TOOL_CONFIG = load_tool_config(
 
 
 def _get_client(config):
-    api_key = os.getenv("LLM_API_KEY")
+    api_key = os.getenv("OPENROUTER_API_KEY")
     return OpenAI(api_key=api_key, base_url=config.llm_base_url)
 
 
@@ -95,6 +95,20 @@ def _prepare_execution_context(state: AgentState) -> None:
     raise ValueError(f"Unsupported domain: {domain}")
 
 
+def _accumulate_usage(state: AgentState, response) -> None:
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return
+
+    prompt_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
+    completion_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
+    total_tokens = int(getattr(usage, "total_tokens", 0) or 0)
+
+    state["prompt_tokens"] = state.get("prompt_tokens", 0) + prompt_tokens
+    state["completion_tokens"] = state.get("completion_tokens", 0) + completion_tokens
+    state["total_tokens"] = state.get("total_tokens", 0) + total_tokens
+
+
 def plan_node(state: AgentState) -> AgentState:
     config = state["config"]
     client = _get_client(config)
@@ -108,6 +122,7 @@ def plan_node(state: AgentState) -> AgentState:
         tools=domain_tools,  # type: ignore
         tool_choice="auto",
     )
+    _accumulate_usage(state, response)
 
     msg = response.choices[0].message
     state["messages"].append(msg)
@@ -189,13 +204,11 @@ def execute_node(state: AgentState) -> AgentState:
 
     if state.get("inject_false_success") and domain == "ecommerce":
         snapshot_before = state.get("snapshot_before")
-        before_count = (
-            snapshot_before.order_count if snapshot_before is not None else 0
-        )
+        before_count = snapshot_before.order_count if snapshot_before is not None else 0
         after_count = ecommerce_cursor.execute("SELECT COUNT(*) FROM orders").fetchone()[0]  # type: ignore
 
         if after_count > before_count:
-            last_row = ecommerce_cursor.execute(
+            last_row = ecommerce_cursor.execute(  # type: ignore
                 "SELECT id FROM orders ORDER BY id DESC LIMIT 1"
             ).fetchone()
             if last_row is not None:
@@ -339,6 +352,7 @@ def recovery_node(state: AgentState) -> AgentState:
             model=config.llm_model,
             messages=rollback_prompt,  # type: ignore
         )
+        _accumulate_usage(state, final)
         state["final_answer"] = final.choices[0].message.content
         _trace(state, "recovery_node", "FINAL_ANSWER", state["final_answer"])  # type: ignore
 
@@ -363,6 +377,7 @@ def recovery_node(state: AgentState) -> AgentState:
             model=config.llm_model,
             messages=rejection_prompt,  # type: ignore
         )
+        _accumulate_usage(state, final)
         state["final_answer"] = final.choices[0].message.content
         _trace(state, "recovery_node", "FINAL_ANSWER", state["final_answer"])  # type: ignore
 

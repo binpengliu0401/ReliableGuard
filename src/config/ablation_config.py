@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-QWEN_PLUS_MODEL = "qwen-plus"
-QWEN_PLUS_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+QWEN_PLUS_MODEL = "qwen/qwen-plus"
 
-GPT4O_MINI_MODEL = "openai/gpt-4o-mini"
-GPT4O_MINI_BASE_URL = "https://openrouter.ai/api/v1"
+DEEPSEEK_MODEL = "deepseek/deepseek-chat-v3-0324"
+DEEPSEEK_BASE_URL = OPENROUTER_BASE_URL
 
 
 @dataclass
@@ -14,7 +14,7 @@ class AblationConfig:
     use_recovery: bool = True
     version_name: str = "V4_Full"
     llm_model: str = QWEN_PLUS_MODEL
-    llm_base_url: str = QWEN_PLUS_BASE_URL
+    llm_base_url: str = OPENROUTER_BASE_URL
 
 
 VERSIONS = {
@@ -45,12 +45,12 @@ VERSIONS = {
 }
 
 
-def with_gpt4o_mini(config: AblationConfig) -> AblationConfig:
+def with_deepseek(config: AblationConfig) -> AblationConfig:
     return AblationConfig(
         use_gate=config.use_gate,
         use_verifier=config.use_verifier,
         use_recovery=config.use_recovery,
-        version_name=config.version_name + "_GPT4oMini",
-        llm_model=GPT4O_MINI_MODEL,
-        llm_base_url=GPT4O_MINI_BASE_URL,
+        version_name=config.version_name + "_DeepSeek",
+        llm_model=DEEPSEEK_MODEL,
+        llm_base_url=DEEPSEEK_BASE_URL,
     )

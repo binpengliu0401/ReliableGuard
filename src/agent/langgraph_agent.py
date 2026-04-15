@@ -141,6 +141,9 @@ def run_agent(
         "tool_config": {},
         "verifier_context": None,
         "inject_false_success": inject_false_success,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
     }  # type: ignore
 
     from src.graph.nodes import _prepare_execution_context

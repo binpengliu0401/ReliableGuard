@@ -177,8 +177,10 @@ def build_result_row(
     score = compute_outcome_score(expected, actual)
 
     executed_tools = []
+    total_tokens = 0
     if state is not None:
         executed_tools = state.get("executed_tools", []) or []
+        total_tokens = state.get("total_tokens", 0) or 0
 
     return {
         "scenario_id": task.get("id"),
@@ -190,6 +192,7 @@ def build_result_row(
         "outcome_score": score,
         "failure_type": derive_failure_type(state, expected, actual),
         "tool_calls": len(executed_tools),
+        "tokens": total_tokens,
         "gate_status": state.get("gate_status") if state else None,
         "gate_category": state.get("gate_category") if state else None,
         "gate_detail": state.get("gate_detail") if state else None,

@@ -45,7 +45,6 @@ ReliableGuard/
 |-- eval/                  # Ablation runner and metrics
 |-- scripts/               # Utility scripts
 |-- docs/findings/         # Empirical findings and design notes
-|-- legacy/                # Archived ReAct prototypes
 |-- results/               # Experiment outputs
 |-- logs/                  # Runtime traces and logs
 |-- ReliableGuard.py       # Unified entry point
@@ -78,26 +77,12 @@ pip install -r requirements.txt
 
 ### 2. Configure environment
 
-Create a `.env` file in project root and set your LLM settings (for example `LLM_API_KEY`, base URL, and model config used by your environment).
+Create a `.env` file in project root and set `OPENROUTER_API_KEY`.
 
 ### 3. Run the unified runtime
 
 ```powershell
 python ReliableGuard.py
-```
-
-## Scenario Generation
-
-Generate ecommerce scenarios:
-
-```powershell
-python tasks/ecommerce_scenario_generator.py
-```
-
-Generate reference scenarios:
-
-```powershell
-python tasks/reference_scenario_generator.py
 ```
 
 ## Evaluation
@@ -154,12 +139,8 @@ Current generated scenario sets:
 
 | Backend | Status | Notes |
 |---|---|---|
-| qwen-plus | Active | Current official backend via OpenAI-compatible API |
+| qwen/qwen-plus | Active | OpenRouter backend via OpenAI-compatible API |
 | mistral-small-latest | Archived | Used in earlier ReAct prototype phase |
-
-## Notes on Legacy Archive
-
-The `legacy/` folder contains earlier ReAct-based prototypes and historical diagnostic scripts. These files are preserved for historical analysis and are not part of the current official evaluation path.
 
 ## References
 
