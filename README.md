@@ -94,6 +94,59 @@ Useful flags:
 - `--verbose`: show internal runtime logs
 - `--full-result`: print full raw agent state (default prints concise result only)
 
+## Reference Domain Modes
+
+`src/domain/reference/api_client.py` supports three data modes:
+
+- `REFERENCE_API_MODE=mock` (default): uses `src/domain/reference/fixtures/mock_data.json` for ablation and reproducibility.
+- `REFERENCE_API_MODE=real`: uses `src/domain/reference/fixtures/real_data.json` generated from real PDFs.
+- `REFERENCE_API_MODE=live`: DOI/authors queries call external APIs directly (live PDF parsing in `api_client` is intentionally not implemented).
+
+Optional strict DOI matching toggle:
+
+- `REFERENCE_STRICT_DOI_MATCH=1` forces title-based DOI semantic matching (default enabled in `real/live`).
+- `REFERENCE_STRICT_DOI_MATCH=0` disables strict title matching and falls back to fixture `matches`.
+
+## Build Real Fixture From PDFs
+
+Generate `real_data.json` from one or more PDFs:
+
+```bash
+python scripts/build_real_fixture.py --pdf "reference 1.pdf" "reference 2.pdf"
+```
+
+Then run reference verification in real mode:
+
+```bash
+REFERENCE_API_MODE=real python ReliableGuard.py --domain reference --input "Please parse the PDF at \"reference 2.pdf\" with paper_id \"paper_ref2\" and verify DOI for all references."
+```
+
+The generated fixture keeps the same schema as `mock_data.json`:
+
+- `pdfs`: parsed references by PDF filename
+- `dois`: CrossRef-backed DOI metadata and `matches`
+- `authors`: title-keyed author lists for `verify_authors`
+
+## DOI Verification Semantics
+
+Runtime keeps a binary `doi_status` for backward-compatible assertions:
+
+- `verified`
+- `failed`
+
+It also writes `doi_verdict_code` for recovery routing:
+
+- `verified`: DOI exists and semantically matches title
+- `invalid`: DOI does not exist in CrossRef
+- `uncertain`: DOI exists but title similarity is borderline (human review)
+- `mismatch`: DOI exists but points to a different paper
+
+Current recovery mapping in reference domain:
+
+- `invalid -> retry` (within retry budget)
+- `uncertain -> human_review` (continue pipeline, mark for manual check)
+- `mismatch -> terminate`
+
 ## Evaluation
 
 Run ablation on a scenario file:

@@ -5,6 +5,7 @@ __pycache__/
 .env.*
 *.db
 *.sqlite3
+CLAUDE.md
 
 # ignore large or sensitive files
 logs/*.txt
@@ -22,6 +23,7 @@ logs/
 .cache/
 tmp/
 temp/
+results/
 
 # test
 .pytest_cache/
@@ -31,3 +33,7 @@ htmlcov/
 .tox/
 test_qwen.py
 
+# reference domain local artifacts
+reference *.pdf
+tests/papers/
+src/domain/reference/fixtures/real_data.json

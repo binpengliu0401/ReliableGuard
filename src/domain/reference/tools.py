@@ -1,4 +1,5 @@
 import json
+import os
 import sqlite3
 from typing import Any
 
@@ -35,12 +36,23 @@ def init_reference_db() -> sqlite3.Connection:
             journal TEXT,
             year INTEGER,
             doi_status TEXT DEFAULT 'pending',
+            doi_verdict_code TEXT DEFAULT 'pending',
             authors_status TEXT DEFAULT 'pending',
             journal_status TEXT DEFAULT 'pending',
             FOREIGN KEY (paper_id) REFERENCES papers(paper_id)
         )
         """
     )
+
+    # Migrate existing DBs that predate the doi_verdict_code column.
+    existing_cols = {
+        row[1]
+        for row in conn.execute('PRAGMA table_info("references")').fetchall()
+    }
+    if "doi_verdict_code" not in existing_cols:
+        conn.execute(
+            'ALTER TABLE "references" ADD COLUMN doi_verdict_code TEXT DEFAULT \'pending\''
+        )
 
     conn.commit()
     return conn
@@ -178,20 +190,67 @@ def list_references(paper_id: str) -> dict[str, Any]:
 
 # Tool 3: verify_doi
 def verify_doi(ref_id: int, doi: str) -> dict[str, Any]:
-    from src.domain.reference.api_client import query_doi
+    from src.domain.reference.api_client import query_doi, _MODE
+    from src.domain.reference.matcher import title_similarity, author_overlap
 
     result = query_doi(doi)
 
     exists = result.get("exists", False)
-    matches = result.get("matches", False)
-    doi_status = "verified" if (exists and matches) else "failed"
     canonical_metadata = result.get("metadata", {})
+    canonical_title = canonical_metadata.get("title", "")
+
+    # Strict mode: verify that this DOI actually points to this reference by comparing
+    # titles. Auto-enabled for real/live modes; can be toggled via env var.
+    # mock mode keeps old fixture-driven behaviour to preserve ablation reproducibility.
+    _env = os.environ.get("REFERENCE_STRICT_DOI_MATCH", "")
+    strict = {"1": True, "0": False}.get(_env, _MODE in ("real", "live"))
+
+    title_score = 0.0
+    a_overlap = 0.0
+    extracted_title = ""
+    extracted_authors: list[str] = []
+
+    if strict and exists:
+        conn = init_reference_db()
+        try:
+            row = conn.execute(
+                'SELECT title, authors FROM "references" WHERE ref_id = ?',
+                (ref_id,),
+            ).fetchone()
+        finally:
+            conn.close()
+
+        if row:
+            extracted_title = row["title"] or ""
+            title_score = title_similarity(extracted_title, canonical_title)
+            try:
+                extracted_authors = json.loads(row["authors"]) if row["authors"] else []
+            except Exception:
+                extracted_authors = []
+            a_overlap = author_overlap(extracted_authors, canonical_metadata.get("authors", []))
+
+        matches = title_score >= 0.80
+    else:
+        matches = result.get("matches", False)
+
+    # Fine-grained verdict code: enables semantic recovery routing.
+    # doi_status stays binary (verified/failed) for assertion and ablation compatibility.
+    if not exists:
+        doi_verdict_code = "invalid"       # DOI not found in CrossRef
+    elif matches:
+        doi_verdict_code = "verified"      # exists + title confirmed
+    elif title_score >= 0.50:
+        doi_verdict_code = "uncertain"     # same paper, but parsing quality too low to confirm
+    else:
+        doi_verdict_code = "mismatch"      # exists but points to a different paper
+
+    doi_status = "verified" if doi_verdict_code == "verified" else "failed"
 
     conn = init_reference_db()
     try:
         conn.execute(
-            'UPDATE "references" SET doi_status = ? WHERE ref_id = ?',
-            (doi_status, ref_id),
+            'UPDATE "references" SET doi_status = ?, doi_verdict_code = ? WHERE ref_id = ?',
+            (doi_status, doi_verdict_code, ref_id),
         )
         conn.commit()
     finally:
@@ -201,9 +260,15 @@ def verify_doi(ref_id: int, doi: str) -> dict[str, Any]:
         "success": True,
         "ref_id": ref_id,
         "doi_status": doi_status,
+        "doi_verdict_code": doi_verdict_code,
+        "needs_review": doi_verdict_code == "uncertain",
         "exists": exists,
         "matches": matches,
         "canonical_metadata": canonical_metadata,
+        "title_score": round(title_score, 3),
+        "canonical_title": canonical_title,
+        "extracted_title": extracted_title,
+        "author_overlap": round(a_overlap, 3),
     }
 
 

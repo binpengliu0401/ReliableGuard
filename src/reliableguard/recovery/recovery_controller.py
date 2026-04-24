@@ -9,6 +9,7 @@ class RecoveryAction(Enum):
     TERMINATE = "terminate"
     RETRY = "retry"
     RENTRY = "retry"
+    HUMAN_REVIEW = "human_review"
 
 
 @dataclass
@@ -120,6 +121,53 @@ def recover(
             action=RecoveryAction.ROLLBACK,
             success=True,
             detail=f"FALSE_SUCCESS detected: environment state already clean (no persisted record found). Reason: {failure.reason}",
+        )
+
+    # Semantic DOI failures — route by verdict code, not by retry count.
+    if failure.failure_type == FailureType.REFERENCE_DOI_INVALID:
+        # DOI not found: could be a typo or transient CrossRef outage → retry eligible.
+        if budget and budget.can_retry() and budget.retries_remaining(2) > 0:
+            budget.consume_retry()
+            return RecoveryResult(
+                action=RecoveryAction.RETRY,
+                success=True,
+                detail=(
+                    "DOI not found in CrossRef. "
+                    "This may be a transient lookup failure or a typo. "
+                    "Please double-check the DOI and retry."
+                ),
+            )
+        return RecoveryResult(
+            action=RecoveryAction.TERMINATE,
+            success=False,
+            detail="DOI not found after retries — mark this reference as unverifiable.",
+        )
+
+    if failure.failure_type == FailureType.REFERENCE_DOI_MISMATCH:
+        # DOI exists but points to a different paper — retrying will not change the result.
+        return RecoveryResult(
+            action=RecoveryAction.TERMINATE,
+            success=False,
+            detail=(
+                "DOI mismatch detected: the DOI resolves to a different paper. "
+                "This reference is likely fabricated or misattributed. "
+                f"Details: {failure.reason}"
+            ),
+        )
+
+    if failure.failure_type == FailureType.REFERENCE_DOI_UNCERTAIN:
+        # Title similarity 0.50–0.80: same paper probable but PDF extraction quality insufficient.
+        # Flag for human review; do not retry (re-querying CrossRef gives the same result).
+        return RecoveryResult(
+            action=RecoveryAction.HUMAN_REVIEW,
+            success=True,
+            detail=(
+                "DOI uncertain: the DOI exists but the extracted title has low similarity "
+                "to the canonical CrossRef title. "
+                "This is likely a PDF parsing artefact rather than fabrication. "
+                "Human review recommended. "
+                f"Details: {failure.reason}"
+            ),
         )
 
     if failure.failure_type == FailureType.REFERENCE_DOI_FAILED:

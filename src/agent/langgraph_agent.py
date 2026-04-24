@@ -76,6 +76,18 @@ def build_graph(config: RuntimeConfig = DEFAULT_RUNTIME_CONFIG, client=None):
         {"recovery": "recovery", "plan": "plan", "end": END},
     )
 
+    def _after_recovery(state: AgentState) -> str:
+        action = state.get("recovery_action")
+        if action in ("retry", "human_review"):
+            return "plan"
+        return "end"
+
+    graph.add_conditional_edges(
+        "recovery",
+        _after_recovery,
+        {"plan": "plan", "end": END},
+    )
+
     compiled = graph.compile()
     _graph_cache[cache_key] = compiled
     return compiled

@@ -101,11 +101,17 @@ def doi_status_verified(tool_name: str, tool_args: dict, conn) -> tuple[bool, st
         return False, reason
 
     if actual_status != "verified":
+        # Include doi_verdict_code so failure_classifier can route semantically.
+        _, _, verdict_code = _get_reference_status(
+            conn, ref_id, "doi_verdict_code", "doi_status_verified"
+        )
+        code = verdict_code or "failed"
         return (
             False,
             (
-                f"doi_status_verified: doi_status={actual_status} for ref_id={ref_id}, "
-                "DOI verification failed — the DOI may be invalid or fabricated."
+                f"doi_status_verified: doi_status={actual_status} "
+                f"doi_verdict_code={code} for ref_id={ref_id}, "
+                "DOI verification failed — the DOI may be invalid, mismatched, or uncertain."
             ),
         )
 

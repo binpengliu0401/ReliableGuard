@@ -381,4 +381,25 @@ def recovery_node(state: AgentState) -> AgentState:
         state["final_answer"] = final.choices[0].message.content
         _trace(state, "recovery_node", "FINAL_ANSWER", state["final_answer"])  # type: ignore
 
+    elif recovery_result.action.value == "human_review":
+        # Keep the run alive: flag this reference for manual review, then continue
+        # with remaining references instead of terminating early.
+        state["messages"].append(
+            {
+                "role": "user",
+                "content": (
+                    f"[SYSTEM RECOVERY] Human review required for the last DOI check: "
+                    f"{recovery_result.detail}. "
+                    "Do not stop the workflow. Skip retrying this same reference and "
+                    "continue verifying the remaining references."
+                ),
+            }
+        )
+        _trace(
+            state,
+            "recovery_node",
+            "CONTINUE",
+            "Human-review flag recorded; routing back to plan for remaining references.",
+        )
+
     return state

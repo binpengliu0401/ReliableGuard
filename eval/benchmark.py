@@ -51,10 +51,18 @@ def _load_scenarios(path: str) -> list[dict]:
         return json.load(f)
 
 
-def _select_scenarios(mode: str):
-    main_scenarios = _load_scenarios("tasks/ecommerce_scenarios.json") + _load_scenarios(
+def _load_main_scenarios(domain: str):
+    if domain == "ecommerce":
+        return _load_scenarios("tasks/ecommerce_scenarios.json")
+    if domain == "reference":
+        return _load_scenarios("tasks/reference_scenarios.json")
+    return _load_scenarios("tasks/ecommerce_scenarios.json") + _load_scenarios(
         "tasks/reference_scenarios.json"
     )
+
+
+def _select_scenarios(mode: str, domain: str):
+    main_scenarios = _load_main_scenarios(domain)
     if mode == "main":
         return main_scenarios
     if mode == "adversarial":
@@ -214,17 +222,24 @@ if __name__ == "__main__":
         default="main",
     )
     parser.add_argument(
+        "--domain",
+        choices=["ecommerce", "reference", "all"],
+        default="all",
+    )
+    parser.add_argument(
         "--model",
         choices=["qwen", "deepseek"],
         default="qwen",
     )
     args = parser.parse_args()
 
-    selected_scenarios = _select_scenarios(args.scenarios)
+    selected_scenarios = _select_scenarios(args.scenarios, args.domain)
     log_path = os.path.join("logs", f"{args.model}_run.log")
 
     with _tee_to_log(log_path):
-        print(f"[BENCHMARK] model={args.model} scenarios={args.scenarios} total={len(selected_scenarios)}")
+        print(
+            f"[BENCHMARK] model={args.model} domain={args.domain} scenarios={args.scenarios} total={len(selected_scenarios)}"
+        )
         run_benchmark(
             scenarios=selected_scenarios,
             model=args.model,

@@ -6,8 +6,10 @@ from typing import Any
 
 _MODE = os.environ.get("REFERENCE_API_MODE", "mock").lower()
 _FIXTURE_PATH = Path(__file__).parent / "fixtures" / "mock_data.json"
+_REAL_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "real_data.json"
 
 _mock_cache: dict | None = None
+_real_cache: dict | None = None
 
 
 def _load_mock() -> dict:
@@ -18,10 +20,22 @@ def _load_mock() -> dict:
     return _mock_cache  # type: ignore
 
 
+def _load_real() -> dict:
+    global _real_cache
+    if _real_cache is None:
+        with open(_REAL_FIXTURE_PATH, "r", encoding="utf-8") as f:
+            _real_cache = json.load(f)
+    return _real_cache
+
+
 # parse_pdf
 def get_references_from_pdf(pdf_path: str) -> list[dict]:
     if _MODE == "mock":
         data = _load_mock()
+        key = Path(pdf_path).name
+        return data.get("pdfs", {}).get(key, {}).get("references", [])
+    elif _MODE == "real":
+        data = _load_real()
         key = Path(pdf_path).name
         return data.get("pdfs", {}).get(key, {}).get("references", [])
 
@@ -35,6 +49,12 @@ def get_references_from_pdf(pdf_path: str) -> list[dict]:
 def query_doi(doi: str) -> dict[str, Any]:
     if _MODE == "mock":
         data = _load_mock()
+        entry = data.get("dois", {}).get(doi)
+        if entry is None:
+            return {"exists": False, "matches": False, "metadata": {}}
+        return entry
+    elif _MODE == "real":
+        data = _load_real()
         entry = data.get("dois", {}).get(doi)
         if entry is None:
             return {"exists": False, "matches": False, "metadata": {}}
@@ -69,6 +89,13 @@ def query_doi(doi: str) -> dict[str, Any]:
 def query_authors(title: str) -> dict[str, Any]:
     if _MODE == "mock":
         data = _load_mock()
+        key = _normalize_title(title)  # type: ignore
+        entry = data.get("authors", {}).get(key)
+        if entry is None:
+            return {"found": False, "authors": []}
+        return entry
+    elif _MODE == "real":
+        data = _load_real()
         key = _normalize_title(title)  # type: ignore
         entry = data.get("authors", {}).get(key)
         if entry is None:
