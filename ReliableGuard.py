@@ -2,7 +2,15 @@ import argparse
 import io
 import json
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from pathlib import Path
 from typing import Any
+
+from src.reliableguard.trace.artifacts import (
+    build_run_id,
+    cleanup_incompatible_results,
+    make_run_stamp,
+    save_run_result,
+)
 
 VERSION_CHOICES = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
 
@@ -68,6 +76,9 @@ def _silence_stdio(enabled: bool):
 def main():
     parser = _build_parser()
     args = parser.parse_args()
+    run_stamp = make_run_stamp()
+    run_id = build_run_id(args.domain, run_stamp)
+    removed_results = cleanup_incompatible_results()
 
     with _silence_stdio(enabled=not args.verbose):
         from eval.config.ablation_versions import VERSIONS, with_deepseek
@@ -89,24 +100,39 @@ def main():
             args.input,
             domain=args.domain,
             config=config,
+            run_stamp=run_stamp,
         )
 
     output = {
+        "run_id": run_id,
+        "run_started_at": run_stamp,
         "domain": args.domain,
         "model": args.model,
         "version": config.version_name,
+        "removed_incompatible_results": removed_results,
     }
     if args.full_result:
         output["result"] = _to_json_safe(result)
     else:
         output["result"] = {
             "final_answer": result.get("final_answer"),
-            "gate_status": result.get("gate_status"),
-            "verifier_status": result.get("verifier_status"),
-            "recovery_action": result.get("recovery_action"),
+            "reliability_verdict": result.get("reliability_verdict"),
+            "reliability_score": result.get("reliability_score"),
+            "reliability_summary": (
+                (result.get("reliability_report") or {}).get("summary")
+                if isinstance(result.get("reliability_report"), dict)
+                else None
+            ),
             "executed_tools": _to_json_safe(result.get("executed_tools", [])),
             "total_tokens": result.get("total_tokens", 0),
         }
+    output["result_path"] = str(Path("results") / args.model / args.domain / f"{run_id}.json")
+    save_run_result(
+        model=args.model,
+        domain=args.domain,
+        run_stamp=run_stamp,
+        payload=output,
+    )
     print(json.dumps(output, ensure_ascii=False, indent=2))
 
 

@@ -1,43 +1,38 @@
 from src.config.runtime_config import (
-    DEEPSEEK_BASE_URL,
     DEEPSEEK_MODEL,
+    OPENROUTER_BASE_URL,
     RuntimeConfig,
 )
 
 VERSIONS = {
     "V1_Baseline": RuntimeConfig(
-        use_gate=False,
         use_verifier=False,
-        use_recovery=False,
+        enforce_intervention=False,
         version_name="V1_Baseline",
     ),
     "V2_Gate": RuntimeConfig(
-        use_gate=True,
         use_verifier=False,
-        use_recovery=False,
-        version_name="V2_Gate",
+        enforce_intervention=False,
+        version_name="V2_NoReliability",
     ),
     "V3_Verifier": RuntimeConfig(
-        use_gate=True,
         use_verifier=True,
-        use_recovery=False,
-        version_name="V3_Verifier",
+        enforce_intervention=False,
+        version_name="V3_AuditOnly",
     ),
     "V4_Full": RuntimeConfig(
-        use_gate=True,
         use_verifier=True,
-        use_recovery=True,
-        version_name="V4_Full",
+        enforce_intervention=True,
+        version_name="V4_Intervention",
     ),
 }
 
 
 def with_deepseek(config: RuntimeConfig) -> RuntimeConfig:
     return RuntimeConfig(
-        use_gate=config.use_gate,
         use_verifier=config.use_verifier,
-        use_recovery=config.use_recovery,
+        enforce_intervention=config.enforce_intervention,
         version_name=config.version_name + "_DeepSeek",
         llm_model=DEEPSEEK_MODEL,
-        llm_base_url=DEEPSEEK_BASE_URL,
+        llm_base_url=OPENROUTER_BASE_URL,
     )

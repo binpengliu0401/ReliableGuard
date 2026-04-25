@@ -9,6 +9,7 @@ from datetime import datetime
 from eval.ablation_runner import run_version
 from eval.config.ablation_versions import VERSIONS, with_deepseek
 from eval.metrics import compute_metrics
+from src.reliableguard.trace.artifacts import build_run_id, make_run_stamp
 
 VERSIONS_TO_RUN = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
 
@@ -90,7 +91,9 @@ def run_benchmark(scenarios, model: str = "qwen"):
 
     _print_summary(all_version_metrics, VERSIONS_TO_RUN)
 
-    result_dir = os.path.join("results", model)
+    domains = {str(scenario.get("domain", "ecommerce")) for scenario in scenarios}
+    domain_bucket = domains.pop() if len(domains) == 1 else "all"
+    result_dir = os.path.join("results", model, domain_bucket)
     scenario_path = os.path.join(result_dir, "scenario_results.csv")
     ablation_path = os.path.join(result_dir, "ablation.csv")
 
@@ -108,11 +111,11 @@ def _print_summary(all_metrics: dict, versions: list[str]):
     print("-" * 86)
 
     metric_keys = [
-        ("end_to_end_success_rate", "Success Rate"),
-        ("false_success_rate", "False Success Rate"),
-        ("invalid_call_rate", "Invalid Call Rate"),
-        ("policy_violation_rate", "Policy Violation Rate"),
-        ("recovery_resolution_rate", "Recovery Resolution Rate"),
+        ("pass_rate", "Pass Rate"),
+        ("false_acceptance_rate", "False Acceptance Rate"),
+        ("block_rate", "Block Rate"),
+        ("warn_rate", "Warn Rate"),
+        ("avg_reliability_score", "Avg Reliability Score"),
         ("avg_outcome_score", "Avg Outcome Score"),
     ]
 
@@ -126,7 +129,7 @@ def _print_summary(all_metrics: dict, versions: list[str]):
     print("=" * 86)
 
 
-def _compute_gate_block_rate(results: list[dict]) -> float:
+def _compute_block_rate(results: list[dict]) -> float:
     total = len(results)
     if total == 0:
         return 0.0
@@ -134,7 +137,7 @@ def _compute_gate_block_rate(results: list[dict]) -> float:
     blocked = 0
     for result in results:
         state = result.get("state")
-        if state is not None and state.get("gate_status") == "BLOCKED":
+        if state is not None and state.get("reliability_verdict") == "BLOCK":
             blocked += 1
 
     return round(blocked / total, 3)
@@ -155,9 +158,9 @@ def _export_ablation_csv(
                 "version",
                 "total",
                 "success_rate",
-                "false_success_rate",
-                "gate_block_rate",
-                "recovery_resolution_rate",
+                "false_acceptance_rate",
+                "block_rate",
+                "warn_rate",
             ]
         )
 
@@ -168,10 +171,10 @@ def _export_ablation_csv(
                 [
                     version,
                     metrics.get("total_tasks", len(version_results)),
-                    metrics.get("end_to_end_success_rate", 0.0),
-                    metrics.get("false_success_rate", 0.0),
-                    _compute_gate_block_rate(version_results),
-                    metrics.get("recovery_resolution_rate", 0.0),
+                    metrics.get("pass_rate", 0.0),
+                    metrics.get("false_acceptance_rate", 0.0),
+                    _compute_block_rate(version_results),
+                    metrics.get("warn_rate", 0.0),
                 ]
             )
 
@@ -234,7 +237,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     selected_scenarios = _select_scenarios(args.scenarios, args.domain)
-    log_path = os.path.join("logs", f"{args.model}_run.log")
+    run_stamp = make_run_stamp()
+    log_path = os.path.join("logs", args.domain, f"{build_run_id(args.domain, run_stamp)}.log")
 
     with _tee_to_log(log_path):
         print(

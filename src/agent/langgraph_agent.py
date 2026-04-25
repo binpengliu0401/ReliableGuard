@@ -1,92 +1,39 @@
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
+
+from src.config.runtime_config import DEFAULT_RUNTIME_CONFIG, RuntimeConfig
+from src.graph.edges import after_execute, after_plan
+from src.graph.nodes import execute_node, plan_node, reliability_node
 from src.graph.state import AgentState
-from src.config.runtime_config import RuntimeConfig, DEFAULT_RUNTIME_CONFIG
-from src.graph.nodes import (
-    plan_node,
-    gate_node,
-    execute_node,
-    verify_node,
-    recovery_node,
-)
+from src.reliableguard.trace.artifacts import build_run_id, make_run_stamp
+
 
 load_dotenv()
 _graph_cache: dict = {}
 
 
 def build_graph(config: RuntimeConfig = DEFAULT_RUNTIME_CONFIG, client=None):
-    cache_key = (
-        config.use_gate,
-        config.use_verifier,
-        config.use_recovery,
-        config.llm_model,
-    )
+    cache_key = (config.use_verifier, config.enforce_intervention, config.llm_model)
     if cache_key in _graph_cache:
         return _graph_cache[cache_key]
 
     graph = StateGraph(AgentState)
 
     graph.add_node("plan", plan_node)
-    graph.add_node("gate", gate_node)
     graph.add_node("execute", execute_node)
-    graph.add_node("verify", verify_node)
-    graph.add_node("recovery", recovery_node)
+    graph.add_node("reliability", reliability_node)
 
     graph.set_entry_point("plan")
 
-    def _after_plan(state: AgentState) -> str:
-        if state.get("tool_call") is None:
-            return "end"
-        return "gate" if config.use_gate else "execute"
-
     graph.add_conditional_edges(
         "plan",
-        _after_plan,
-        {"gate": "gate", "execute": "execute", "end": END},
+        lambda state: after_plan(state)
+        if config.use_verifier
+        else ("end" if state.get("tool_call") is None else "execute"),
+        {"execute": "execute", "reliability": "reliability", "end": END},
     )
-
-    def _after_gate(state: AgentState) -> str:
-        if state.get("gate_status") == "BLOCKED":
-            return "recovery" if config.use_recovery else "end"
-        return "execute"
-
-    graph.add_conditional_edges(
-        "gate",
-        _after_gate,
-        {"execute": "execute", "recovery": "recovery", "end": END},
-    )
-
-    def _after_execute(state: AgentState) -> str:
-        return "verify" if config.use_verifier else "end"
-
-    graph.add_conditional_edges(
-        "execute",
-        _after_execute,
-        {"verify": "verify", "end": END},
-    )
-
-    def _after_verify(state: AgentState) -> str:
-        if state.get("verifier_status") == "FAILED":
-            return "recovery" if config.use_recovery else "end"
-        return "plan"
-
-    graph.add_conditional_edges(
-        "verify",
-        _after_verify,
-        {"recovery": "recovery", "plan": "plan", "end": END},
-    )
-
-    def _after_recovery(state: AgentState) -> str:
-        action = state.get("recovery_action")
-        if action in ("retry", "human_review"):
-            return "plan"
-        return "end"
-
-    graph.add_conditional_edges(
-        "recovery",
-        _after_recovery,
-        {"plan": "plan", "end": END},
-    )
+    graph.add_conditional_edges("execute", after_execute, {"plan": "plan"})
+    graph.add_edge("reliability", END)
 
     compiled = graph.compile()
     _graph_cache[cache_key] = compiled
@@ -97,17 +44,17 @@ def _build_system_prompt(domain: str) -> str:
     if domain == "ecommerce":
         return (
             "You are an autonomous order management agent. "
-            "When the user gives you a multi-step instruction, execute all steps "
-            "sequentially without asking for confirmation between steps. "
-            "Use the available tools to complete the full request."
+            "Use available tools for operational data. "
+            "When you give the final answer, be concise and include concrete order ids, "
+            "amounts, statuses, and tool results when available."
         )
 
     if domain == "reference":
         return (
             "You are an autonomous academic reference verification agent. "
-            "When the user asks you to process PDFs or verify references, "
-            "use the available tools to complete the full workflow step by step "
-            "without asking for confirmation between steps."
+            "Use the available tools to parse PDFs, list references, and verify metadata. "
+            "When you give the final answer, be concise and include concrete paper ids, "
+            "reference ids, DOI statuses, titles, journals, years, and authors when available."
         )
 
     raise ValueError(f"Unsupported domain: {domain}")
@@ -118,10 +65,13 @@ def run_agent(
     *,
     domain: str = "ecommerce",
     config: RuntimeConfig = DEFAULT_RUNTIME_CONFIG,
-    inject_false_success: bool = False,
+    run_stamp: str | None = None,
 ) -> dict:
+    resolved_run_stamp = run_stamp or make_run_stamp()
+    run_id = build_run_id(domain, resolved_run_stamp)
     print(f"\n{'='*50}")
     print(f"[DOMAIN]   {domain}")
+    print(f"[RUN_ID]   {run_id}")
     print(f"[INPUT]    {msg}")
 
     initial_state: AgentState = {
@@ -133,30 +83,22 @@ def run_agent(
             {"role": "user", "content": msg},
         ],
         "tool_call": None,
-        "gate_status": None,
-        "gate_detail": None,
-        "gate_category": None,
-        "verifier_status": None,
-        "verifier_verdict": None,
-        "verifier_detail": None,
-        "recovery_action": None,
-        "recovery_detail": None,
-        "retry_count": 0,
         "trace": [],
         "final_answer": None,
-        "snapshot_before": None,
-        "snapshot_after": None,
-        "diff": None,
+        "reliability_report": None,
+        "reliability_verdict": None,
+        "reliability_score": None,
         "executed_tools": [],
         "config": config,
         "domain": domain,
-        "tool_config": {},
         "verifier_context": None,
-        "inject_false_success": inject_false_success,
         "prompt_tokens": 0,
         "completion_tokens": 0,
         "total_tokens": 0,
-    }  # type: ignore
+        "run_id": run_id,
+        "run_stamp": resolved_run_stamp,
+        "run_started_at": resolved_run_stamp,
+    }
 
     from src.graph.nodes import _prepare_execution_context
 

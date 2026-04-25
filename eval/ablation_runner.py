@@ -31,7 +31,6 @@ def run_version(
                 task["input"],
                 domain=domain,
                 config=config,
-                inject_false_success=task.get("note") == "f4b_injection",
             )
             row = build_result_row(
                 task=task, state=state, version=version_key, error=None

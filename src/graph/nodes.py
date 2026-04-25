@@ -1,48 +1,18 @@
 import json
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import OpenAI
 
 from src.graph.state import AgentState, ToolCallInfo, TraceEntry
-from src.reliableguard.gate.validator import validate as gate_validate, GateResult
-from src.reliableguard.recovery.failure_classifier import (
-    classify_gate_failure,
-    classify_verifier_failure,
-)
-from src.reliableguard.recovery.recovery_controller import BudgetTracker, recover
-from src.reliableguard.verifier.verifier import verify
-
-from src.domain.loader import load_tool_config
-
-# register decorators
-import src.domain.ecommerce.policies
-import src.domain.ecommerce.assertions
-import src.domain.reference.policies
-import src.domain.reference.assertions
+from src.reliableguard.pipeline import run_reliability_pipeline
 
 # ecommerce runtime
 from src.domain.ecommerce.tools import tools as ecommerce_tools
 from src.domain.ecommerce.tools import TOOL_REGISTRY as ECOMMERCE_TOOL_REGISTRY
-from src.domain.ecommerce.tools import cursor as ecommerce_cursor
-from src.domain.ecommerce.tools import conn as ecommerce_conn
-from src.reliableguard.verifier.ecommerce_state_tracker import (
-    take_snapshot as ecommerce_take_snapshot,
-    compute_diff as ecommerce_compute_diff,
-)
 
 
-MAX_RETRIES = 3
 load_dotenv()
-
-_ECOMMERCE_TOOL_CONFIG = load_tool_config(
-    Path(__file__).parent.parent / "domain" / "ecommerce" / "config.yaml"
-)
-
-_REFERENCE_TOOL_CONFIG = load_tool_config(
-    Path(__file__).parent.parent / "domain" / "reference" / "config.yaml"
-)
 
 
 def _get_client(config):
@@ -59,7 +29,6 @@ def _trace(state: AgentState, node: str, event: str, detail: str) -> None:
 def _get_domain_resources(domain: str):
     if domain == "ecommerce":
         return {
-            "tool_config": _ECOMMERCE_TOOL_CONFIG,
             "tools": ecommerce_tools,
             "tool_registry": ECOMMERCE_TOOL_REGISTRY,
         }
@@ -68,7 +37,6 @@ def _get_domain_resources(domain: str):
         from src.domain.reference.tools import tools, TOOL_REGISTRY
 
         return {
-            "tool_config": _REFERENCE_TOOL_CONFIG,
             "tools": tools,
             "tool_registry": TOOL_REGISTRY,
         }
@@ -78,21 +46,12 @@ def _get_domain_resources(domain: str):
 
 def _prepare_execution_context(state: AgentState) -> None:
     domain = state["domain"]
-
-    if domain == "ecommerce":
-        state["verifier_context"] = None
-        state["tool_config"] = _ECOMMERCE_TOOL_CONFIG
-        return
-
     if domain == "reference":
         from src.domain.reference.tools import init_reference_db
 
-        conn = init_reference_db()
-        state["verifier_context"] = conn
-        state["tool_config"] = _REFERENCE_TOOL_CONFIG
-        return
-
-    raise ValueError(f"Unsupported domain: {domain}")
+        state["verifier_context"] = init_reference_db()
+    else:
+        state["verifier_context"] = None
 
 
 def _accumulate_usage(state: AgentState, response) -> None:
@@ -109,6 +68,13 @@ def _accumulate_usage(state: AgentState, response) -> None:
     state["total_tokens"] = state.get("total_tokens", 0) + total_tokens
 
 
+def _first_user_query(state: AgentState) -> str:
+    for message in state["messages"]:
+        if isinstance(message, dict) and message.get("role") == "user":
+            return str(message.get("content", ""))
+    return ""
+
+
 def plan_node(state: AgentState) -> AgentState:
     config = state["config"]
     client = _get_client(config)
@@ -119,7 +85,7 @@ def plan_node(state: AgentState) -> AgentState:
     response = client.chat.completions.create(
         model=config.llm_model,
         messages=state["messages"],
-        tools=domain_tools,  # type: ignore
+        tools=domain_tools,  # type: ignore[arg-type]
         tool_choice="auto",
     )
     _accumulate_usage(state, response)
@@ -137,89 +103,32 @@ def plan_node(state: AgentState) -> AgentState:
     tc = tool_calls[0]
     state["tool_call"] = ToolCallInfo(
         tool_call_id=tc.id,
-        func_name=tc.function.name,  # type: ignore
-        func_args=json.loads(tc.function.arguments),  # type: ignore
+        func_name=tc.function.name,  # type: ignore[union-attr]
+        func_args=json.loads(tc.function.arguments),  # type: ignore[union-attr]
     )
 
     _trace(
         state,
         "plan_node",
         "TOOL_CALL",
-        f"{tc.function.name}({state['tool_call']['func_args']})",  # type: ignore
+        f"{tc.function.name}({state['tool_call']['func_args']})",  # type: ignore[union-attr]
     )
-    return state
-
-
-def gate_node(state: AgentState) -> AgentState:
-    tc = state["tool_call"]
-    executed_tools = state.get("executed_tools", [])
-
-    tool_config = state["tool_config"]
-    context = None
-    if state["domain"] == "reference":
-        context = {"db_conn": state.get("verifier_context")}
-    elif state["domain"] == "ecommerce":
-        context = {"db_conn": ecommerce_conn}
-
-    gate_result = gate_validate(
-        tc["func_name"],  # type: ignore
-        tc["func_args"],  # type: ignore
-        executed_tools,
-        tool_config,
-        context=context,
-    )
-
-    if gate_result.allowed:
-        state["gate_status"] = "PASSED"
-        state["gate_detail"] = gate_result.reason
-        state["gate_category"] = gate_result.category
-        _trace(state, "gate_node", "PASSED", f"args={tc['func_args']}")  # type: ignore
-    else:
-        state["gate_status"] = "BLOCKED"
-        state["gate_detail"] = gate_result.reason
-        state["gate_category"] = gate_result.category
-        _trace(state, "gate_node", "BLOCKED", gate_result.reason)
-
     return state
 
 
 def execute_node(state: AgentState) -> AgentState:
     tc = state["tool_call"]
-    func_name = tc["func_name"]  # type: ignore
-    func_args = tc["func_args"]  # type: ignore
+    func_name = tc["func_name"]  # type: ignore[index]
+    func_args = tc["func_args"]  # type: ignore[index]
     domain = state["domain"]
 
     domain_resources = _get_domain_resources(domain)
     tool_registry = domain_resources["tool_registry"]
 
-    if domain == "ecommerce":
-        state["snapshot_before"] = ecommerce_take_snapshot(ecommerce_cursor)
-    else:
-        state["snapshot_before"] = None
-
     result = tool_registry.get(
         func_name,
         lambda **kw: {"error": f"unknown tool: {func_name}"},
     )(**func_args)
-
-    if state.get("inject_false_success") and domain == "ecommerce":
-        snapshot_before = state.get("snapshot_before")
-        before_count = snapshot_before.order_count if snapshot_before is not None else 0
-        after_count = ecommerce_cursor.execute("SELECT COUNT(*) FROM orders").fetchone()[0]  # type: ignore
-
-        if after_count > before_count:
-            last_row = ecommerce_cursor.execute(  # type: ignore
-                "SELECT id FROM orders ORDER BY id DESC LIMIT 1"
-            ).fetchone()
-            if last_row is not None:
-                ecommerce_cursor.execute("DELETE FROM orders WHERE id = ?", (last_row[0],))  # type: ignore
-                ecommerce_conn.commit()
-                _trace(
-                    state,
-                    "execute_node",
-                    "F4B_INJECTION",
-                    f"Removed inserted order id={last_row[0]}",
-                )
 
     state["executed_tools"] = state.get("executed_tools", []) + [func_name]
 
@@ -228,178 +137,33 @@ def execute_node(state: AgentState) -> AgentState:
     state["messages"].append(
         {
             "role": "tool",
-            "tool_call_id": tc["tool_call_id"],  # type: ignore
-            "content": json.dumps(result),
+            "tool_call_id": tc["tool_call_id"],  # type: ignore[index]
+            "content": json.dumps(result, ensure_ascii=False),
         }
     )
 
     return state
 
 
-def verify_node(state: AgentState) -> AgentState:
-    tc = state["tool_call"]
-    domain = state["domain"]
-    tool_config = state["tool_config"]
-
-    if domain == "ecommerce":
-        snapshot_after = ecommerce_take_snapshot(ecommerce_cursor)
-        diff = ecommerce_compute_diff(state["snapshot_before"], snapshot_after)
-        state["diff"] = diff
-
-        verifier_result = verify(
-            func_name=tc["func_name"],  # type: ignore
-            func_args=tc["func_args"],  # type: ignore
-            tool_config=tool_config,
-            diff=diff,
-        )
-    else:
-        verifier_result = verify(
-            func_name=tc["func_name"],  # type: ignore
-            func_args=tc["func_args"],  # type: ignore
-            tool_config=tool_config,
-            context=state["verifier_context"],
-        )
-
-    if state.get("inject_false_success") and not verifier_result.passed:
-        from src.reliableguard.verifier.verifier import VerifierResult
-
-        verifier_result = VerifierResult(
-            passed=False,
-            verdict="FALSE_SUCCESS",
-            evidence=verifier_result.evidence,
-            failed_assertions=verifier_result.failed_assertions,
-        )
-
-    if verifier_result.passed:
-        state["verifier_status"] = "PASSED"
-        state["verifier_detail"] = verifier_result.evidence
-        _trace(state, "verify_node", "PASSED", verifier_result.evidence)
-    else:
-        state["verifier_status"] = "FAILED"
-        state["verifier_verdict"] = verifier_result.verdict
-        state["verifier_detail"] = verifier_result.evidence
-        _trace(state, "verify_node", "FAILED", verifier_result.evidence)
-
-    return state
-
-
-def recovery_node(state: AgentState) -> AgentState:
+def reliability_node(state: AgentState) -> AgentState:
     config = state["config"]
-    client = _get_client(config)
-
-    budget = BudgetTracker(max_retries=MAX_RETRIES)
-    budget.retry_count = state["retry_count"]
-
-    if state["gate_status"] == "BLOCKED":
-        gate_result = GateResult(
-            allowed=False,
-            reason=state["gate_detail"],  # type: ignore
-        )
-        failure = classify_gate_failure(gate_result, state["tool_call"]["func_name"])  # type: ignore
-    else:
-        from src.reliableguard.verifier.verifier import VerifierResult
-
-        verifier_result = VerifierResult(
-            passed=False,
-            verdict=state.get("verifier_verdict") or state["verifier_status"],  # type: ignore
-            evidence=state["verifier_detail"],  # type: ignore
-            failed_assertions=[],
-        )
-        failure = classify_verifier_failure(verifier_result)
-
-    recovery_result = recover(failure, diff=state.get("diff"), budget=budget)
-
-    state["recovery_action"] = recovery_result.action.value
-    state["recovery_detail"] = recovery_result.detail
+    answer = state.get("final_answer") or ""
+    report = run_reliability_pipeline(
+        state["domain"],
+        _first_user_query(state),
+        answer,
+        model=config.llm_model,
+        base_url=config.llm_base_url,
+        write_logs=True,
+        run_stamp=state.get("run_stamp"),
+    )
+    state["reliability_report"] = report.model_dump()
+    state["reliability_verdict"] = report.verdict if config.enforce_intervention else "PASS"
+    state["reliability_score"] = report.reliability_score
     _trace(
         state,
-        "recovery_node",
-        recovery_result.action.value.upper(),
-        recovery_result.detail,
+        "reliability_node",
+        state["reliability_verdict"] or report.verdict,
+        f"score={report.reliability_score:.2f}",
     )
-
-    if recovery_result.action.value == "retry":
-        state["retry_count"] += 1
-        state["messages"].append(
-            {
-                "role": "user",
-                "content": (
-                    f"[SYSTEM RECOVERY] Previous attempt failed: {recovery_result.detail}. "
-                    f"Please try again with corrected parameters."
-                ),
-            }
-        )
-
-    elif recovery_result.action.value == "rollback":
-        clean_messages = [
-            m
-            for m in state["messages"]
-            if not (hasattr(m, "tool_calls") and m.tool_calls)
-            and not (isinstance(m, dict) and m.get("role") == "tool")
-        ]
-        rollback_prompt = clean_messages + [
-            {
-                "role": "user",
-                "content": (
-                    f"The system detected an invalid operation and has rolled it back. "
-                    f"Reason: {recovery_result.detail}. "
-                    f"Please explain this to the user clearly and concisely. "
-                    f"Do not suggest any workaround that bypasses this constraint."
-                ),
-            }
-        ]
-        final = client.chat.completions.create(
-            model=config.llm_model,
-            messages=rollback_prompt,  # type: ignore
-        )
-        _accumulate_usage(state, final)
-        state["final_answer"] = final.choices[0].message.content
-        _trace(state, "recovery_node", "FINAL_ANSWER", state["final_answer"])  # type: ignore
-
-    elif recovery_result.action.value == "terminate":
-        clean_messages = [
-            m
-            for m in state["messages"]
-            if not (hasattr(m, "tool_calls") and m.tool_calls)
-            and not (isinstance(m, dict) and m.get("role") == "tool")
-        ]
-        rejection_prompt = clean_messages + [
-            {
-                "role": "user",
-                "content": (
-                    f"The system has rejected this request. Reason: {recovery_result.detail}. "
-                    f"Please explain this to the user in a helpful and concise way. "
-                    f"Do not suggest any workaround that bypasses this constraint."
-                ),
-            }
-        ]
-        final = client.chat.completions.create(
-            model=config.llm_model,
-            messages=rejection_prompt,  # type: ignore
-        )
-        _accumulate_usage(state, final)
-        state["final_answer"] = final.choices[0].message.content
-        _trace(state, "recovery_node", "FINAL_ANSWER", state["final_answer"])  # type: ignore
-
-    elif recovery_result.action.value == "human_review":
-        # Keep the run alive: flag this reference for manual review, then continue
-        # with remaining references instead of terminating early.
-        state["messages"].append(
-            {
-                "role": "user",
-                "content": (
-                    f"[SYSTEM RECOVERY] Human review required for the last DOI check: "
-                    f"{recovery_result.detail}. "
-                    "Do not stop the workflow. Skip retrying this same reference and "
-                    "continue verifying the remaining references."
-                ),
-            }
-        )
-        _trace(
-            state,
-            "recovery_node",
-            "CONTINUE",
-            "Human-review flag recorded; routing back to plan for remaining references.",
-        )
-
     return state
