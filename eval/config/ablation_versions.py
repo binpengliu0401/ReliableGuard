@@ -35,4 +35,6 @@ def with_deepseek(config: RuntimeConfig) -> RuntimeConfig:
         version_name=config.version_name + "_DeepSeek",
         llm_model=DEEPSEEK_MODEL,
         llm_base_url=OPENROUTER_BASE_URL,
+        llm_temperature=config.llm_temperature,
+        llm_seed=config.llm_seed,
     )

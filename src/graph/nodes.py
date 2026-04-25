@@ -20,6 +20,13 @@ def _get_client(config):
     return OpenAI(api_key=api_key, base_url=config.llm_base_url)
 
 
+def _completion_options(config) -> dict:
+    options = {"temperature": config.llm_temperature}
+    if config.llm_seed is not None:
+        options["seed"] = config.llm_seed
+    return options
+
+
 def _trace(state: AgentState, node: str, event: str, detail: str) -> None:
     entry: TraceEntry = {"node": node, "event": event, "detail": detail}
     state["trace"].append(entry)
@@ -87,6 +94,7 @@ def plan_node(state: AgentState) -> AgentState:
         messages=state["messages"],
         tools=domain_tools,  # type: ignore[arg-type]
         tool_choice="auto",
+        **_completion_options(config),
     )
     _accumulate_usage(state, response)
 
@@ -156,6 +164,8 @@ def reliability_node(state: AgentState) -> AgentState:
         base_url=config.llm_base_url,
         write_logs=True,
         run_stamp=state.get("run_stamp"),
+        temperature=config.llm_temperature,
+        seed=config.llm_seed,
     )
     state["reliability_report"] = report.model_dump()
     state["reliability_verdict_audit"] = report.verdict

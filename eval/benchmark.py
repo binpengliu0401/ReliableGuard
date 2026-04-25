@@ -88,7 +88,8 @@ def _select_scenarios(mode: str, domain: str):
     return main_scenarios + _load_adversarial_scenarios()
 
 
-def run_benchmark(scenarios, model: str = "qwen"):
+def run_benchmark(scenarios, model: str = "qwen", seeds: list[int] | None = None):
+    selected_seeds = seeds or [42, 43, 44]
     all_version_metrics = {}
     all_results = {}
 
@@ -100,6 +101,7 @@ def run_benchmark(scenarios, model: str = "qwen"):
             scenarios,
             verbose=True,
             config_override=config_override,  # type: ignore[arg-type]
+            seeds=selected_seeds,
         )
         metrics = compute_metrics(results)
 
@@ -119,7 +121,7 @@ def run_benchmark(scenarios, model: str = "qwen"):
 
 
 def _print_summary(all_metrics: dict, versions: list[str]):
-    version_width = max(16, *(len(version) + 2 for version in versions))
+    version_width = max(22, *(len(version) + 2 for version in versions))
     table_width = 30 + version_width * len(versions)
     print(f"\n{'=' * table_width}")
     print(f"{'BENCHMARK SUMMARY':^{table_width}}")
@@ -143,11 +145,19 @@ def _print_summary(all_metrics: dict, versions: list[str]):
     for key, label in metric_keys:
         row = f"{label:<30}"
         for version in versions:
-            val = all_metrics.get(version, {}).get(key, "-")
-            row += f"{str(val):<{version_width}}"
+            metrics = all_metrics.get(version, {})
+            row += f"{_format_metric(metrics, key):<{version_width}}"
         print(row)
 
     print("=" * table_width)
+
+
+def _format_metric(metrics: dict, key: str) -> str:
+    value = metrics.get(key, "-")
+    ci = metrics.get(f"{key}_ci")
+    if isinstance(ci, (list, tuple)) and len(ci) == 2:
+        return f"{value} [{ci[0]}, {ci[1]}]"
+    return str(value)
 
 
 def _compute_block_rate(results: list[dict]) -> float:
@@ -178,9 +188,13 @@ def _export_ablation_csv(
             [
                 "version",
                 "total",
-                "success_rate",
+                "pass_rate",
+                "pass_rate_ci_low",
+                "pass_rate_ci_high",
                 "audit_pass_rate",
                 "false_acceptance_rate",
+                "false_acceptance_rate_ci_low",
+                "false_acceptance_rate_ci_high",
                 "audit_false_acceptance_rate",
                 "block_rate",
                 "warn_rate",
@@ -192,13 +206,19 @@ def _export_ablation_csv(
         for version in versions:
             metrics = all_metrics.get(version, {})
             version_results = all_results.get(version, [])
+            pass_rate_ci = metrics.get("pass_rate_ci", (0.0, 0.0))
+            far_ci = metrics.get("false_acceptance_rate_ci", (0.0, 0.0))
             writer.writerow(
                 [
                     version,
                     metrics.get("total_tasks", len(version_results)),
                     metrics.get("pass_rate", 0.0),
+                    pass_rate_ci[0],
+                    pass_rate_ci[1],
                     metrics.get("audit_pass_rate", 0.0),
                     metrics.get("false_acceptance_rate", 0.0),
+                    far_ci[0],
+                    far_ci[1],
                     metrics.get("audit_false_acceptance_rate", 0.0),
                     metrics.get("block_rate", _compute_block_rate(version_results)),
                     metrics.get("warn_rate", 0.0),
@@ -222,6 +242,7 @@ def _export_scenario_results(all_results: dict, path: str):
                     "scenario_id": row.get("scenario_id"),
                     "domain": row.get("domain"),
                     "version": row.get("version"),
+                    "seed": row.get("seed"),
                     "expected_outcome": row.get("expected_outcome"),
                     "actual_outcome": row.get("actual_outcome"),
                     "actual_audit_outcome": row.get("actual_audit_outcome"),
@@ -243,6 +264,7 @@ def _export_scenario_results(all_results: dict, path: str):
                 "scenario_id",
                 "domain",
                 "version",
+                "seed",
                 "expected_outcome",
                 "actual_outcome",
                 "actual_audit_outcome",
@@ -283,6 +305,13 @@ if __name__ == "__main__":
         "--input",
         help="Optional explicit scenario JSON file. Domain filtering still applies.",
     )
+    parser.add_argument(
+        "--seeds",
+        nargs="+",
+        type=int,
+        default=[42, 43, 44],
+        help="Random seeds to run for each version.",
+    )
     args = parser.parse_args()
 
     selected_scenarios = (
@@ -295,9 +324,12 @@ if __name__ == "__main__":
 
     with _tee_to_log(log_path):
         print(
-            f"[BENCHMARK] model={args.model} domain={args.domain} scenarios={args.scenarios} total={len(selected_scenarios)}"
+            f"[BENCHMARK] model={args.model} domain={args.domain} "
+            f"scenarios={args.scenarios} total={len(selected_scenarios)} "
+            f"seeds={args.seeds}"
         )
         run_benchmark(
             scenarios=selected_scenarios,
             model=args.model,
+            seeds=args.seeds,
         )

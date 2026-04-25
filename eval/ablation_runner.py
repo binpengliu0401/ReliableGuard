@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 
 from eval.config.ablation_versions import VERSIONS
 from src.agent.langgraph_agent import run_agent
@@ -14,73 +15,94 @@ def run_version(
     scenarios: list[dict],
     verbose: bool = True,
     config_override: RuntimeConfig | None = None,
+    seeds: list[int] | None = None,
 ) -> list[dict]:
-    config = config_override if config_override else VERSIONS[version_key]
+    base_config = config_override if config_override else VERSIONS[version_key]
+    selected_seeds = seeds or [42]
     results = []
 
     print(f"\n{'#'*60}")
-    print(f"# VERSION: {config.version_name}")
+    print(f"# VERSION: {base_config.version_name}")
     print(f"{'#'*60}")
 
-    for task in scenarios:
-        domain = task.get("domain", "ecommerce")
-        if domain == "ecommerce":
-            reset_env()
-        else:
-            from src.db.reset_reference_env import reset_reference_env
+    for seed in selected_seeds:
+        config = replace(base_config, llm_temperature=0.7, llm_seed=seed)
+        if verbose:
+            print(f"\n[SEED] {seed}")
 
-            reset_reference_env()
-        try:
-            if task.get("mode", "e2e") == "verifier_only":
-                state = _run_verifier_only(task, config)
+        for task in scenarios:
+            domain = task.get("domain", "ecommerce")
+            if domain == "ecommerce":
+                reset_env()
             else:
-                state = run_agent(
-                    task["input"],
-                    domain=domain,
-                    config=config,
+                from src.db.reset_reference_env import reset_reference_env
+
+                reset_reference_env()
+            try:
+                if task.get("mode", "e2e") == "verifier_only":
+                    state = _run_verifier_only(task, config, seed)
+                else:
+                    state = run_agent(
+                        task["input"],
+                        domain=domain,
+                        config=config,
+                    )
+                    state["seed"] = seed
+                row = build_result_row(
+                    task=task,
+                    state=state,
+                    version=version_key,
+                    error=None,
+                    seed=seed,
                 )
-            row = build_result_row(
-                task=task, state=state, version=version_key, error=None
-            )
 
-            results.append(
-                {
-                    "task": task,
-                    "state": state,
-                    "version": version_key,
-                    "error": None,
-                    "scored_row": row,
-                }
-            )
+                results.append(
+                    {
+                        "task": task,
+                        "state": state,
+                        "version": version_key,
+                        "seed": seed,
+                        "error": None,
+                        "scored_row": row,
+                    }
+                )
 
-            if verbose:
-                actual = row["actual_outcome"]
-                expected = row["expected_outcome"]
-                match = "OK" if actual == expected else "MISMATCH"
-                print(f"[{match}] {task['id']} | expected={expected} actual={actual}")
+                if verbose:
+                    actual = row["actual_outcome"]
+                    expected = row["expected_outcome"]
+                    match = "OK" if actual == expected else "MISMATCH"
+                    print(
+                        f"[{match}] seed={seed} {task['id']} | "
+                        f"expected={expected} actual={actual}"
+                    )
 
-        except Exception as e:
-            error_label = type(e).__name__
-            print(f"[ERROR] {task['id']} | {error_label}: {e}")
+            except Exception as e:
+                error_label = type(e).__name__
+                print(f"[ERROR] seed={seed} {task['id']} | {error_label}: {e}")
 
-            row = build_result_row(
-                task=task, state=None, version=version_key, error=error_label
-            )
+                row = build_result_row(
+                    task=task,
+                    state=None,
+                    version=version_key,
+                    error=error_label,
+                    seed=seed,
+                )
 
-            results.append(
-                {
-                    "task": task,
-                    "state": None,
-                    "version": version_key,
-                    "error": error_label,
-                    "scored_row": row,
-                }
-            )
+                results.append(
+                    {
+                        "task": task,
+                        "state": None,
+                        "version": version_key,
+                        "seed": seed,
+                        "error": error_label,
+                        "scored_row": row,
+                    }
+                )
 
     return results
 
 
-def _run_verifier_only(task: dict, config: RuntimeConfig) -> dict:
+def _run_verifier_only(task: dict, config: RuntimeConfig, seed: int) -> dict:
     domain = task.get("domain", "ecommerce")
     _seed_database(domain, task.get("db_seed", {}))
     answer = task.get("injected_final_answer", "")
@@ -104,6 +126,7 @@ def _run_verifier_only(task: dict, config: RuntimeConfig) -> dict:
         "run_id": task.get("id"),
         "run_stamp": None,
         "run_started_at": None,
+        "seed": seed,
     }
 
     if not config.use_verifier:
@@ -122,6 +145,8 @@ def _run_verifier_only(task: dict, config: RuntimeConfig) -> dict:
         base_url=config.llm_base_url,
         write_logs=False,
         claims=injected_claims or None,
+        temperature=config.llm_temperature,
+        seed=config.llm_seed,
     )
     state["reliability_report"] = report.model_dump()
     state["reliability_verdict_audit"] = report.verdict
@@ -228,6 +253,13 @@ if __name__ == "__main__":
         "--versions", nargs="+", default=list(VERSIONS.keys()), help="Versions to run"
     )
     parser.add_argument(
+        "--seeds",
+        nargs="+",
+        type=int,
+        default=[42],
+        help="Random seeds to run for each version",
+    )
+    parser.add_argument(
         "--stratified",
         action="store_true",
         help="Sample evenly across failure categories F0-F5 using scenario id prefix",
@@ -271,7 +303,7 @@ if __name__ == "__main__":
 
     all_metrics = {}
     for version_key in args.versions:
-        results = run_version(version_key, scenarios)
+        results = run_version(version_key, scenarios, seeds=args.seeds)
         metrics = compute_metrics(results)
         all_metrics[version_key] = metrics
         print(f"\n[METRICS] {version_key}: {metrics}")

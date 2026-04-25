@@ -13,6 +13,8 @@ class RuntimeConfig:
     version_name: str = "V4_Full"
     llm_model: str = QWEN_PLUS_MODEL
     llm_base_url: str = OPENROUTER_BASE_URL
+    llm_temperature: float = 0.0
+    llm_seed: int | None = None
 
 
 DEFAULT_RUNTIME_CONFIG = RuntimeConfig()

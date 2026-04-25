@@ -19,11 +19,21 @@ def extract_claims(
     *,
     model: str = QWEN_PLUS_MODEL,
     base_url: str = OPENROUTER_BASE_URL,
+    temperature: float = 0.0,
+    seed: int | None = None,
 ) -> list[Claim]:
     api_key = os.getenv("OPENROUTER_API_KEY")
     if api_key:
         try:
-            return _extract_with_llm(domain, query, agent_answer, model=model, base_url=base_url)
+            return _extract_with_llm(
+                domain,
+                query,
+                agent_answer,
+                model=model,
+                base_url=base_url,
+                temperature=temperature,
+                seed=seed,
+            )
         except Exception as exc:
             print(f"[CLAIM_EXTRACTOR] Falling back to heuristic extraction: {exc}")
     return _extract_with_heuristics(domain, agent_answer)
@@ -36,12 +46,17 @@ def _extract_with_llm(
     *,
     model: str,
     base_url: str,
+    temperature: float,
+    seed: int | None,
 ) -> list[Claim]:
     client = OpenAI(api_key=os.environ["OPENROUTER_API_KEY"], base_url=base_url)
+    options: dict[str, Any] = {"temperature": temperature}
+    if seed is not None:
+        options["seed"] = seed
     response = client.chat.completions.create(
         model=model,
-        messages=build_claim_extraction_prompt(domain, query, agent_answer), # type: ignore
-        temperature=0,
+        messages=build_claim_extraction_prompt(domain, query, agent_answer),  # type: ignore
+        **options,
     )
     content = response.choices[0].message.content or "{}"
     payload = _load_json_object(content)

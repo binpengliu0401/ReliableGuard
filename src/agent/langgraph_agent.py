@@ -99,6 +99,7 @@ def run_agent(
         "run_id": run_id,
         "run_stamp": resolved_run_stamp,
         "run_started_at": resolved_run_stamp,
+        "seed": config.llm_seed,
     }
 
     from src.graph.nodes import _prepare_execution_context

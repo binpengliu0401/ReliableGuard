@@ -35,3 +35,4 @@ class AgentState(TypedDict):
     run_id: str
     run_stamp: str
     run_started_at: str
+    seed: int | None

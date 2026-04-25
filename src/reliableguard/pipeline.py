@@ -18,9 +18,19 @@ def run_reliability_pipeline(
     write_logs: bool = True,
     run_stamp: str | None = None,
     claims: list[Claim] | None = None,
+    temperature: float = 0.0,
+    seed: int | None = None,
 ) -> ReliabilityReport:
     if claims is None:
-        claims = extract_claims(domain, query, agent_answer, model=model, base_url=base_url)
+        claims = extract_claims(
+            domain,
+            query,
+            agent_answer,
+            model=model,
+            base_url=base_url,
+            temperature=temperature,
+            seed=seed,
+        )
     verifiability = classify_verifiability(domain, claims)
     verification_results = verify_claims(domain, claims, verifiability)
     risks, reliability_score = score_risks(claims, verification_results)
