@@ -25,6 +25,16 @@ def derive_outcome(state: dict | None) -> str:
     return "NOT_TRIGGERED"
 
 
+def derive_audit_outcome(state: dict | None) -> str:
+    """Return true audit verdict when reliability ran, otherwise normal outcome."""
+    if state is None:
+        return "ERROR"
+    audit = state.get("reliability_verdict_audit")
+    if audit:
+        return str(audit)
+    return derive_outcome(state)
+
+
 def compute_outcome_score(expected: str, actual: str) -> int:
     if actual == "ERROR":
         return 0
@@ -47,7 +57,10 @@ def compute_metrics(results: list[dict]) -> dict:
         return {}
 
     passed = 0
+    audit_passed = 0
     false_accept = 0
+    audit_false_accept = 0
+    false_accept_denominator = 0
     blocked = 0
     warned = 0
     outcome_scores = []
@@ -58,14 +71,21 @@ def compute_metrics(results: list[dict]) -> dict:
         state = item.get("state")
         task = item.get("task", {})
         actual = derive_outcome(state)
+        audit_actual = derive_audit_outcome(state)
         expected = normalize_expected(task)
         score = compute_outcome_score(expected, actual)
         outcome_scores.append(score)
 
         if actual == expected:
             passed += 1
+        if audit_actual == expected:
+            audit_passed += 1
+        if expected in {"BLOCK", "WARN"}:
+            false_accept_denominator += 1
         if expected in {"BLOCK", "WARN"} and actual == "PASS":
             false_accept += 1
+        if expected in {"BLOCK", "WARN"} and audit_actual == "PASS":
+            audit_false_accept += 1
         if actual == "BLOCK":
             blocked += 1
         if actual == "WARN":
@@ -88,7 +108,15 @@ def compute_metrics(results: list[dict]) -> dict:
     return {
         "total_tasks": total,
         "pass_rate": round(passed / total, 3),
-        "false_acceptance_rate": round(false_accept / total, 3),
+        "audit_pass_rate": round(audit_passed / total, 3),
+        "false_acceptance_rate": round(false_accept / false_accept_denominator, 3)
+        if false_accept_denominator
+        else 0.0,
+        "audit_false_acceptance_rate": round(
+            audit_false_accept / false_accept_denominator, 3
+        )
+        if false_accept_denominator
+        else 0.0,
         "block_rate": round(blocked / total, 3),
         "warn_rate": round(warned / total, 3),
         "avg_reliability_score": round(sum(reliability_scores) / len(reliability_scores), 3)
@@ -116,6 +144,7 @@ def build_result_row(
     task: dict, state: dict | None, version: str, error: str | None = None
 ) -> dict:
     actual = derive_outcome(state)
+    actual_audit = derive_audit_outcome(state)
     expected = normalize_expected(task)
     score = compute_outcome_score(expected, actual)
 
@@ -137,13 +166,16 @@ def build_result_row(
         "version": version,
         "expected_outcome": expected,
         "actual_outcome": actual,
+        "actual_audit_outcome": actual_audit,
         "pass_fail": actual == expected,
+        "audit_pass_fail": actual_audit == expected,
         "outcome_score": score,
-        "failure_type": derive_failure_type(state, expected, actual),
+        "failure_type": task.get("failure_type")
+        or task.get("injected_error_type")
+        or derive_failure_type(state, expected, actual),
         "tool_calls": len(executed_tools),
         "tokens": total_tokens,
         "reliability_score": reliability_score,
         "reliability_summary": reliability_summary,
         "error": error,
     }
-

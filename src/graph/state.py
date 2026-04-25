@@ -22,6 +22,7 @@ class AgentState(TypedDict):
     final_answer: str | None
     reliability_report: dict[str, Any] | None
     reliability_verdict: str | None
+    reliability_verdict_audit: str | None
     reliability_score: float | None
 
     executed_tools: list[str]

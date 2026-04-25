@@ -158,6 +158,7 @@ def reliability_node(state: AgentState) -> AgentState:
         run_stamp=state.get("run_stamp"),
     )
     state["reliability_report"] = report.model_dump()
+    state["reliability_verdict_audit"] = report.verdict
     state["reliability_verdict"] = report.verdict if config.enforce_intervention else "PASS"
     state["reliability_score"] = report.reliability_score
     _trace(

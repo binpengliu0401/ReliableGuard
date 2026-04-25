@@ -1,8 +1,12 @@
+import json
+
 from eval.config.ablation_versions import VERSIONS
 from src.agent.langgraph_agent import run_agent
 from src.config.runtime_config import RuntimeConfig
 from src.db.reset_env import reset_env
-from eval.metrics import derive_outcome, build_result_row
+from eval.metrics import build_result_row
+from src.reliableguard.pipeline import run_reliability_pipeline
+from src.reliableguard.schema import Claim
 
 
 def run_version(
@@ -27,11 +31,14 @@ def run_version(
 
             reset_reference_env()
         try:
-            state = run_agent(
-                task["input"],
-                domain=domain,
-                config=config,
-            )
+            if task.get("mode", "e2e") == "verifier_only":
+                state = _run_verifier_only(task, config)
+            else:
+                state = run_agent(
+                    task["input"],
+                    domain=domain,
+                    config=config,
+                )
             row = build_result_row(
                 task=task, state=state, version=version_key, error=None
             )
@@ -71,6 +78,127 @@ def run_version(
             )
 
     return results
+
+
+def _run_verifier_only(task: dict, config: RuntimeConfig) -> dict:
+    domain = task.get("domain", "ecommerce")
+    _seed_database(domain, task.get("db_seed", {}))
+    answer = task.get("injected_final_answer", "")
+
+    state = {
+        "messages": [{"role": "user", "content": task.get("input", "")}],
+        "tool_call": None,
+        "trace": [],
+        "final_answer": answer,
+        "reliability_report": None,
+        "reliability_verdict": None,
+        "reliability_verdict_audit": None,
+        "reliability_score": None,
+        "executed_tools": [],
+        "config": config,
+        "domain": domain,
+        "verifier_context": None,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "run_id": task.get("id"),
+        "run_stamp": None,
+        "run_started_at": None,
+    }
+
+    if not config.use_verifier:
+        return state
+
+    injected_claims = [
+        Claim(**claim_payload)
+        for claim_payload in task.get("injected_claims", [])
+        if isinstance(claim_payload, dict)
+    ]
+    report = run_reliability_pipeline(
+        domain=domain,
+        query=task.get("input", ""),
+        agent_answer=answer,
+        model=config.llm_model,
+        base_url=config.llm_base_url,
+        write_logs=False,
+        claims=injected_claims or None,
+    )
+    state["reliability_report"] = report.model_dump()
+    state["reliability_verdict_audit"] = report.verdict
+    state["reliability_score"] = report.reliability_score
+    state["reliability_verdict"] = report.verdict if config.enforce_intervention else "PASS"
+    return state
+
+
+def _seed_database(domain: str, seed: dict) -> None:
+    if not seed:
+        return
+
+    if domain == "ecommerce":
+        from src.domain.ecommerce.tools import conn, cursor
+
+        for order in seed.get("orders", []):
+            cursor.execute(  # type: ignore[union-attr]
+                """
+                INSERT INTO orders (id, amount, status, refund_reason)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    order.get("id"),
+                    order.get("amount"),
+                    order.get("status", "pending"),
+                    order.get("refund_reason"),
+                ),
+            )
+        conn.commit()
+        return
+
+    if domain == "reference":
+        from src.domain.reference.tools import init_reference_db
+
+        db = init_reference_db()
+        try:
+            for paper in seed.get("papers", []):
+                db.execute(
+                    """
+                    INSERT INTO papers (paper_id, pdf_path, status)
+                    VALUES (?, ?, ?)
+                    """,
+                    (
+                        paper.get("paper_id"),
+                        paper.get("pdf_path", "fixture.pdf"),
+                        paper.get("status", "parsed"),
+                    ),
+                )
+            for ref in seed.get("references", []):
+                authors = ref.get("authors", [])
+                db.execute(
+                    """
+                    INSERT INTO "references" (
+                        ref_id, paper_id, title, authors, doi, journal, year,
+                        doi_status, doi_verdict_code, authors_status, journal_status
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        ref.get("ref_id"),
+                        ref.get("paper_id"),
+                        ref.get("title", ""),
+                        json.dumps(authors, ensure_ascii=False),
+                        ref.get("doi", ""),
+                        ref.get("journal", ""),
+                        ref.get("year"),
+                        ref.get("doi_status", "pending"),
+                        ref.get("doi_verdict_code", "pending"),
+                        ref.get("authors_status", "pending"),
+                        ref.get("journal_status", "pending"),
+                    ),
+                )
+            db.commit()
+        finally:
+            db.close()
+        return
+
+    raise ValueError(f"Unsupported domain: {domain}")
 
 
 if __name__ == "__main__":

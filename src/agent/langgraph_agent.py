@@ -87,6 +87,7 @@ def run_agent(
         "final_answer": None,
         "reliability_report": None,
         "reliability_verdict": None,
+        "reliability_verdict_audit": None,
         "reliability_score": None,
         "executed_tools": [],
         "config": config,

@@ -11,7 +11,7 @@ from eval.config.ablation_versions import VERSIONS, with_deepseek
 from eval.metrics import compute_metrics
 from src.reliableguard.trace.artifacts import build_run_id, make_run_stamp
 
-VERSIONS_TO_RUN = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
+VERSIONS_TO_RUN = ["V1_Baseline", "V2_NoReliability", "V3_AuditOnly", "V4_Full"]
 
 
 class _TeeStream:
@@ -43,6 +43,8 @@ def _tee_to_log(path: str):
 
 
 def _load_adversarial_scenarios(path: str = "tasks/adversarial_scenarios.json"):
+    if not os.path.exists(path):
+        return []
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -62,12 +64,27 @@ def _load_main_scenarios(domain: str):
     )
 
 
+def _load_verifier_scenarios(domain: str):
+    scenarios = _load_scenarios("tasks/verifier_scenarios.json")
+    return _filter_by_domain(scenarios, domain)
+
+
+def _filter_by_domain(scenarios: list[dict], domain: str) -> list[dict]:
+    if domain == "all":
+        return scenarios
+    return [scenario for scenario in scenarios if scenario.get("domain", "ecommerce") == domain]
+
+
 def _select_scenarios(mode: str, domain: str):
     main_scenarios = _load_main_scenarios(domain)
     if mode == "main":
         return main_scenarios
+    if mode == "verifier":
+        return _load_verifier_scenarios(domain)
     if mode == "adversarial":
         return _load_adversarial_scenarios()
+    if mode == "all":
+        return main_scenarios + _load_verifier_scenarios(domain) + _load_adversarial_scenarios()
     return main_scenarios + _load_adversarial_scenarios()
 
 
@@ -102,17 +119,21 @@ def run_benchmark(scenarios, model: str = "qwen"):
 
 
 def _print_summary(all_metrics: dict, versions: list[str]):
-    print(f"\n{'='*86}")
-    print(f"{'BENCHMARK SUMMARY':^86}")
-    print(f"{'='*86}")
+    version_width = max(16, *(len(version) + 2 for version in versions))
+    table_width = 30 + version_width * len(versions)
+    print(f"\n{'=' * table_width}")
+    print(f"{'BENCHMARK SUMMARY':^{table_width}}")
+    print(f"{'=' * table_width}")
 
-    header = f"{'Metric':<30}" + "".join(f"{v:<16}" for v in versions)
+    header = f"{'Metric':<30}" + "".join(f"{v:<{version_width}}" for v in versions)
     print(header)
-    print("-" * 86)
+    print("-" * table_width)
 
     metric_keys = [
         ("pass_rate", "Pass Rate"),
+        ("audit_pass_rate", "Audit Pass Rate"),
         ("false_acceptance_rate", "False Acceptance Rate"),
+        ("audit_false_acceptance_rate", "Audit FAR"),
         ("block_rate", "Block Rate"),
         ("warn_rate", "Warn Rate"),
         ("avg_reliability_score", "Avg Reliability Score"),
@@ -123,10 +144,10 @@ def _print_summary(all_metrics: dict, versions: list[str]):
         row = f"{label:<30}"
         for version in versions:
             val = all_metrics.get(version, {}).get(key, "-")
-            row += f"{str(val):<16}"
+            row += f"{str(val):<{version_width}}"
         print(row)
 
-    print("=" * 86)
+    print("=" * table_width)
 
 
 def _compute_block_rate(results: list[dict]) -> float:
@@ -158,9 +179,13 @@ def _export_ablation_csv(
                 "version",
                 "total",
                 "success_rate",
+                "audit_pass_rate",
                 "false_acceptance_rate",
+                "audit_false_acceptance_rate",
                 "block_rate",
                 "warn_rate",
+                "avg_reliability_score",
+                "avg_outcome_score",
             ]
         )
 
@@ -172,9 +197,13 @@ def _export_ablation_csv(
                     version,
                     metrics.get("total_tasks", len(version_results)),
                     metrics.get("pass_rate", 0.0),
+                    metrics.get("audit_pass_rate", 0.0),
                     metrics.get("false_acceptance_rate", 0.0),
-                    _compute_block_rate(version_results),
+                    metrics.get("audit_false_acceptance_rate", 0.0),
+                    metrics.get("block_rate", _compute_block_rate(version_results)),
                     metrics.get("warn_rate", 0.0),
+                    metrics.get("avg_reliability_score", 0.0),
+                    metrics.get("avg_outcome_score", 0.0),
                 ]
             )
 
@@ -191,9 +220,17 @@ def _export_scenario_results(all_results: dict, path: str):
             rows.append(
                 {
                     "scenario_id": row.get("scenario_id"),
+                    "domain": row.get("domain"),
                     "version": row.get("version"),
-                    "outcome": row.get("actual_outcome"),
+                    "expected_outcome": row.get("expected_outcome"),
+                    "actual_outcome": row.get("actual_outcome"),
+                    "actual_audit_outcome": row.get("actual_audit_outcome"),
+                    "pass_fail": row.get("pass_fail"),
+                    "audit_pass_fail": row.get("audit_pass_fail"),
+                    "outcome_score": row.get("outcome_score"),
                     "failure_type": row.get("failure_type"),
+                    "reliability_score": row.get("reliability_score"),
+                    "error": row.get("error"),
                     "tool_calls": row.get("tool_calls", 0),
                     "tokens": row.get("tokens", 0),
                 }
@@ -204,9 +241,17 @@ def _export_scenario_results(all_results: dict, path: str):
             f,
             fieldnames=[
                 "scenario_id",
+                "domain",
                 "version",
-                "outcome",
+                "expected_outcome",
+                "actual_outcome",
+                "actual_audit_outcome",
+                "pass_fail",
+                "audit_pass_fail",
+                "outcome_score",
                 "failure_type",
+                "reliability_score",
+                "error",
                 "tool_calls",
                 "tokens",
             ],
@@ -221,7 +266,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--scenarios",
-        choices=["main", "adversarial", "both"],
+        choices=["main", "verifier", "adversarial", "both", "all"],
         default="main",
     )
     parser.add_argument(
@@ -234,9 +279,17 @@ if __name__ == "__main__":
         choices=["qwen", "deepseek"],
         default="qwen",
     )
+    parser.add_argument(
+        "--input",
+        help="Optional explicit scenario JSON file. Domain filtering still applies.",
+    )
     args = parser.parse_args()
 
-    selected_scenarios = _select_scenarios(args.scenarios, args.domain)
+    selected_scenarios = (
+        _filter_by_domain(_load_scenarios(args.input), args.domain)
+        if args.input
+        else _select_scenarios(args.scenarios, args.domain)
+    )
     run_stamp = make_run_stamp()
     log_path = os.path.join("logs", args.domain, f"{build_run_id(args.domain, run_stamp)}.log")
 
