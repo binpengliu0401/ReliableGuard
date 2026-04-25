@@ -6,7 +6,7 @@ Run with:
 
 This is deterministic: it uses a fake LLM client and an isolated in-memory
 ecommerce DB, but it still runs through run_agent(), tool execution, the
-reliability node, trace logging, and result persistence.
+reliability node, and trace logging.
 """
 
 from __future__ import annotations
@@ -28,7 +28,6 @@ from src.agent.langgraph_agent import run_agent
 from src.reliableguard.trace.artifacts import (
     build_run_id,
     make_run_stamp,
-    save_run_result,
 )
 
 
@@ -125,51 +124,11 @@ def main() -> int:
         conn.close()
 
     log_path = Path("logs") / domain / f"{run_id}.json"
-    report = result.get("reliability_report") or {}
-    payload = {
-        "run_id": run_id,
-        "run_started_at": run_stamp,
-        "domain": domain,
-        "model": model,
-        "version": VERSIONS["V4_Full"].version_name,
-        "trace_log": str(log_path),
-        "result": {
-            "final_answer": result.get("final_answer"),
-            "executed_tools": result.get("executed_tools", []),
-            "reliability_verdict": result.get("reliability_verdict"),
-            "reliability_score": result.get("reliability_score"),
-            "reliability_summary": report.get("summary"),
-            "supported_count": report.get("supported_count", 0),
-            "contradicted_count": report.get("contradicted_count", 0),
-            "unsupported_count": report.get("unsupported_count", 0),
-            "unverifiable_count": report.get("unverifiable_count", 0),
-            "not_found_count": report.get("not_found_count", 0),
-            "claims": [
-                {
-                    "claim_id": trace["claim"]["claim_id"],
-                    "claim": trace["claim"]["text"],
-                    "evidence_state": trace["verification"]["evidence_state"],
-                    "source": trace["verification"]["source"],
-                    "risk_level": trace["risk"]["risk_level"],
-                    "intervention": trace["intervention"]["action"],
-                    "reason": trace["verification"]["reason"],
-                }
-                for trace in report.get("traces", [])
-            ],
-        },
-    }
-    result_path = save_run_result(
-        model=model,
-        domain=domain,
-        run_stamp=run_stamp,
-        payload=payload,
-    )
-
     print(json.dumps(
         {
             "run_id": run_id,
             "trace_log": str(log_path),
-            "result": result_path,
+            "results_note": "Single-run artifacts are trace logs only. Run eval.benchmark to generate CSV results.",
             "verdict": result.get("reliability_verdict"),
             "score": result.get("reliability_score"),
         },

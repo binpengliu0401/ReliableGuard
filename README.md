@@ -317,14 +317,11 @@ Each reliability run can write a JSON trace into `logs/<domain>/`:
 }
 ```
 
-CLI runs also write structured outputs into `results/<model>/<domain>/`.
-
-Result files contain the final answer, executed tools, verdict, reliability
-score, summary counts, and a compact claim list. For example:
+Single CLI runs are trace/debug artifacts only. They do not write experiment
+CSV files into `results/`. For example:
 
 ```text
 logs/ecommerce/ecommerce_20260425T072209Z.json
-results/qwen/ecommerce/ecommerce_20260425T072209Z.json
 ```
 
 To generate a deterministic local artifact sample without real LLM/API access:
@@ -337,7 +334,6 @@ To inspect the newest ecommerce artifacts:
 
 ```bash
 cat "$(ls -t logs/ecommerce/*.json | head -1)"
-cat "$(ls -t results/qwen/ecommerce/*.json | head -1)"
 ```
 
 These traces are the basis for:
@@ -392,7 +388,42 @@ Run benchmark:
 
 ```bash
 python -m eval.benchmark --scenarios main --domain all --model qwen
+python -m eval.benchmark --scenarios verifier --domain all --model qwen
 python -m eval.benchmark --scenarios main --domain reference --model deepseek
+```
+
+`main` scenarios run the full LLM/tool path. `verifier` scenarios use
+`mode: verifier_only` records from `tasks/verifier_scenarios.json`: the runner
+seeds domain state from `db_seed`, bypasses plan/execute, and sends
+`injected_final_answer` plus optional `injected_claims` through the reliability
+verifier. This keeps ground truth controlled for FAR ablations.
+
+Generate larger deterministic verifier-only suites from parameterized templates:
+
+```bash
+python scripts/generate_verifier_scenarios.py --count 1200 \
+  --output tasks/generated_verifier_scenarios.json
+python -m eval.benchmark --input tasks/generated_verifier_scenarios.json \
+  --domain all --model qwen
+```
+
+Benchmark runs write quantitative CSV results into `results/<model>/<domain>/`:
+
+```text
+results/qwen/ecommerce/scenario_results.csv
+results/qwen/ecommerce/ablation.csv
+```
+
+`scenario_results.csv` contains one row per scenario/version:
+
+```csv
+scenario_id,domain,version,expected_outcome,actual_outcome,pass_fail,outcome_score,failure_type,reliability_score,error,tool_calls,tokens
+```
+
+`ablation.csv` contains one row per runtime version:
+
+```csv
+version,total,success_rate,false_acceptance_rate,block_rate,warn_rate,avg_reliability_score,avg_outcome_score
 ```
 
 Current metrics are reliability-oriented:
@@ -400,7 +431,7 @@ Current metrics are reliability-oriented:
 | Metric | Description |
 |---|---|
 | Pass Rate | Fraction of scenarios where expected and actual verdict match |
-| False Acceptance Rate | Risky outputs incorrectly accepted as `PASS` |
+| False Acceptance Rate | Risky `BLOCK`/`WARN` scenarios incorrectly accepted as `PASS` |
 | Block Rate | Fraction of runs producing `BLOCK` |
 | Warn Rate | Fraction of runs producing `WARN` |
 | Avg Reliability Score | Mean reliability score across runs |

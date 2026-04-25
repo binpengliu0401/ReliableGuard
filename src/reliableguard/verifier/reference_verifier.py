@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from src.domain.reference.api_client import query_authors, query_doi
@@ -16,6 +17,9 @@ def verify_reference_claim(claim: Claim, verifiability: Verifiability) -> Verifi
     ref_id = _as_int(claim.entities.get("ref_id"))
     if ref_id is not None:
         return _verify_reference_db_claim(claim, ref_id)
+
+    if claim.attribute in {"reference_count", "ref_count"} and claim.entities.get("paper_id"):
+        return _verify_reference_count_claim(claim, str(claim.entities["paper_id"]))
 
     if claim.attribute == "authors" and claim.entities.get("paper_title"):
         return _verify_authors_claim(claim, str(claim.entities["paper_title"]))
@@ -115,6 +119,13 @@ def _verify_reference_db_claim(claim: Claim, ref_id: int) -> VerificationResult:
             reason=f"Claimed {attr}={claimed}; database {attr}={actual}.",
         )
 
+    if attr in {"author_count", "authors_count"}:
+        try:
+            authors = json.loads(evidence["authors"]) if evidence["authors"] else []
+        except Exception:
+            authors = []
+        return _compare_numeric(claim, len(authors), "references_db", evidence)
+
     return VerificationResult(
         claim_id=claim.claim_id,
         evidence_state="supported",
@@ -123,6 +134,20 @@ def _verify_reference_db_claim(claim: Claim, ref_id: int) -> VerificationResult:
         confidence=1.0,
         reason="Reference entity exists in references_db.",
     )
+
+
+def _verify_reference_count_claim(claim: Claim, paper_id: str) -> VerificationResult:
+    conn = init_reference_db()
+    try:
+        row = conn.execute(
+            'SELECT COUNT(*) AS count FROM "references" WHERE paper_id = ?',
+            (paper_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    actual = row["count"] if row is not None else 0
+    return _compare_numeric(claim, actual, "references_db", {"paper_id": paper_id, "count": actual})
 
 
 def _verify_authors_claim(claim: Claim, title: str) -> VerificationResult:
@@ -159,3 +184,37 @@ def _as_int(value: Any) -> int | None:
     except (TypeError, ValueError):
         return None
 
+
+def _as_float(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _compare_numeric(
+    claim: Claim,
+    actual: Any,
+    source: str,
+    evidence_value: Any | None = None,
+) -> VerificationResult:
+    claimed = _as_float(claim.value)
+    actual_number = _as_float(actual)
+    if claimed is None or actual_number is None:
+        return VerificationResult(
+            claim_id=claim.claim_id,
+            evidence_state="unsupported",
+            evidence_value=evidence_value if evidence_value is not None else actual,
+            source=source,
+            confidence=0.5,
+            reason="Numeric claim could not be parsed into a comparable value.",
+        )
+    supported = abs(claimed - actual_number) < 1e-6
+    return VerificationResult(
+        claim_id=claim.claim_id,
+        evidence_state="supported" if supported else "contradicted",
+        evidence_value=evidence_value if evidence_value is not None else actual,
+        source=source,
+        confidence=1.0,
+        reason=f"Claimed value={claimed}; database value={actual_number}.",
+    )

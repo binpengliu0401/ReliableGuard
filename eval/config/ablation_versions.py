@@ -10,12 +10,12 @@ VERSIONS = {
         enforce_intervention=False,
         version_name="V1_Baseline",
     ),
-    "V2_Gate": RuntimeConfig(
+    "V2_NoReliability": RuntimeConfig(
         use_verifier=False,
         enforce_intervention=False,
         version_name="V2_NoReliability",
     ),
-    "V3_Verifier": RuntimeConfig(
+    "V3_AuditOnly": RuntimeConfig(
         use_verifier=True,
         enforce_intervention=False,
         version_name="V3_AuditOnly",

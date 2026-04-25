@@ -1,7 +1,7 @@
 from src.reliableguard.classifier.verifiability_classifier import classify_verifiability
 from src.reliableguard.extractor.claim_extractor import extract_claims
 from src.reliableguard.intervention.policy_engine import decide_interventions
-from src.reliableguard.schema import ReliabilityReport
+from src.reliableguard.schema import Claim, ReliabilityReport
 from src.reliableguard.scorer.risk_scorer import score_risks
 from src.reliableguard.trace.report_generator import generate_report
 from src.reliableguard.trace.trace_logger import build_traces, write_trace
@@ -17,8 +17,10 @@ def run_reliability_pipeline(
     base_url: str,
     write_logs: bool = True,
     run_stamp: str | None = None,
+    claims: list[Claim] | None = None,
 ) -> ReliabilityReport:
-    claims = extract_claims(domain, query, agent_answer, model=model, base_url=base_url)
+    if claims is None:
+        claims = extract_claims(domain, query, agent_answer, model=model, base_url=base_url)
     verifiability = classify_verifiability(domain, claims)
     verification_results = verify_claims(domain, claims, verifiability)
     risks, reliability_score = score_risks(claims, verification_results)

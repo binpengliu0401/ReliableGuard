@@ -2,14 +2,11 @@ import argparse
 import io
 import json
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
-from pathlib import Path
 from typing import Any
 
 from src.reliableguard.trace.artifacts import (
     build_run_id,
-    cleanup_incompatible_results,
     make_run_stamp,
-    save_run_result,
 )
 
 VERSION_CHOICES = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
@@ -78,7 +75,6 @@ def main():
     args = parser.parse_args()
     run_stamp = make_run_stamp()
     run_id = build_run_id(args.domain, run_stamp)
-    removed_results = cleanup_incompatible_results()
 
     with _silence_stdio(enabled=not args.verbose):
         from eval.config.ablation_versions import VERSIONS, with_deepseek
@@ -109,7 +105,7 @@ def main():
         "domain": args.domain,
         "model": args.model,
         "version": config.version_name,
-        "removed_incompatible_results": removed_results,
+        "trace_log": f"logs/{args.domain}/{run_id}.json",
     }
     if args.full_result:
         output["result"] = _to_json_safe(result)
@@ -126,13 +122,6 @@ def main():
             "executed_tools": _to_json_safe(result.get("executed_tools", [])),
             "total_tokens": result.get("total_tokens", 0),
         }
-    output["result_path"] = str(Path("results") / args.model / args.domain / f"{run_id}.json")
-    save_run_result(
-        model=args.model,
-        domain=args.domain,
-        run_stamp=run_stamp,
-        payload=output,
-    )
     print(json.dumps(output, ensure_ascii=False, indent=2))
 
 

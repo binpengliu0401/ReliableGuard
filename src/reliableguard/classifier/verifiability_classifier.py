@@ -21,11 +21,15 @@ def _classify_one(domain: str, claim: Claim) -> Verifiability:
         return "unverifiable"
 
     if domain == "reference":
-        if claim.entities.get("doi") or claim.entities.get("ref_id") or claim.entities.get("paper_id"):
+        if (
+            claim.entities.get("doi")
+            or claim.entities.get("ref_id")
+            or claim.entities.get("paper_id")
+            or claim.attribute in {"reference_count", "ref_count", "author_count", "authors_count"}
+        ):
             return "fully_verifiable"
         if claim.entities.get("paper_title") or claim.attribute in {"title", "authors", "journal", "year"}:
             return "partially_verifiable"
         return "unverifiable"
 
     return "unverifiable"
-
