@@ -37,3 +37,7 @@ test_qwen.py
 reference *.pdf
 tests/papers/
 src/domain/reference/fixtures/real_data.json
+
+# local scenario generation helpers
+scripts/generate_verifier_scenarios.py
+tasks/generated_verifier_scenarios.json
