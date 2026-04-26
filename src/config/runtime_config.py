@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 QWEN_PLUS_MODEL = "qwen/qwen-plus"
-
 DEEPSEEK_MODEL = "deepseek/deepseek-chat-v3-0324"
 
 

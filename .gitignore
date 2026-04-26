@@ -5,7 +5,10 @@ __pycache__/
 .env.*
 *.db
 *.sqlite3
+
+# Agent markdown file
 CLAUDE.md
+AGENTS.md
 
 # ignore large or sensitive files
 logs/*.txt
@@ -40,4 +43,5 @@ src/domain/reference/fixtures/real_data.json
 
 # local scenario generation helpers
 scripts/generate_verifier_scenarios.py
+tasks/
 tasks/generated_verifier_scenarios.json

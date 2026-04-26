@@ -23,7 +23,9 @@ def _to_json_safe(value: Any):
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="ReliableGuard runtime CLI entry point")
+    parser = argparse.ArgumentParser(
+        description="ReliableGuard runtime CLI entry point"
+    )
     parser.add_argument(
         "--domain",
         choices=["ecommerce", "reference"],

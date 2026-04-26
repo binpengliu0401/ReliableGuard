@@ -8,8 +8,8 @@ _MODE = os.environ.get("REFERENCE_API_MODE", "mock").lower()
 _FIXTURE_PATH = Path(__file__).parent / "fixtures" / "mock_data.json"
 _REAL_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "real_data.json"
 
-_mock_cache: dict | None = None
-_real_cache: dict | None = None
+_mock_cache: dict[str, Any] | None = None
+_real_cache: dict[str, Any] | None = None
 
 DOI_URL_PATTERN = re.compile(r"https?://doi\.org/([^\s]+)", re.IGNORECASE)
 DOI_PATTERN = re.compile(r"\b(10\.\d{4,}/[^\s]+)", re.IGNORECASE)
@@ -25,19 +25,29 @@ NUMBERED_REF_START_PATTERN = re.compile(
 AUTHOR_YEAR_START_PATTERN = re.compile(r"^[A-Z][^()]{0,140}\(\d{4}[a-z]?\)")
 
 
-def _load_mock() -> dict:
+def _load_mock() -> dict[str, Any]:
     global _mock_cache
     if _mock_cache is None:
         with open(_FIXTURE_PATH, "r", encoding="utf-8") as f:
-            _mock_cache = json.load(f)
-    return _mock_cache  # type: ignore
+            loaded = json.load(f)
+        if not isinstance(loaded, dict):
+            raise ValueError(
+                f"Mock reference fixture must be a JSON object: {_FIXTURE_PATH}"
+            )
+        _mock_cache = loaded
+    return _mock_cache
 
 
-def _load_real() -> dict:
+def _load_real() -> dict[str, Any]:
     global _real_cache
     if _real_cache is None:
         with open(_REAL_FIXTURE_PATH, "r", encoding="utf-8") as f:
-            _real_cache = json.load(f)
+            loaded = json.load(f)
+        if not isinstance(loaded, dict):
+            raise ValueError(
+                f"Real reference fixture must be a JSON object: {_REAL_FIXTURE_PATH}"
+            )
+        _real_cache = loaded
     return _real_cache
 
 
