@@ -23,7 +23,6 @@ VERSION_ALIASES = {
     "V1": "V1_Baseline",
     "V2": "V2_AuditOnly",
     "V3": "V3_Intervention",
-    "V4": "V3_Intervention",
 }
 CSV_FIELDS = [
     "scenario_id",

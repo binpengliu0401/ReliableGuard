@@ -3,7 +3,7 @@
 # F1  Schema Violation          300
 # F2  Policy Violation          200
 # F3  Dependency Violation      150
-# F4-B Structural FALSE_SUCCESS  50  (note=f4b_injection, excluded from main metrics)
+# F4  Structural FALSE_SUCCESS   50  (note=f4b_injection, excluded from main metrics)
 # F5  Partial Completion        100
 # ─────────────────────────────────
 # Total                        1000
@@ -337,7 +337,7 @@ def generate_f4b(count: int) -> list[dict]:
         amount = random.choice(VALID_AMOUNTS)
         scenarios.append({
             "id": f"F4-G-{i + 1:03d}",
-            "failure_mode": "F4-B",
+            "failure_mode": "F4",
             "description": (
                 f"Structural FALSE_SUCCESS: tool reports success "
                 f"but DB not updated (amount={amount})"

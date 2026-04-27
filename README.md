@@ -49,9 +49,6 @@ Scenario files under `tasks/` are local experiment data and are gitignored.
 | `V2_AuditOnly` | True | False | Runs the reliability audit, but still releases the original answer |
 | `V3_Intervention` | True | True | Runs the audit and enforces PASS/WARN/BLOCK intervention |
 
-`V2_NoReliability` remains available only for cross-model baseline comparison,
-for example DeepSeek-vs-Qwen experiments.
-
 ## Running Evaluations
 
 Common `eval/benchmark.py` usage:

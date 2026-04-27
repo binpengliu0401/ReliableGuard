@@ -5,22 +5,25 @@ from pathlib import Path
 import scripts.run_ablation as run_ablation
 
 
-def test_default_versions_excludes_v2():
-    from scripts.run_ablation import DEFAULT_VERSIONS
+def test_version_aliases():
+    from scripts.run_ablation import VERSION_ALIASES
 
-    assert "V2_NoReliability" not in DEFAULT_VERSIONS
-    assert DEFAULT_VERSIONS == ["V1_Baseline", "V2_AuditOnly", "V3_Intervention"]
+    assert "V4" not in VERSION_ALIASES
+    assert VERSION_ALIASES == {
+        "V1": "V1_Baseline",
+        "V2": "V2_AuditOnly",
+        "V3": "V3_Intervention",
+    }
 
 
-def test_short_version_aliases_use_canonical_three_version_names():
-    args = run_ablation._parse_args(["--versions", "V1", "V2", "V3", "V4"])
+def test_versions_dict_has_three_entries():
+    from eval.config.ablation_versions import VERSIONS
 
-    assert args.versions == [
+    assert set(VERSIONS.keys()) == {
         "V1_Baseline",
         "V2_AuditOnly",
         "V3_Intervention",
-        "V3_Intervention",
-    ]
+    }
 
 
 def _write_scenarios(tmp_path: Path) -> tuple[Path, Path, Path]:
