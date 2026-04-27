@@ -124,6 +124,17 @@ def compute_metrics(results: list[dict]) -> dict:
     warned = 0
     outcome_scores = []
     reliability_scores = []
+    fact_accuracy_values = [
+        item["fact_accuracy"]
+        for item in results
+        if item.get("fact_accuracy") is not None
+    ]
+    all_trace_scores = [
+        value
+        for item in results
+        for value in (item.get("trace_fact_scores") or {}).values()
+        if value is not None
+    ]
     detection_by_type: dict[str, dict[str, int]] = {}
 
     for item in results:
@@ -198,6 +209,17 @@ def compute_metrics(results: list[dict]) -> dict:
         "avg_reliability_score": round(sum(reliability_scores) / len(reliability_scores), 3)
         if reliability_scores
         else 0.0,
+        "avg_fact_accuracy": round(
+            sum(fact_accuracy_values) / len(fact_accuracy_values), 3
+        )
+        if fact_accuracy_values
+        else None,
+        "fact_accuracy_coverage": round(len(fact_accuracy_values) / total, 3),
+        "avg_trace_fact_accuracy": round(
+            sum(1 for value in all_trace_scores if value) / len(all_trace_scores), 3
+        )
+        if all_trace_scores
+        else None,
         "avg_outcome_score": round(sum(outcome_scores) / total, 3),
         "detection_rate_by_type": detection_rates,
         "outcome_scores": outcome_scores,
@@ -222,6 +244,9 @@ def build_result_row(
     version: str,
     error: str | None = None,
     seed: int | None = None,
+    fact_accuracy: float | None = None,
+    fact_snapshot: dict | None = None,
+    trace_fact_scores: dict | None = None,
 ) -> dict:
     actual = derive_outcome(state)
     actual_audit = derive_audit_outcome(state)
@@ -258,5 +283,8 @@ def build_result_row(
         "tokens": total_tokens,
         "reliability_score": reliability_score,
         "reliability_summary": reliability_summary,
+        "fact_accuracy": fact_accuracy,
+        "fact_snapshot": fact_snapshot or {},
+        "trace_fact_scores": trace_fact_scores or {},
         "error": error,
     }

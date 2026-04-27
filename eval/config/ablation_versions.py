@@ -10,6 +10,8 @@ VERSIONS = {
         enforce_intervention=False,
         version_name="V1_Baseline",
     ),
+    # V2_NoReliability: Same flags as V1; intended for DeepSeek cross-model comparison.
+    # Use with with_deepseek(VERSIONS["V2_NoReliability"]) when running --model deepseek.
     "V2_NoReliability": RuntimeConfig(
         use_verifier=False,
         enforce_intervention=False,

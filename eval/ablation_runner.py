@@ -2,6 +2,12 @@ import json
 from dataclasses import replace
 
 from eval.config.ablation_versions import VERSIONS
+from eval.fact_scorer import (
+    parse_expected_facts,
+    score_facts,
+    score_trace_facts,
+    snapshot_facts,
+)
 from src.agent.langgraph_agent import run_agent
 from src.config.runtime_config import RuntimeConfig
 from src.db.reset_env import reset_env
@@ -48,12 +54,31 @@ def run_version(
                         config=config,
                     )
                     state["seed"] = seed
+
+                verifiable_facts = task.get("verifiable_facts", [])
+                expected_facts = parse_expected_facts(verifiable_facts)
+                fact_snap = (
+                    snapshot_facts(domain, set(expected_facts.keys()))
+                    if expected_facts
+                    else {}
+                )
+                fact_accuracy = (
+                    score_facts(expected_facts, fact_snap) if expected_facts else None
+                )
+                trace_fact_scores = (
+                    score_trace_facts(expected_facts, state, domain)
+                    if expected_facts
+                    else {}
+                )
                 row = build_result_row(
                     task=task,
                     state=state,
                     version=version_key,
                     error=None,
                     seed=seed,
+                    fact_accuracy=fact_accuracy,
+                    fact_snapshot=fact_snap,
+                    trace_fact_scores=trace_fact_scores,
                 )
 
                 results.append(
@@ -64,6 +89,9 @@ def run_version(
                         "seed": seed,
                         "error": None,
                         "scored_row": row,
+                        "fact_snapshot": fact_snap,
+                        "fact_accuracy": fact_accuracy,
+                        "trace_fact_scores": trace_fact_scores,
                     }
                 )
 
@@ -86,6 +114,9 @@ def run_version(
                     version=version_key,
                     error=error_label,
                     seed=seed,
+                    fact_accuracy=None,
+                    fact_snapshot={},
+                    trace_fact_scores={},
                 )
 
                 results.append(
@@ -96,6 +127,9 @@ def run_version(
                         "seed": seed,
                         "error": error_label,
                         "scored_row": row,
+                        "fact_snapshot": {},
+                        "fact_accuracy": None,
+                        "trace_fact_scores": {},
                     }
                 )
 

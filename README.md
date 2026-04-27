@@ -73,7 +73,7 @@ ReliableGuard/
 |   |   |-- reference/         # Reference tools, CrossRef fixtures, matcher
 |   |-- db/                    # DB initialization and reset helpers
 |   |-- config/                # Runtime config
-|-- tasks/                     # Scenario datasets and paper test data
+|-- tasks/                     # Local scenario datasets and paper test data (gitignored)
 |-- eval/                      # Evaluation runners and metrics
 |-- scripts/                   # Utility and smoke-test scripts
 |-- logs/                      # Domain-scoped traces: logs/<domain>/
@@ -238,10 +238,14 @@ Current version presets:
 
 | CLI key | Runtime behavior |
 |---|---|
-| `V1_Baseline` | Agent only, no reliability node |
-| `V2_Gate` | Legacy-compatible key; currently same as no reliability |
-| `V3_Verifier` | Audit-only reliability: report is generated, but intervention is not enforced |
-| `V4_Full` | Full reliability: report is generated and PASS/WARN/BLOCK/ESCALATE is enforced |
+| `V1_Baseline` | Agent only; no reliability audit and no intervention |
+| `V3_AuditOnly` | Reliability audit runs and records verdicts, but intervention is not enforced |
+| `V4_Full` | Full Reliable Guard: audit plus enforced PASS/WARN/BLOCK intervention |
+
+`V2_NoReliability` remains in `eval.config.ablation_versions.VERSIONS` for
+cross-model comparison, especially with
+`with_deepseek(VERSIONS["V2_NoReliability"])`. It is not part of the default
+ablation run list because it has the same reliability flags as `V1_Baseline`.
 
 ## Reference Domain Modes
 
@@ -366,7 +370,9 @@ parsing calls, but it covers:
 - `run_agent()` business flows through LangGraph plan/execute/reliability nodes
 - real tool side effects against isolated in-memory databases
 
-Real paper PDFs used for reference-domain experiments live under:
+Scenario JSON files and real paper PDFs used for local experiments live under
+`tasks/`, which is intentionally gitignored. Keep benchmark datasets and PDFs
+local, or regenerate them with the scripts in `scripts/`.
 
 ```text
 tasks/papers/
@@ -374,7 +380,48 @@ tasks/papers/
 
 ## Evaluation
 
-Run ablation scenarios:
+Run the current two-set ablation entry point:
+
+```bash
+python scripts/run_ablation.py \
+  --set both \
+  --versions V1 V3 V4 \
+  --seeds 42 123 7 \
+  --output-dir results/ \
+  --timestamped-output
+```
+
+The default versions are:
+
+```text
+V1_Baseline, V3_AuditOnly, V4_Full
+```
+
+Outputs are written under `results/`. With `--timestamped-output`, each run is
+stored in a dated subdirectory such as:
+
+```text
+results/20260427/151800/
+```
+
+The runner writes:
+
+```text
+set_a_metrics.json
+set_b_metrics.json
+set_a_rows.csv
+set_b_rows.csv
+summary.txt
+```
+
+Optional debugging flags:
+
+```bash
+python scripts/run_ablation.py --set B --save-states false-alarms --debug-false-alarms
+python scripts/diagnose_false_alarms.py --csv results/<date>/<time>/set_b_rows.csv
+```
+
+Legacy direct ablation runner:
 
 ```bash
 python -m eval.ablation_runner \
@@ -435,6 +482,7 @@ Current metrics are reliability-oriented:
 | Block Rate | Fraction of runs producing `BLOCK` |
 | Warn Rate | Fraction of runs producing `WARN` |
 | Avg Reliability Score | Mean reliability score across runs |
+| Avg Fact Accuracy | Mean match rate between post-run DB/reference state and `verifiable_facts` |
 | Detection Rate by Type | Detection rate grouped by injected claim/hallucination type |
 
 ## Research Framing

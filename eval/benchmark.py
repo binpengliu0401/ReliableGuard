@@ -11,7 +11,7 @@ from eval.config.ablation_versions import VERSIONS, with_deepseek
 from eval.metrics import compute_metrics
 from src.reliableguard.trace.artifacts import build_run_id, make_run_stamp
 
-VERSIONS_TO_RUN = ["V1_Baseline", "V2_NoReliability", "V3_AuditOnly", "V4_Full"]
+VERSIONS_TO_RUN = ["V1_Baseline", "V3_AuditOnly", "V4_Full"]
 
 
 class _TeeStream:
