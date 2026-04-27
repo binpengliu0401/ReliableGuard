@@ -9,7 +9,7 @@ DEEPSEEK_MODEL = "deepseek/deepseek-chat-v3-0324"
 class RuntimeConfig:
     use_verifier: bool = True
     enforce_intervention: bool = True
-    version_name: str = "V4_Full"
+    version_name: str = "V3_Intervention"
     llm_model: str = QWEN_PLUS_MODEL
     llm_base_url: str = OPENROUTER_BASE_URL
     llm_temperature: float = 0.0

@@ -9,7 +9,13 @@ from src.reliableguard.trace.artifacts import (
     make_run_stamp,
 )
 
-VERSION_CHOICES = ["V1_Baseline", "V2_Gate", "V3_Verifier", "V4_Full"]
+VERSION_CHOICES = [
+    "V1_Baseline",
+    "V2_AuditOnly",
+    "V3_Intervention",
+    "V3_AuditOnly",
+    "V4_Full",
+]
 
 
 def _to_json_safe(value: Any):
@@ -40,7 +46,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version",
         choices=VERSION_CHOICES,
-        default="V4_Full",
+        default="V3_Intervention",
         help="Ablation version preset",
     )
     parser.add_argument(

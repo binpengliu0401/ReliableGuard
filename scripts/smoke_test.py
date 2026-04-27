@@ -495,7 +495,7 @@ def test_ecommerce_order_create_confirm_full_business_flow(
     result = run_agent(
         "Create an order for amount 100, confirm it, and report the final status.",
         domain="ecommerce",
-        config=VERSIONS["V4_Full"],
+        config=VERSIONS["V3_Intervention"],
     )
 
     row = isolated_ecommerce_db.execute(
@@ -567,7 +567,7 @@ def test_reference_parse_verify_doi_full_business_flow(
     result = run_agent(
         'Parse "business-fixture.pdf" as paper_business_001 and verify its DOI.',
         domain="reference",
-        config=VERSIONS["V4_Full"],
+        config=VERSIONS["V3_Intervention"],
     )
 
     conn = sqlite3.connect(isolated_reference_db)

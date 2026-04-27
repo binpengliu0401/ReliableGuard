@@ -17,13 +17,13 @@ from eval.config.ablation_versions import VERSIONS
 from eval.metrics import build_result_row, compute_metrics, normalize_expected
 
 
-DEFAULT_VERSIONS = ["V1_Baseline", "V3_AuditOnly", "V4_Full"]
+DEFAULT_VERSIONS = ["V1_Baseline", "V2_AuditOnly", "V3_Intervention"]
 DEFAULT_SEEDS = [42, 123, 7]
 VERSION_ALIASES = {
     "V1": "V1_Baseline",
-    "V2": "V2_NoReliability",
-    "V3": "V3_AuditOnly",
-    "V4": "V4_Full",
+    "V2": "V2_AuditOnly",
+    "V3": "V3_Intervention",
+    "V4": "V3_Intervention",
 }
 CSV_FIELDS = [
     "scenario_id",

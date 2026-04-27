@@ -9,7 +9,18 @@ def test_default_versions_excludes_v2():
     from scripts.run_ablation import DEFAULT_VERSIONS
 
     assert "V2_NoReliability" not in DEFAULT_VERSIONS
-    assert DEFAULT_VERSIONS == ["V1_Baseline", "V3_AuditOnly", "V4_Full"]
+    assert DEFAULT_VERSIONS == ["V1_Baseline", "V2_AuditOnly", "V3_Intervention"]
+
+
+def test_short_version_aliases_use_canonical_three_version_names():
+    args = run_ablation._parse_args(["--versions", "V1", "V2", "V3", "V4"])
+
+    assert args.versions == [
+        "V1_Baseline",
+        "V2_AuditOnly",
+        "V3_Intervention",
+        "V3_Intervention",
+    ]
 
 
 def _write_scenarios(tmp_path: Path) -> tuple[Path, Path, Path]:
@@ -209,4 +220,4 @@ def test_group_exception_does_not_abort_remaining_groups(tmp_path, monkeypatch):
 
     assert metrics["V1_Baseline"]["ecommerce"]["error"] == "RuntimeError: boom"
     assert metrics["V1_Baseline"]["reference"]["total_tasks"] == 5
-    assert ("V4_Full", "reference") in calls
+    assert ("V3_Intervention", "reference") in calls

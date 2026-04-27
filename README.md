@@ -190,7 +190,7 @@ python ReliableGuard.py \
   --domain ecommerce \
   --input "Please create an order with amount 100 and tell me the status." \
   --model qwen \
-  --version V4_Full \
+  --version V3_Intervention \
   --reset
 ```
 
@@ -203,7 +203,7 @@ python ReliableGuard.py \
   --domain reference \
   --input "Please parse the PDF at \"paper_f0.pdf\" with paper_id \"paper_ref_valid_001\" and verify DOI." \
   --model qwen \
-  --version V4_Full \
+  --version V3_Intervention \
   --reset
 ```
 
@@ -214,7 +214,7 @@ REFERENCE_API_MODE=real python ReliableGuard.py \
   --domain reference \
   --input "Please parse the PDF at \"reference 2.pdf\" with paper_id \"paper_ref2\" and verify DOI for all references." \
   --model qwen \
-  --version V4_Full \
+  --version V3_Intervention \
   --reset
 ```
 
@@ -239,13 +239,15 @@ Current version presets:
 | CLI key | Runtime behavior |
 |---|---|
 | `V1_Baseline` | Agent only; no reliability audit and no intervention |
-| `V3_AuditOnly` | Reliability audit runs and records verdicts, but intervention is not enforced |
-| `V4_Full` | Full Reliable Guard: audit plus enforced PASS/WARN/BLOCK intervention |
+| `V2_AuditOnly` | Reliability audit runs and records verdicts, but intervention is not enforced |
+| `V3_Intervention` | Reliability audit plus enforced PASS/WARN/BLOCK intervention gate |
 
 `V2_NoReliability` remains in `eval.config.ablation_versions.VERSIONS` for
 cross-model comparison, especially with
 `with_deepseek(VERSIONS["V2_NoReliability"])`. It is not part of the default
 ablation run list because it has the same reliability flags as `V1_Baseline`.
+Legacy keys `V3_AuditOnly` and `V4_Full` are still accepted as aliases for
+backward compatibility.
 
 ## Reference Domain Modes
 
@@ -277,7 +279,7 @@ REFERENCE_API_MODE=live python ReliableGuard.py \
   --domain reference \
   --input "Please parse the PDF at \"tasks/papers/All Atention you need.pdf\" with paper_id \"attention_demo\" and list the references." \
   --model qwen \
-  --version V4_Full \
+  --version V3_Intervention \
   --reset
 ```
 
@@ -385,7 +387,7 @@ Run the current two-set ablation entry point:
 ```bash
 python scripts/run_ablation.py \
   --set both \
-  --versions V1 V3 V4 \
+  --versions V1 V2 V3 \
   --seeds 42 123 7 \
   --output-dir results/ \
   --timestamped-output
@@ -394,7 +396,7 @@ python scripts/run_ablation.py \
 The default versions are:
 
 ```text
-V1_Baseline, V3_AuditOnly, V4_Full
+V1_Baseline, V2_AuditOnly, V3_Intervention
 ```
 
 Outputs are written under `results/`. With `--timestamped-output`, each run is
@@ -427,7 +429,7 @@ Legacy direct ablation runner:
 python -m eval.ablation_runner \
   --input tasks/reference_scenarios.json \
   --scenarios 20 \
-  --versions V4_Full \
+  --versions V3_Intervention \
   --output results/reference_sample.json
 ```
 

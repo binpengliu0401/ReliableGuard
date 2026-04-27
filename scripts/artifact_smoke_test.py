@@ -117,7 +117,7 @@ def main() -> int:
             result = run_agent(
                 "Create an order for amount 100, confirm it, and report the final status.",
                 domain=domain,
-                config=VERSIONS["V4_Full"],
+                config=VERSIONS["V3_Intervention"],
                 run_stamp=run_stamp,
             )
     finally:
