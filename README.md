@@ -73,14 +73,21 @@ python scripts/run_ablation.py --set both --versions V1 V2 V3 --seeds 42 123 7
 ## Project Structure
 
 ```text
-src/              # Agent graph, reliability pipeline, domains, config, DB helpers
-eval/             # Ablation versions, benchmark runners, metrics, fact scoring
-scripts/          # Experiment runners, diagnostics, fixture/scenario utilities
-tests/            # Pytest unit tests
-tasks/            # Local scenario JSON and paper fixtures (gitignored)
-logs/             # Local reliability traces (gitignored)
-results/          # Local benchmark outputs (gitignored)
-ReliableGuard.py  # Single-run CLI entry point
-requirements.txt  # Python dependencies
-AGENTS.md         # Detailed codebase guide for coding agents
+src/
+  agent/             # LangGraph agent runtime
+  graph/             # Graph state, nodes, and routing
+  reliableguard/     # Claim extraction, verification, scoring, intervention
+  domain/            # Ecommerce and reference domain tools/verifiers
+  db/                # Local database initialization and reset helpers
+  config/            # Runtime configuration
+eval/
+  config/            # Ablation version definitions
+  benchmark.py       # Benchmark entry point
+  ablation_runner.py # Per-version scenario runner
+  metrics.py         # Aggregate metrics
+  fact_scorer.py     # Ground-truth fact scoring
+scripts/             # Experiment runners and utility scripts
+tests/               # Pytest unit tests
+ReliableGuard.py     # Single-run CLI entry point
+requirements.txt     # Python dependencies
 ```
