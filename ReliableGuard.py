@@ -13,8 +13,6 @@ VERSION_CHOICES = [
     "V1_Baseline",
     "V2_AuditOnly",
     "V3_Intervention",
-    "V3_AuditOnly",
-    "V4_Full",
 ]
 
 

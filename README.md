@@ -246,8 +246,6 @@ Current version presets:
 cross-model comparison, especially with
 `with_deepseek(VERSIONS["V2_NoReliability"])`. It is not part of the default
 ablation run list because it has the same reliability flags as `V1_Baseline`.
-Legacy keys `V3_AuditOnly` and `V4_Full` are still accepted as aliases for
-backward compatibility.
 
 ## Reference Domain Modes
 

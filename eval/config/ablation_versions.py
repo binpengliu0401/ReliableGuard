@@ -34,9 +34,6 @@ VERSIONS = {
     "V2_NoReliability": V2_NO_RELIABILITY,
     "V2_AuditOnly": V2_AUDIT_ONLY,
     "V3_Intervention": V3_INTERVENTION,
-    # Legacy aliases kept for old commands and previous result artifacts.
-    "V3_AuditOnly": V2_AUDIT_ONLY,
-    "V4_Full": V3_INTERVENTION,
 }
 
 
