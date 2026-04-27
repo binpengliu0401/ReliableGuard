@@ -1,515 +1,86 @@
-﻿# ReliableGuard
+# Reliable Guard
 
-ReliableGuard is a third-party reliability auditing layer for AI agent outputs.
+Reliable Guard is a LangGraph-based agent benchmark framework with a post-hoc,
+domain-grounded reliability audit and intervention layer.
 
-It does not try to make the agent verify itself. After an agent produces a final
-answer, ReliableGuard extracts factual claims, checks them against authoritative
-sources, scores the risk, and returns a user-readable reliability report with a
-claim-level evidence trace.
+## Overview
 
-## Current Direction
+Reliable Guard runs tool-using LLM agents and audits their final answers after
+execution. The reliability pipeline extracts factual claims, checks them against
+domain evidence, scores risk, and optionally blocks unsafe answers. The project
+currently supports two domains: ecommerce workflows backed by SQLite order state,
+and reference/citation workflows backed by parsed reference metadata. The
+ablation study compares baseline execution, audit-only detection, and enforced
+intervention. OpenRouter is used through the OpenAI-compatible client.
 
-This project has been refactored from a tool-execution governance prototype into
-a claim-level reliability auditing framework.
+## Quick Start
 
-The previous Gate / Recovery / assertion-decorator design has been removed. The
-current research focus is:
-
-- hallucination taxonomy for AI agent outputs
-- verifiability boundary analysis
-- evidence-grounded source verification
-- claim-level reliability trace
-- risk-aware intervention decisions
-- detection-rate and human-agreement evaluation
-
-## Architecture
-
-Runtime agent flow:
-
-```text
-plan -> execute -> plan
-plan -> reliability -> END
-```
-
-Reliability pipeline:
-
-```text
-Agent final answer
-  -> Claim Extractor
-  -> Verifiability Classifier
-  -> Source Verifier
-  -> Risk Scorer
-  -> Intervention Policy
-  -> Reliability Trace
-  -> Report Generator
-```
-
-The framework's shared abstraction is not a universal verifier. Each domain has
-its own evidence sources and verification logic, but both domains are mapped into
-the same claim-level trace:
-
-```text
-claim -> verifiability -> evidence -> verdict -> risk -> intervention
-```
-
-## Project Structure
-
-```text
-ReliableGuard/
-|-- src/
-|   |-- agent/                 # LangGraph agent runtime
-|   |-- graph/                 # StateGraph nodes and control flow
-|   |-- reliableguard/
-|   |   |-- schema.py          # Pydantic v2 data contracts
-|   |   |-- pipeline.py        # Reliability pipeline orchestrator
-|   |   |-- extractor/         # Claim extraction
-|   |   |-- classifier/        # Taxonomy and verifiability classification
-|   |   |-- verifier/          # Domain source verifiers
-|   |   |-- scorer/            # Risk scoring
-|   |   |-- intervention/      # PASS/WARN/BLOCK/ESCALATE policy
-|   |   |-- trace/             # Trace logging and report generation
-|   |-- domain/
-|   |   |-- ecommerce/         # Ecommerce tools and DB-backed evidence
-|   |   |-- reference/         # Reference tools, CrossRef fixtures, matcher
-|   |-- db/                    # DB initialization and reset helpers
-|   |-- config/                # Runtime config
-|-- tasks/                     # Local scenario datasets and paper test data (gitignored)
-|-- eval/                      # Evaluation runners and metrics
-|-- scripts/                   # Utility and smoke-test scripts
-|-- logs/                      # Domain-scoped traces: logs/<domain>/
-|-- results/                   # Model/domain-scoped outputs: results/<model>/<domain>/
-|-- ReliableGuard.py           # CLI entry point
-|-- requirements.txt
-```
-
-Runtime databases are local generated artifacts and are ignored by git:
-
-- `ecommerce.db`: ecommerce orders table
-- `references.db`: reference-domain papers and references tables
-
-Removed legacy modules:
-
-```text
-src/reliableguard/gate/
-src/reliableguard/recovery/
-src/reliableguard/verifier/verifier.py
-src/reliableguard/verifier/ecommerce_state_tracker.py
-src/domain/ecommerce/assertions.py
-src/domain/ecommerce/policies.py
-src/domain/reference/assertions.py
-src/domain/reference/policies.py
-src/domain/loader.py
-```
-
-## Core Concepts
-
-### Claim Types
-
-ReliableGuard currently uses six claim types:
-
-| Type | Meaning |
-|---|---|
-| `existence` | Entity exists in an authoritative source |
-| `attribute` | Direct non-numeric property of an entity |
-| `numeric` | Amount, count, score, year, or calculated value |
-| `temporal` | Date, order, duration, or state transition timing |
-| `relational` | Relationship between two or more entities |
-| `semantic` | Textual grounding or interpretation |
-
-Uncertainty is not a claim type. It is represented as a claim field:
-
-```text
-certainty = certain | uncertain | abstained
-```
-
-### Evidence States
-
-| State | Meaning |
-|---|---|
-| `supported` | Evidence confirms the claim |
-| `contradicted` | Entity exists, but the claimed value or relation conflicts with evidence |
-| `unsupported` | Relevant evidence exists, but is insufficient to support the claim |
-| `unverifiable` | No suitable verification path exists |
-| `not_found` | The claimed primary entity cannot be resolved in the source |
-
-`not_found` corresponds to a potential entity fabrication, but the code uses the
-more conservative name because missing evidence does not always prove malicious
-or intentional fabrication.
-
-### Interventions
-
-ReliableGuard does not perform automatic recovery by default. It decides how the
-answer should be treated:
-
-```text
-PASS      claim is acceptable
-WARN      user should inspect the issue
-BLOCK     high-risk contradiction or missing entity
-ESCALATE  no reliable verification path is available
-```
-
-This is intentionally different from recovery. Verification answers whether the
-agent output is trustworthy; recovery would require knowing the correct
-replacement answer, which can introduce secondary hallucinations.
-
-## Quickstart
-
-### 1. Install
+Install dependencies:
 
 ```bash
-git clone https://github.com/binpengliu0401/ReliableGuard.git
-cd ReliableGuard
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-PowerShell:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-### 2. Configure LLM access
-
-Create a `.env` file in the project root:
-
-```text
-OPENROUTER_API_KEY=your_key_here
-```
-
-If the key is absent, the claim extractor falls back to simple heuristic
-extraction. That is useful for smoke tests, but LLM extraction is expected for
-real experiments.
-
-### 3. Run ecommerce domain
+Configure LLM access:
 
 ```bash
-python ReliableGuard.py \
-  --domain ecommerce \
-  --input "Please create an order with amount 100 and tell me the status." \
-  --model qwen \
-  --version V3_Intervention \
-  --reset
+export OPENROUTER_API_KEY=your_key_here
 ```
 
-### 4. Run reference domain
-
-Mock fixture mode is the default:
-
-```bash
-python ReliableGuard.py \
-  --domain reference \
-  --input "Please parse the PDF at \"paper_f0.pdf\" with paper_id \"paper_ref_valid_001\" and verify DOI." \
-  --model qwen \
-  --version V3_Intervention \
-  --reset
-```
-
-Real fixture mode:
-
-```bash
-REFERENCE_API_MODE=real python ReliableGuard.py \
-  --domain reference \
-  --input "Please parse the PDF at \"reference 2.pdf\" with paper_id \"paper_ref2\" and verify DOI for all references." \
-  --model qwen \
-  --version V3_Intervention \
-  --reset
-```
-
-Useful flags:
-
-- `--verbose`: show internal runtime logs
-- `--full-result`: print full raw agent state, including `reliability_report`
-
-The concise CLI output includes:
-
-```text
-final_answer
-reliability_verdict
-reliability_score
-reliability_summary
-executed_tools
-total_tokens
-```
-
-Current version presets:
-
-| CLI key | Runtime behavior |
-|---|---|
-| `V1_Baseline` | Agent only; no reliability audit and no intervention |
-| `V2_AuditOnly` | Reliability audit runs and records verdicts, but intervention is not enforced |
-| `V3_Intervention` | Reliability audit plus enforced PASS/WARN/BLOCK intervention gate |
-
-`V2_NoReliability` remains in `eval.config.ablation_versions.VERSIONS` for
-cross-model comparison, especially with
-`with_deepseek(VERSIONS["V2_NoReliability"])`. It is not part of the default
-ablation run list because it has the same reliability flags as `V1_Baseline`.
-
-## Reference Domain Modes
-
-`src/domain/reference/api_client.py` supports:
-
-- `REFERENCE_API_MODE=mock` default, uses `src/domain/reference/fixtures/mock_data.json`
-- `REFERENCE_API_MODE=real`, uses `src/domain/reference/fixtures/real_data.json`
-- `REFERENCE_API_MODE=live`, parses a local PDF directly and calls external APIs for DOI/authors lookup
-
-Recommended usage:
-
-- Use `mock` for full benchmark runs and ablation experiments. It is deterministic and reproducible.
-- Use `live` for demos where the system should parse a real local PDF.
-- Use `real` when you want reproducible experiments backed by a prebuilt fixture from real PDFs.
-
-Live mode is intended for demonstration, not full-scale benchmark reporting,
-because PDF parsing quality and external API availability can vary.
-
-Build the real fixture:
-
-```bash
-python scripts/build_real_fixture.py --pdf "reference 1.pdf" "reference 2.pdf"
-```
-
-Demo with direct PDF parsing:
-
-```bash
-REFERENCE_API_MODE=live python ReliableGuard.py \
-  --domain reference \
-  --input "Please parse the PDF at \"tasks/papers/All Atention you need.pdf\" with paper_id \"attention_demo\" and list the references." \
-  --model qwen \
-  --version V3_Intervention \
-  --reset
-```
-
-The generated fixture includes:
-
-- `pdfs`: parsed references by PDF filename
-- `dois`: DOI metadata and existence/match information
-- `authors`: title-keyed author lists
-
-## Reliability Traces
-
-Each reliability run can write a JSON trace into `logs/<domain>/`:
-
-```json
-{
-  "run_id": "ecommerce_20260425T072209Z",
-  "run_started_at": "20260425T072209Z",
-  "domain": "ecommerce",
-  "query": "...",
-  "answer": "...",
-  "summary": {
-    "total_claims": 2,
-    "counts": {
-      "supported": 2,
-      "contradicted": 0,
-      "unsupported": 0,
-      "unverifiable": 0,
-      "not_found": 0
-    },
-    "items": [
-      {
-        "claim": "Order 1 status is confirmed",
-        "evidence_state": "supported",
-        "source": "orders_db",
-        "risk_level": "low",
-        "intervention": "PASS"
-      }
-    ]
-  },
-  "traces": []
-}
-```
-
-Single CLI runs are trace/debug artifacts only. They do not write experiment
-CSV files into `results/`. For example:
-
-```text
-logs/ecommerce/ecommerce_20260425T072209Z.json
-```
-
-To generate a deterministic local artifact sample without real LLM/API access:
-
-```bash
-python scripts/artifact_smoke_test.py
-```
-
-To inspect the newest ecommerce artifacts:
-
-```bash
-cat "$(ls -t logs/ecommerce/*.json | head -1)"
-```
-
-These traces are the basis for:
-
-- debugging agent hallucinations
-- detection-rate analysis by claim type
-- human agreement annotation
-- calibration of reliability scores
-
-## Smoke Tests
-
-All smoke and local business-flow tests are consolidated in:
-
-```text
-scripts/smoke_test.py
-```
-
-Run them with either command:
-
-```bash
-python -m pytest scripts/smoke_test.py -q
-python scripts/smoke_test.py
-```
-
-The smoke suite is deterministic. It avoids real OpenRouter, CrossRef, and PDF
-parsing calls, but it covers:
-
-- ecommerce and reference verifier rules
-- heuristic claim extraction through the full reliability pipeline
-- `run_agent()` business flows through LangGraph plan/execute/reliability nodes
-- real tool side effects against isolated in-memory databases
-
-Scenario JSON files and real paper PDFs used for local experiments live under
-`tasks/`, which is intentionally gitignored. Keep benchmark datasets and PDFs
-local, or regenerate them with the scripts in `scripts/`.
-
-```text
-tasks/papers/
-```
-
-## Evaluation
-
-Run the current two-set ablation entry point:
+Run the main benchmark:
 
 ```bash
 python scripts/run_ablation.py \
   --set both \
   --versions V1 V2 V3 \
   --seeds 42 123 7 \
-  --output-dir results/ \
-  --timestamped-output
+  --output-dir results/
 ```
 
-The default versions are:
+Scenario files under `tasks/` are local experiment data and are gitignored.
 
-```text
-V1_Baseline, V2_AuditOnly, V3_Intervention
-```
+## Ablation Versions
 
-Outputs are written under `results/`. With `--timestamped-output`, each run is
-stored in a dated subdirectory such as:
+| Key | `use_verifier` | `enforce_intervention` | Meaning |
+| --- | --- | --- | --- |
+| `V1_Baseline` | False | False | Agent-only baseline; no reliability audit or gate |
+| `V2_AuditOnly` | True | False | Runs the reliability audit, but still releases the original answer |
+| `V3_Intervention` | True | True | Runs the audit and enforces PASS/WARN/BLOCK intervention |
 
-```text
-results/20260427/151800/
-```
+`V2_NoReliability` remains available only for cross-model baseline comparison,
+for example DeepSeek-vs-Qwen experiments.
 
-The runner writes:
+## Running Evaluations
 
-```text
-set_a_metrics.json
-set_b_metrics.json
-set_a_rows.csv
-set_b_rows.csv
-summary.txt
-```
-
-Optional debugging flags:
+Common `eval/benchmark.py` usage:
 
 ```bash
-python scripts/run_ablation.py --set B --save-states false-alarms --debug-false-alarms
-python scripts/diagnose_false_alarms.py --csv results/<date>/<time>/set_b_rows.csv
+python eval/benchmark.py --scenarios main --domain all --model qwen
+python eval/benchmark.py --scenarios verifier --domain all --model qwen
+python eval/benchmark.py --scenarios main --domain reference --model deepseek
 ```
 
-Legacy direct ablation runner:
+Common `scripts/run_ablation.py` usage:
 
 ```bash
-python -m eval.ablation_runner \
-  --input tasks/reference_scenarios.json \
-  --scenarios 20 \
-  --versions V3_Intervention \
-  --output results/reference_sample.json
+python scripts/run_ablation.py --set A --versions V1 V2 V3 --seeds 42 123 7
+python scripts/run_ablation.py --set B --versions V1 V2 V3 --seeds 42 123 7
+python scripts/run_ablation.py --set both --versions V1 V2 V3 --seeds 42 123 7
 ```
 
-Run benchmark:
-
-```bash
-python -m eval.benchmark --scenarios main --domain all --model qwen
-python -m eval.benchmark --scenarios verifier --domain all --model qwen
-python -m eval.benchmark --scenarios main --domain reference --model deepseek
-```
-
-`main` scenarios run the full LLM/tool path. `verifier` scenarios use
-`mode: verifier_only` records from `tasks/verifier_scenarios.json`: the runner
-seeds domain state from `db_seed`, bypasses plan/execute, and sends
-`injected_final_answer` plus optional `injected_claims` through the reliability
-verifier. This keeps ground truth controlled for FAR ablations.
-
-Generate larger deterministic verifier-only suites from parameterized templates:
-
-```bash
-python scripts/generate_verifier_scenarios.py --count 1200 \
-  --output tasks/generated_verifier_scenarios.json
-python -m eval.benchmark --input tasks/generated_verifier_scenarios.json \
-  --domain all --model qwen
-```
-
-Benchmark runs write quantitative CSV results into `results/<model>/<domain>/`:
+## Project Structure
 
 ```text
-results/qwen/ecommerce/scenario_results.csv
-results/qwen/ecommerce/ablation.csv
+src/              # Agent graph, reliability pipeline, domains, config, DB helpers
+eval/             # Ablation versions, benchmark runners, metrics, fact scoring
+scripts/          # Experiment runners, diagnostics, fixture/scenario utilities
+tests/            # Pytest unit tests
+tasks/            # Local scenario JSON and paper fixtures (gitignored)
+logs/             # Local reliability traces (gitignored)
+results/          # Local benchmark outputs (gitignored)
+ReliableGuard.py  # Single-run CLI entry point
+requirements.txt  # Python dependencies
+AGENTS.md         # Detailed codebase guide for coding agents
 ```
-
-`scenario_results.csv` contains one row per scenario/version:
-
-```csv
-scenario_id,domain,version,expected_outcome,actual_outcome,pass_fail,outcome_score,failure_type,reliability_score,error,tool_calls,tokens
-```
-
-`ablation.csv` contains one row per runtime version:
-
-```csv
-version,total,success_rate,false_acceptance_rate,block_rate,warn_rate,avg_reliability_score,avg_outcome_score
-```
-
-Current metrics are reliability-oriented:
-
-| Metric | Description |
-|---|---|
-| Pass Rate | Fraction of scenarios where expected and actual verdict match |
-| False Acceptance Rate | Risky `BLOCK`/`WARN` scenarios incorrectly accepted as `PASS` |
-| Block Rate | Fraction of runs producing `BLOCK` |
-| Warn Rate | Fraction of runs producing `WARN` |
-| Avg Reliability Score | Mean reliability score across runs |
-| Avg Fact Accuracy | Mean match rate between post-run DB/reference state and `verifiable_facts` |
-| Detection Rate by Type | Detection rate grouped by injected claim/hallucination type |
-
-## Research Framing
-
-ReliableGuard studies a narrower and more deployable problem than training a
-better agent:
-
-> Given an AI agent's final answer, which generated claims are verifiable, what
-> evidence supports or contradicts them, and what risk-aware intervention should
-> be shown to the user?
-
-The intended thesis contributions are:
-
-1. A taxonomy of hallucination types in enterprise-style agent outputs.
-2. A verifiability boundary for deciding which claims can be checked.
-3. A domain-adaptable evidence verification pipeline.
-4. Claim-level reliability traces for auditability and human agreement study.
-5. Detection-rate and false-acceptance evaluation across ecommerce and reference domains.
-
-## LLM Backend
-
-| Backend | Status | Notes |
-|---|---|---|
-| `qwen/qwen-plus` | Active | OpenRouter backend via OpenAI-compatible API |
-| `deepseek/deepseek-chat-v3-0324` | Active | OpenRouter backend via OpenAI-compatible API |
-
-## Author
-
-Binpeng Liu - PolyU DSAI, MSc Dissertation (2026)  
-Supervisor: Prof. Han Ruijian
