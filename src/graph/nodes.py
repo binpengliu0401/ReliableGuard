@@ -1,3 +1,4 @@
+import ast
 import json
 import os
 
@@ -82,6 +83,75 @@ def _first_user_query(state: AgentState) -> str:
     return ""
 
 
+def _parse_tool_arguments(raw_arguments: str | None) -> dict:
+    if not raw_arguments:
+        return {}
+
+    try:
+        parsed = json.loads(raw_arguments)
+    except json.JSONDecodeError:
+        repaired_arguments = _repair_json_closing_delimiters(raw_arguments)
+        if repaired_arguments != raw_arguments:
+            try:
+                parsed = json.loads(repaired_arguments)
+                return parsed if isinstance(parsed, dict) else {
+                    "_argument_parse_error": raw_arguments
+                }
+            except json.JSONDecodeError:
+                pass
+        try:
+            parsed = ast.literal_eval(raw_arguments)
+        except (SyntaxError, ValueError):
+            return {"_argument_parse_error": raw_arguments}
+
+    return parsed if isinstance(parsed, dict) else {"_argument_parse_error": raw_arguments}
+
+
+def _repair_json_closing_delimiters(raw_arguments: str) -> str:
+    stripped = raw_arguments.strip()
+    if not stripped:
+        return raw_arguments
+
+    repaired = stripped
+    bracket_delta = stripped.count("[") - stripped.count("]")
+    brace_delta = stripped.count("{") - stripped.count("}")
+    if bracket_delta > 0:
+        repaired += "]" * bracket_delta
+    if brace_delta > 0:
+        repaired += "}" * brace_delta
+    return repaired
+
+
+def _assistant_message_from_response(msg, parsed_args: dict | None = None) -> dict:
+    tool_calls = getattr(msg, "tool_calls", None)
+    if not tool_calls:
+        return {"role": "assistant", "content": msg.content}
+
+    sanitized_tool_calls = []
+    for index, tool_call in enumerate(tool_calls):
+        arguments = tool_call.function.arguments
+        if index == 0 and parsed_args is not None:
+            arguments = json.dumps(parsed_args, ensure_ascii=False)
+        else:
+            arguments = json.dumps(_parse_tool_arguments(arguments), ensure_ascii=False)
+        sanitized_tool_calls.append(
+            {
+                "id": tool_call.id,
+                "type": "function",
+                "function": {
+                    "name": tool_call.function.name,
+                    "arguments": arguments,
+                },
+            }
+        )
+
+    return {
+        "role": "assistant",
+        "content": msg.content,
+        "tool_calls": sanitized_tool_calls,
+    }
+
+
 def plan_node(state: AgentState) -> AgentState:
     config = state["config"]
     client = _get_client(config)
@@ -99,20 +169,21 @@ def plan_node(state: AgentState) -> AgentState:
     _accumulate_usage(state, response)
 
     msg = response.choices[0].message
-    state["messages"].append(msg)
-
     tool_calls = msg.tool_calls
     if not tool_calls:
+        state["messages"].append(_assistant_message_from_response(msg))
         state["tool_call"] = None
         state["final_answer"] = msg.content
         _trace(state, "plan_node", "COMPLETED", msg.content or "no further tool calls")
         return state
 
     tc = tool_calls[0]
+    func_args = _parse_tool_arguments(tc.function.arguments)  # type: ignore[union-attr]
+    state["messages"].append(_assistant_message_from_response(msg, func_args))
     state["tool_call"] = ToolCallInfo(
         tool_call_id=tc.id,
         func_name=tc.function.name,  # type: ignore[union-attr]
-        func_args=json.loads(tc.function.arguments),  # type: ignore[union-attr]
+        func_args=func_args,
     )
 
     _trace(
@@ -130,15 +201,21 @@ def execute_node(state: AgentState) -> AgentState:
     func_args = tc["func_args"]  # type: ignore[index]
     domain = state["domain"]
 
-    domain_resources = _get_domain_resources(domain)
-    tool_registry = domain_resources["tool_registry"]
+    if "_argument_parse_error" in func_args:
+        result = {
+            "error": "tool argument parse error",
+            "raw_arguments": func_args["_argument_parse_error"],
+        }
+    else:
+        domain_resources = _get_domain_resources(domain)
+        tool_registry = domain_resources["tool_registry"]
 
-    result = tool_registry.get(
-        func_name,
-        lambda **kw: {"error": f"unknown tool: {func_name}"},
-    )(**func_args)
+        result = tool_registry.get(
+            func_name,
+            lambda **kw: {"error": f"unknown tool: {func_name}"},
+        )(**func_args)
 
-    state["executed_tools"] = state.get("executed_tools", []) + [func_name]
+        state["executed_tools"] = state.get("executed_tools", []) + [func_name]
 
     _trace(state, "execute_node", "EXECUTED", f"{func_name} - {result}")
 

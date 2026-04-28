@@ -62,6 +62,24 @@ def score_facts(expected: dict[str, str], snapshot: dict[str, FactValue]) -> flo
     return matched / compared
 
 
+def mismatch_summary(expected: dict[str, str], snapshot: dict[str, FactValue]) -> str:
+    parts = []
+    for key, exp_val in expected.items():
+        if key not in snapshot:
+            continue
+        actual_str = str(snapshot[key]).strip().lower()
+        exp_str = str(exp_val).strip().lower()
+        match = actual_str == exp_str
+        if not match:
+            try:
+                match = float(actual_str) == float(exp_str)
+            except (ValueError, TypeError):
+                pass
+        if not match:
+            parts.append(f"{key}: expected={exp_val}, actual={snapshot[key]}")
+    return "; ".join(parts)
+
+
 def score_trace_facts(
     expected: dict[str, str],
     state: dict,

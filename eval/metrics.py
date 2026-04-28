@@ -120,10 +120,14 @@ def compute_metrics(results: list[dict]) -> dict:
     false_accept = 0
     audit_false_accept = 0
     false_accept_denominator = 0
+    false_alarm = 0
+    false_alarm_denominator = 0
     blocked = 0
     warned = 0
     outcome_scores = []
     reliability_scores = []
+    fact_accuracy_blocked: list[float] = []
+    fact_accuracy_correct_pass: list[float] = []
     fact_accuracy_values = [
         item["fact_accuracy"]
         for item in results
@@ -160,6 +164,15 @@ def compute_metrics(results: list[dict]) -> dict:
             blocked += 1
         if actual == "WARN":
             warned += 1
+        if expected == "PASS":
+            false_alarm_denominator += 1
+            fa = item.get("fact_accuracy")
+            if actual in {"WARN", "BLOCK"}:
+                false_alarm += 1
+                if fa is not None:
+                    fact_accuracy_blocked.append(float(fa))
+            elif actual == "PASS" and fa is not None:
+                fact_accuracy_correct_pass.append(float(fa))
         if state is not None and state.get("reliability_score") is not None:
             reliability_scores.append(float(state["reliability_score"]))
 
@@ -205,6 +218,7 @@ def compute_metrics(results: list[dict]) -> dict:
         if false_accept_denominator
         else 0.0,
         "block_rate": round(blocked / total, 3),
+        "gate_action_rate": round((blocked + warned) / total, 3),
         "warn_rate": round(warned / total, 3),
         "avg_reliability_score": round(sum(reliability_scores) / len(reliability_scores), 3)
         if reliability_scores
@@ -213,6 +227,19 @@ def compute_metrics(results: list[dict]) -> dict:
             sum(fact_accuracy_values) / len(fact_accuracy_values), 3
         )
         if fact_accuracy_values
+        else None,
+        "false_alarm_rate": round(false_alarm / false_alarm_denominator, 3)
+        if false_alarm_denominator
+        else None,
+        "avg_fact_accuracy_blocked": round(
+            sum(fact_accuracy_blocked) / len(fact_accuracy_blocked), 3
+        )
+        if fact_accuracy_blocked
+        else None,
+        "avg_fact_accuracy_correct_pass": round(
+            sum(fact_accuracy_correct_pass) / len(fact_accuracy_correct_pass), 3
+        )
+        if fact_accuracy_correct_pass
         else None,
         "fact_accuracy_coverage": round(len(fact_accuracy_values) / total, 3),
         "avg_trace_fact_accuracy": round(

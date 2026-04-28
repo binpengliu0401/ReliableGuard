@@ -14,6 +14,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from eval.ablation_runner import run_version
 from eval.config.ablation_versions import VERSIONS
+from eval.fact_scorer import mismatch_summary, parse_expected_facts
 from eval.metrics import build_result_row, compute_metrics, normalize_expected
 
 
@@ -38,6 +39,8 @@ CSV_FIELDS = [
     "fact_accuracy",
     "tokens",
     "error",
+    "fact_snapshot",
+    "fact_mismatch_summary",
 ]
 
 
@@ -280,6 +283,8 @@ def _result_to_csv_row(result: dict[str, Any]) -> dict[str, Any]:
     fact_accuracy = result.get("fact_accuracy")
     if fact_accuracy is None:
         fact_accuracy = row.get("fact_accuracy")
+    expected = parse_expected_facts(result.get("task", {}).get("verifiable_facts") or [])
+    snapshot = result.get("fact_snapshot") or {}
 
     return {
         "scenario_id": row.get("scenario_id", ""),
@@ -295,6 +300,8 @@ def _result_to_csv_row(result: dict[str, Any]) -> dict[str, Any]:
         "fact_accuracy": _blank_if_none(fact_accuracy),
         "tokens": row.get("tokens", ""),
         "error": row.get("error", result.get("error", "")) or "",
+        "fact_snapshot": json.dumps(result.get("fact_snapshot") or {}),
+        "fact_mismatch_summary": mismatch_summary(expected, snapshot),
     }
 
 
@@ -304,27 +311,54 @@ def _format_summary_section(
     versions: list[str],
     include_fact_accuracy: bool,
 ) -> str:
+    from eval.config.ablation_versions import VERSIONS
+
     metrics_by_version = {
         version: compute_metrics(results) if results else {}
         for version, results in aggregate_results.items()
     }
 
-    metric_label = "avg_fact_accuracy" if include_fact_accuracy else "block_rate"
-    lines = [
-        f"=== {title} ===",
-        f"{'Version':<18} {'pass_rate (95% CI)':<22} {'FAR':<8} "
-        f"{'avg_reliability':<17} {metric_label}",
-    ]
+    def _gate(version: str) -> str:
+        cfg = VERSIONS.get(version)
+        return "ON" if cfg and cfg.enforce_intervention else "OFF"
 
-    for version in versions:
-        metrics = metrics_by_version.get(version, {})
+    lines = [f"=== {title} ==="]
+
+    if not include_fact_accuracy:
+        # Set A: gate | avg_reliability | FAR | block_rate | pass_rate
         lines.append(
-            f"{version:<18} "
-            f"{_format_pass_rate(metrics):<22} "
-            f"{_format_far(metrics, aggregate_results.get(version, [])):<8} "
-            f"{_format_optional_float(metrics.get('avg_reliability_score')):<17} "
-            f"{_format_optional_float(metrics.get(metric_label))}"
+            f"{'Version':<18} {'gate':<6} {'avg_reliability':<17} "
+            f"{'FAR':<8} {'block_rate':<12} {'pass_rate (95% CI)'}"
         )
+        for version in versions:
+            m = metrics_by_version.get(version, {})
+            lines.append(
+                f"{version:<18} {_gate(version):<6} "
+                f"{_format_optional_float(m.get('avg_reliability_score')):<17} "
+                f"{_format_far(m, aggregate_results.get(version, [])):<8} "
+                f"{_format_optional_float(m.get('block_rate')):<12} "
+                f"{_format_pass_rate(m)}"
+            )
+    else:
+        # Set B: gate | avg_reliability | gate_action_rate | FAR | false_alarm_rate | fact_acc_blocked | fact_acc_passed | pass_rate
+        lines.append(
+            f"{'Version':<18} {'gate':<6} {'avg_reliability':<17} {'gate_action_rate':<18} "
+            f"{'FAR':<8} {'false_alarm_rate':<18} {'fact_acc_blocked':<18} "
+            f"{'fact_acc_passed':<16} {'pass_rate (95% CI)'}"
+        )
+        for version in versions:
+            m = metrics_by_version.get(version, {})
+            lines.append(
+                f"{version:<18} {_gate(version):<6} "
+                f"{_format_optional_float(m.get('avg_reliability_score')):<17} "
+                f"{_format_optional_float(m.get('gate_action_rate')):<18} "
+                f"{_format_far(m, aggregate_results.get(version, [])):<8} "
+                f"{_format_optional_float(m.get('false_alarm_rate')):<18} "
+                f"{_format_optional_float(m.get('avg_fact_accuracy_blocked')):<18} "
+                f"{_format_optional_float(m.get('avg_fact_accuracy_correct_pass')):<16} "
+                f"{_format_pass_rate(m)}"
+            )
+
     return "\n".join(lines)
 
 
