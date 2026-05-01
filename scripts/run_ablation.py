@@ -325,10 +325,12 @@ def _format_summary_section(
     lines = [f"=== {title} ==="]
 
     if not include_fact_accuracy:
-        # Set A: gate | avg_reliability | FAR | block_rate | pass_rate
+        # Set A: gate | avg_reliability | FAR | risk_detection_rate | false_alarm_rate | safe_pass_rate | pass_rate
         lines.append(
             f"{'Version':<18} {'gate':<6} {'avg_reliability':<17} "
-            f"{'FAR':<8} {'block_rate':<12} {'pass_rate (95% CI)'}"
+            f"{'FAR':<8} {'risk_detection_rate':<21} "
+            f"{'false_alarm_rate':<18} {'safe_pass_rate':<15} "
+            f"{'pass_rate (95% CI)'}"
         )
         for version in versions:
             m = metrics_by_version.get(version, {})
@@ -336,7 +338,9 @@ def _format_summary_section(
                 f"{version:<18} {_gate(version):<6} "
                 f"{_format_optional_float(m.get('avg_reliability_score')):<17} "
                 f"{_format_far(m, aggregate_results.get(version, [])):<8} "
-                f"{_format_optional_float(m.get('block_rate')):<12} "
+                f"{_format_optional_float(m.get('risk_detection_rate')):<21} "
+                f"{_format_optional_float(m.get('false_alarm_rate')):<18} "
+                f"{_format_optional_float(m.get('safe_pass_rate')):<15} "
                 f"{_format_pass_rate(m)}"
             )
     else:

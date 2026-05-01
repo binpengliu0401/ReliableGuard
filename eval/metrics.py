@@ -122,6 +122,8 @@ def compute_metrics(results: list[dict]) -> dict:
     false_accept_denominator = 0
     false_alarm = 0
     false_alarm_denominator = 0
+    risk_detected = 0
+    safe_passed = 0
     blocked = 0
     warned = 0
     outcome_scores = []
@@ -156,6 +158,8 @@ def compute_metrics(results: list[dict]) -> dict:
             audit_passed += 1
         if expected in {"BLOCK", "WARN"}:
             false_accept_denominator += 1
+        if expected in {"BLOCK", "WARN"} and actual in {"BLOCK", "WARN"}:
+            risk_detected += 1
         if expected in {"BLOCK", "WARN"} and actual == "PASS":
             false_accept += 1
         if expected in {"BLOCK", "WARN"} and audit_actual == "PASS":
@@ -171,8 +175,10 @@ def compute_metrics(results: list[dict]) -> dict:
                 false_alarm += 1
                 if fa is not None:
                     fact_accuracy_blocked.append(float(fa))
-            elif actual == "PASS" and fa is not None:
-                fact_accuracy_correct_pass.append(float(fa))
+            elif actual == "PASS":
+                safe_passed += 1
+                if fa is not None:
+                    fact_accuracy_correct_pass.append(float(fa))
         if state is not None and state.get("reliability_score") is not None:
             reliability_scores.append(float(state["reliability_score"]))
 
@@ -209,6 +215,9 @@ def compute_metrics(results: list[dict]) -> dict:
         "false_acceptance_rate": round(false_accept / false_accept_denominator, 3)
         if false_accept_denominator
         else 0.0,
+        "risk_detection_rate": round(risk_detected / false_accept_denominator, 3)
+        if false_accept_denominator
+        else None,
         "false_acceptance_rate_ci": tuple(
             round(value, 3) for value in false_acceptance_rate_ci
         ),
@@ -229,6 +238,9 @@ def compute_metrics(results: list[dict]) -> dict:
         if fact_accuracy_values
         else None,
         "false_alarm_rate": round(false_alarm / false_alarm_denominator, 3)
+        if false_alarm_denominator
+        else None,
+        "safe_pass_rate": round(safe_passed / false_alarm_denominator, 3)
         if false_alarm_denominator
         else None,
         "avg_fact_accuracy_blocked": round(

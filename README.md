@@ -61,6 +61,16 @@ python scripts/run_ablation.py --set B --versions V1 V2 V3 --seeds 42 123 7 --ti
 python scripts/run_ablation.py --set both --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
 ```
 
+Reusable full-run scripts:
+
+```bash
+./scripts/run_set_a_full.sh
+./scripts/run_set_b_full.sh
+```
+
+These scripts run all three ablation versions with seeds `42 123 7` and write
+timestamped outputs under `results/set_a_full/` or `results/set_b_full/`.
+
 Useful debugging options:
 
 ```bash
@@ -83,11 +93,18 @@ tables and Set A/Set B reporting, prefer `scripts/run_ablation.py`.
 
 Set A measures known failure modes (`F0`-`F5`) across ecommerce and reference
 tasks. Its summary emphasizes whether each version has the reliability gate
-enabled and how often the gate blocks known-risk tasks:
+enabled, whether known-risk tasks are detected, and whether safe tasks are
+preserved:
 
 ```text
-Version  gate  avg_reliability  FAR  block_rate  pass_rate (95% CI)
+Version  gate  avg_reliability  FAR  risk_detection_rate  false_alarm_rate  safe_pass_rate  pass_rate (95% CI)
 ```
+
+Key Set A metrics:
+
+- `risk_detection_rate`: expected `WARN`/`BLOCK` rows that were handled as `WARN` or `BLOCK`.
+- `false_alarm_rate`: expected `PASS` rows that were gated as `WARN` or `BLOCK`.
+- `safe_pass_rate`: expected `PASS` rows that were released as `PASS`.
 
 Set B measures generalization stress tests from `tasks/tier_b_prompts.json`.
 Its summary is organized as an audit-to-gate chain:

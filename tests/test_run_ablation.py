@@ -186,6 +186,49 @@ def test_summary_contains_both_sections(tmp_path, monkeypatch):
     assert "SET B" in summary
 
 
+def test_set_a_summary_uses_detection_metrics(tmp_path, monkeypatch):
+    output_dir = _run_main(tmp_path, monkeypatch, _fake_results)
+
+    summary = (output_dir / "summary.txt").read_text(encoding="utf-8")
+    set_a_summary = summary.split("=== SET B", 1)[0]
+
+    assert "risk_detection_rate" in set_a_summary
+    assert "false_alarm_rate" in set_a_summary
+    assert "safe_pass_rate" in set_a_summary
+    assert "block_rate" not in set_a_summary
+
+
+def test_compute_metrics_includes_set_a_detection_rates():
+    metrics = run_ablation.compute_metrics(
+        [
+            {
+                "task": {"expected_outcome": "BLOCK"},
+                "state": {"reliability_verdict": "BLOCK"},
+            },
+            {
+                "task": {"expected_outcome": "BLOCK"},
+                "state": {"reliability_verdict": "WARN"},
+            },
+            {
+                "task": {"expected_outcome": "BLOCK"},
+                "state": {"reliability_verdict": "PASS"},
+            },
+            {
+                "task": {"expected_outcome": "PASS"},
+                "state": {"reliability_verdict": "PASS"},
+            },
+            {
+                "task": {"expected_outcome": "PASS"},
+                "state": {"reliability_verdict": "BLOCK"},
+            },
+        ]
+    )
+
+    assert metrics["risk_detection_rate"] == 0.667
+    assert metrics["false_alarm_rate"] == 0.5
+    assert metrics["safe_pass_rate"] == 0.5
+
+
 def test_missing_openrouter_api_key_exits_with_error(tmp_path, monkeypatch, capsys):
     ecommerce, reference, tier_b = _write_scenarios(tmp_path)
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
