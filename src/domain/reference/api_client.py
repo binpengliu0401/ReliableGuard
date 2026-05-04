@@ -256,7 +256,7 @@ def _extract_reference_fields(entry: str) -> dict[str, Any]:
         year = int(year_match.group(1))
         authors_source = _clean_author_source(compact[: year_match.start()])
         authors = _extract_authors(authors_source)
-        after_year = compact[year_match.end() :].strip(" .:-")
+        after_year = _remove_doi_from_text(compact[year_match.end() :]).strip(" .:-")
         title, journal = _split_title_journal(after_year)
     else:
         bare_match = YEAR_BARE_PATTERN.search(compact)
@@ -317,6 +317,12 @@ def _trim_doi_from_text(text: str) -> str:
     if doi_match:
         return text[: doi_match.start()].strip(" .:-")
     return text.strip(" .:-")
+
+
+def _remove_doi_from_text(text: str) -> str:
+    text = re.sub(r"https?://doi\.org/\S+", "", text, flags=re.IGNORECASE)
+    text = DOI_PATTERN.sub("", text)
+    return re.sub(r"\s+", " ", text).strip(" .:-")
 
 
 def _clean_author_source(text: str) -> str:

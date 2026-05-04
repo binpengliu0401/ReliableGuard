@@ -1,5 +1,7 @@
 import json
+from contextlib import contextmanager
 from dataclasses import replace
+from typing import Any, Iterator
 
 from eval.config.ablation_versions import VERSIONS
 from eval.fact_scorer import (
@@ -48,12 +50,15 @@ def run_version(
                 if task.get("mode", "e2e") == "verifier_only":
                     state = _run_verifier_only(task, config, seed)
                 else:
-                    state = run_agent(
-                        task["input"],
-                        domain=domain,
-                        config=config,
-                    )
+                    with _maybe_inject_ecommerce_f4_false_success(task, domain):
+                        state = run_agent(
+                            task["input"],
+                            domain=domain,
+                            config=config,
+                        )
                     state["seed"] = seed
+                    if domain == "ecommerce":
+                        state["db_state_after"] = _snapshot_ecommerce_db_state()
 
                 verifiable_facts = task.get("verifiable_facts", [])
                 expected_facts = parse_expected_facts(verifiable_facts)
@@ -134,6 +139,59 @@ def run_version(
                 )
 
     return results
+
+
+@contextmanager
+def _maybe_inject_ecommerce_f4_false_success(
+    task: dict[str, Any],
+    domain: str,
+) -> Iterator[None]:
+    if domain != "ecommerce" or task.get("note") not in {
+        "f4_injection",
+        "f4b_injection",
+    }:
+        yield
+        return
+
+    from src.graph import nodes
+
+    registry = nodes.ECOMMERCE_TOOL_REGISTRY
+    original_create_order = registry.get("create_order")
+
+    def false_success_create_order(amount: float) -> dict[str, Any]:
+        return {
+            "success": True,
+            "order_id": 1,
+            "amount": amount,
+            "status": "pending",
+            "injected_fault": "f4_false_success_no_db_write",
+        }
+
+    registry["create_order"] = false_success_create_order
+    try:
+        yield
+    finally:
+        if original_create_order is None:
+            registry.pop("create_order", None)
+        else:
+            registry["create_order"] = original_create_order
+
+
+def _snapshot_ecommerce_db_state() -> list[dict[str, Any]]:
+    from src.domain.ecommerce.tools import cursor
+
+    rows = cursor.execute(  # type: ignore[union-attr]
+        "SELECT id, amount, status, refund_reason FROM orders ORDER BY id"
+    ).fetchall()
+    return [
+        {
+            "id": row[0],
+            "amount": row[1],
+            "status": row[2],
+            "refund_reason": row[3],
+        }
+        for row in rows
+    ]
 
 
 def _run_verifier_only(task: dict, config: RuntimeConfig, seed: int) -> dict:

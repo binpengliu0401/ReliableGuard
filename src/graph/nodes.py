@@ -200,6 +200,8 @@ def execute_node(state: AgentState) -> AgentState:
     func_name = tc["func_name"]  # type: ignore[index]
     func_args = tc["func_args"]  # type: ignore[index]
     domain = state["domain"]
+    config = state["config"]
+    structural_guard_enabled = domain == "ecommerce" and config.enforce_intervention
 
     if "_argument_parse_error" in func_args:
         result = {
@@ -209,6 +211,42 @@ def execute_node(state: AgentState) -> AgentState:
     else:
         domain_resources = _get_domain_resources(domain)
         tool_registry = domain_resources["tool_registry"]
+        before_snapshot = None
+
+        if structural_guard_enabled:
+            from src.domain.ecommerce.structural_audit import (
+                check_pre_execution,
+                issue_to_dict,
+                snapshot_ecommerce_state,
+            )
+
+            pre_issues = check_pre_execution(func_name, func_args)
+            if pre_issues:
+                state["structural_audit"] = state.get("structural_audit", []) + [
+                    issue_to_dict(issue) for issue in pre_issues
+                ]
+                result = {
+                    "success": False,
+                    "blocked": True,
+                    "policy_rule": pre_issues[0].rule_name,
+                    "error": pre_issues[0].reason,
+                }
+                _trace(
+                    state,
+                    "execute_node",
+                    "POLICY_BLOCK",
+                    f"{func_name} - {pre_issues[0].reason}",
+                )
+                state["messages"].append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tc["tool_call_id"],  # type: ignore[index]
+                        "content": json.dumps(result, ensure_ascii=False),
+                    }
+                )
+                return state
+
+            before_snapshot = snapshot_ecommerce_state()
 
         result = tool_registry.get(
             func_name,
@@ -216,6 +254,31 @@ def execute_node(state: AgentState) -> AgentState:
         )(**func_args)
 
         state["executed_tools"] = state.get("executed_tools", []) + [func_name]
+
+        if structural_guard_enabled and before_snapshot is not None:
+            from src.domain.ecommerce.structural_audit import (
+                check_post_execution,
+                issue_to_dict,
+                snapshot_ecommerce_state,
+            )
+
+            post_issues = check_post_execution(
+                func_name,
+                func_args,
+                result,
+                before_snapshot,
+                snapshot_ecommerce_state(),
+            )
+            if post_issues:
+                state["structural_audit"] = state.get("structural_audit", []) + [
+                    issue_to_dict(issue) for issue in post_issues
+                ]
+                _trace(
+                    state,
+                    "execute_node",
+                    "STATE_BLOCK",
+                    f"{func_name} - {post_issues[0].reason}",
+                )
 
     _trace(state, "execute_node", "EXECUTED", f"{func_name} - {result}")
 
@@ -246,7 +309,14 @@ def reliability_node(state: AgentState) -> AgentState:
     )
     state["reliability_report"] = report.model_dump()
     state["reliability_verdict_audit"] = report.verdict
-    state["reliability_verdict"] = report.verdict if config.enforce_intervention else "PASS"
+    structural_blocks = [
+        item
+        for item in state.get("structural_audit", [])
+        if item.get("action") == "BLOCK"
+    ]
+    audit_verdict = "BLOCK" if structural_blocks else report.verdict
+    state["reliability_verdict_audit"] = audit_verdict
+    state["reliability_verdict"] = audit_verdict if config.enforce_intervention else "PASS"
     state["reliability_score"] = report.reliability_score
     _trace(
         state,

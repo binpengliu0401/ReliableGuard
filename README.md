@@ -66,10 +66,13 @@ Reusable full-run scripts:
 ```bash
 ./scripts/run_set_a_full.sh
 ./scripts/run_set_b_full.sh
+./scripts/run_set_a_ecommerce_full.sh
 ```
 
 These scripts run all three ablation versions with seeds `42 123 7` and write
-timestamped outputs under `results/set_a_full/` or `results/set_b_full/`.
+timestamped outputs under `results/set_a_full/`, `results/set_b_full/`, or
+`results/set_a_ecommerce_full/`. The ecommerce-only Set A script runs the full
+ecommerce suite while passing an empty reference scenario file.
 
 Useful debugging options:
 
@@ -97,31 +100,41 @@ enabled, whether known-risk tasks are detected, and whether safe tasks are
 preserved:
 
 ```text
-Version  gate  avg_reliability  FAR  risk_detection_rate  false_alarm_rate  safe_pass_rate  pass_rate (95% CI)
+Version  gate  avg_reliability  false_acceptance_rate  risk_detection_rate  false_alarm_rate  safe_pass_rate  pass_rate (95% CI)
 ```
 
 Key Set A metrics:
 
+- `false_acceptance_rate`: high-risk expected `WARN`/`BLOCK` rows that were released as `PASS`.
 - `risk_detection_rate`: expected `WARN`/`BLOCK` rows that were handled as `WARN` or `BLOCK`.
 - `false_alarm_rate`: expected `PASS` rows that were gated as `WARN` or `BLOCK`.
 - `safe_pass_rate`: expected `PASS` rows that were released as `PASS`.
+
+For ecommerce Set A, V3 also includes additive structural checks for failure
+modes that are not well represented as final-answer text claims:
+
+- `F2`: block `create_order` requests where `amount > 5000` using the named
+  `amount_requires_approval` policy rule.
+- `F4`: detect false-success tool executions where a tool reports success but
+  the ecommerce database state is unchanged. F4 fault injection is limited to
+  the evaluation runner for scenarios marked `note: f4_injection`.
 
 Set B measures generalization stress tests from `tasks/tier_b_prompts.json`.
 Its summary is organized as an audit-to-gate chain:
 
 ```text
-Version  gate  avg_reliability  gate_action_rate  FAR  false_alarm_rate  fact_acc_blocked  fact_acc_passed  pass_rate (95% CI)
+Version  gate  avg_reliability  gate_action_rate  false_acceptance_rate  false_alarm_rate  fact_acc_blocked  fact_acc_passed  pass_rate (95% CI)
 ```
 
 Key Set B metrics:
 
-- `FAR`: false acceptance rate; high-risk expected `WARN`/`BLOCK` rows that were released as `PASS`.
+- `false_acceptance_rate`: high-risk expected `WARN`/`BLOCK` rows that were released as `PASS`.
 - `false_alarm_rate`: expected `PASS` rows that were gated as `WARN` or `BLOCK`.
 - `gate_action_rate`: all `WARN`/`BLOCK` outcomes over all rows.
 - `fact_acc_blocked`: average fact accuracy for expected `PASS` rows that were gated.
 - `fact_acc_passed`: average fact accuracy for expected `PASS` rows that were released.
 
-The intended interpretation is: V3 should reduce `FAR`, while
+The intended interpretation is: V3 should reduce `false_acceptance_rate`, while
 `fact_acc_blocked` and `fact_acc_passed` diagnose whether its false alarms are
 concentrated on lower-quality answers.
 

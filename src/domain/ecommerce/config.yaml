@@ -9,9 +9,17 @@ tools:
         max: 10000
     policies:
       - name: amount_requires_approval
+        action: BLOCK
+        condition:
+          argument: amount
+          operator: ">"
+          value: 5000
         reason: "amount exceeds 5000, requires approval before order creation"
     dependencies: []
     assertions:
+      - name: tool_success_requires_state_change
+        action: BLOCK
+        failure: "tool reported success but environment state unchanged"
       - name: order_created
         failure: "No new order found in DB after execution"
       - name: status_is_pending

@@ -325,10 +325,10 @@ def _format_summary_section(
     lines = [f"=== {title} ==="]
 
     if not include_fact_accuracy:
-        # Set A: gate | avg_reliability | FAR | risk_detection_rate | false_alarm_rate | safe_pass_rate | pass_rate
+        # Set A: gate | avg_reliability | false_acceptance_rate | risk_detection_rate | false_alarm_rate | safe_pass_rate | pass_rate
         lines.append(
             f"{'Version':<18} {'gate':<6} {'avg_reliability':<17} "
-            f"{'FAR':<8} {'risk_detection_rate':<21} "
+            f"{'false_acceptance_rate':<23} {'risk_detection_rate':<21} "
             f"{'false_alarm_rate':<18} {'safe_pass_rate':<15} "
             f"{'pass_rate (95% CI)'}"
         )
@@ -337,17 +337,17 @@ def _format_summary_section(
             lines.append(
                 f"{version:<18} {_gate(version):<6} "
                 f"{_format_optional_float(m.get('avg_reliability_score')):<17} "
-                f"{_format_far(m, aggregate_results.get(version, [])):<8} "
+                f"{_format_far(m, aggregate_results.get(version, [])):<23} "
                 f"{_format_optional_float(m.get('risk_detection_rate')):<21} "
                 f"{_format_optional_float(m.get('false_alarm_rate')):<18} "
                 f"{_format_optional_float(m.get('safe_pass_rate')):<15} "
                 f"{_format_pass_rate(m)}"
             )
     else:
-        # Set B: gate | avg_reliability | gate_action_rate | FAR | false_alarm_rate | fact_acc_blocked | fact_acc_passed | pass_rate
+        # Set B: gate | avg_reliability | gate_action_rate | false_acceptance_rate | false_alarm_rate | fact_acc_blocked | fact_acc_passed | pass_rate
         lines.append(
             f"{'Version':<18} {'gate':<6} {'avg_reliability':<17} {'gate_action_rate':<18} "
-            f"{'FAR':<8} {'false_alarm_rate':<18} {'fact_acc_blocked':<18} "
+            f"{'false_acceptance_rate':<23} {'false_alarm_rate':<18} {'fact_acc_blocked':<18} "
             f"{'fact_acc_passed':<16} {'pass_rate (95% CI)'}"
         )
         for version in versions:
@@ -356,7 +356,7 @@ def _format_summary_section(
                 f"{version:<18} {_gate(version):<6} "
                 f"{_format_optional_float(m.get('avg_reliability_score')):<17} "
                 f"{_format_optional_float(m.get('gate_action_rate')):<18} "
-                f"{_format_far(m, aggregate_results.get(version, [])):<8} "
+                f"{_format_far(m, aggregate_results.get(version, [])):<23} "
                 f"{_format_optional_float(m.get('false_alarm_rate')):<18} "
                 f"{_format_optional_float(m.get('avg_fact_accuracy_blocked')):<18} "
                 f"{_format_optional_float(m.get('avg_fact_accuracy_correct_pass')):<16} "

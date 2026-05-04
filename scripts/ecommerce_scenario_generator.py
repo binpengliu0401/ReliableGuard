@@ -3,7 +3,7 @@
 # F1  Schema Violation          300
 # F2  Policy Violation          200
 # F3  Dependency Violation      150
-# F4  Structural FALSE_SUCCESS   50  (note=f4b_injection, excluded from main metrics)
+# F4  Structural FALSE_SUCCESS   50  (note=f4_injection, excluded from main metrics)
 # F5  Partial Completion        100
 # ─────────────────────────────────
 # Total                        1000
@@ -325,14 +325,14 @@ def generate_f3(count: int) -> list[dict]:
     return scenarios
 
 
-def generate_f4b(count: int) -> list[dict]:
+def generate_f4(count: int) -> list[dict]:
     # Structural FALSE_SUCCESS scenarios.
     # Requires mock injection in the benchmark runner:
     # tool returns success without committing to DB.
     # Filtered from main ablation metrics via note field.
     # Used for separate robustness analysis.
     scenarios = []
-    templates_f4b = cycle(F4_TEMPLATES)
+    templates_f4 = cycle(F4_TEMPLATES)
     for i in range(count):
         amount = random.choice(VALID_AMOUNTS)
         scenarios.append({
@@ -342,9 +342,9 @@ def generate_f4b(count: int) -> list[dict]:
                 f"Structural FALSE_SUCCESS: tool reports success "
                 f"but DB not updated (amount={amount})"
             ),
-            "input": next(templates_f4b).format(amount=amount),
+            "input": next(templates_f4).format(amount=amount),
             "expected_outcome": "VERIFY_FAILED",
-            "note": "f4b_injection",
+            "note": "f4_injection",
         })
     return scenarios
 
@@ -392,7 +392,7 @@ def generate_all_ecommerce(
     f1_count: int = 300,
     f2_count: int = 200,
     f3_count: int = 150,
-    f4b_count: int = 50,
+    f4_count: int = 50,
     f5_count: int = 100,
 ) -> list[dict]:
     all_scenarios = []
@@ -400,7 +400,7 @@ def generate_all_ecommerce(
     all_scenarios.extend(generate_f1(f1_count))
     all_scenarios.extend(generate_f2(f2_count))
     all_scenarios.extend(generate_f3(f3_count))
-    all_scenarios.extend(generate_f4b(f4b_count))
+    all_scenarios.extend(generate_f4(f4_count))
     all_scenarios.extend(generate_f5(f5_count))
     return all_scenarios
 

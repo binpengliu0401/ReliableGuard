@@ -24,6 +24,7 @@ class AgentState(TypedDict):
     reliability_verdict: str | None
     reliability_verdict_audit: str | None
     reliability_score: float | None
+    structural_audit: list[dict[str, Any]]
 
     executed_tools: list[str]
     config: Any
