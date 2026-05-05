@@ -92,6 +92,18 @@ The CSV rows include structured fact-audit columns for later inspection:
 `eval/benchmark.py` is kept as a lower-level benchmark entry point. For thesis
 tables and Set A/Set B reporting, prefer `scripts/run_ablation.py`.
 
+Additional focused runs:
+
+```bash
+./scripts/run_ecommerce_holdout.sh
+python scripts/check_references_external.py
+python scripts/check_papers_external.py
+```
+
+The external reference check scripts use live bibliographic sources and write
+diagnostic artifacts under `results/`; they are intended for case-study
+inspection rather than deterministic benchmark tables.
+
 ## Evaluation Sets
 
 Set A measures known failure modes (`F0`-`F5`) across ecommerce and reference
@@ -109,6 +121,16 @@ Key Set A metrics:
 - `risk_detection_rate`: expected `WARN`/`BLOCK` rows that were handled as `WARN` or `BLOCK`.
 - `false_alarm_rate`: expected `PASS` rows that were gated as `WARN` or `BLOCK`.
 - `safe_pass_rate`: expected `PASS` rows that were released as `PASS`.
+
+Set A scenario counts:
+
+| Domain | Raw scenarios | Distribution |
+| --- | ---: | --- |
+| ecommerce | 1000 | F0=200, F1=300, F2=200, F3=150, F4=50, F5=100 |
+| reference | 550 | F0=100, F1=150, F2=100, F3=100, F4=50, F5=50 |
+
+Full Set A runs normally use three seeds (`42`, `123`, `7`), so one version
+evaluates 3000 ecommerce rows and 1650 reference rows.
 
 For ecommerce Set A, V3 also includes additive structural checks for failure
 modes that are not well represented as final-answer text claims:
@@ -138,6 +160,27 @@ The intended interpretation is: V3 should reduce `false_acceptance_rate`, while
 `fact_acc_blocked` and `fact_acc_passed` diagnose whether its false alarms are
 concentrated on lower-quality answers.
 
+Set B is not organized by F0-F5. It contains 120 raw prompts, split evenly
+between ecommerce and reference. Each domain has 40 expected-PASS prompts, 10
+expected-WARN prompts, and 10 expected-BLOCK prompts. Scenarios are grouped by
+task category, expected difficulty, anticipated failure type, and explicit
+`verifiable_facts`.
+
+## Reference Verifier Sources
+
+Reference verification first uses deterministic fixture metadata and local
+reference DB state. It also has an optional `verifier_sources` registry for
+external bibliographic evidence:
+
+- `src.domain.reference.sources.crossref:CrossRefSource`
+- `src.domain.reference.sources.semantic_scholar:SemanticScholarSource`
+- `src.domain.reference.sources.url:UrlSource`
+
+The registry is configured in `src/domain/reference/config.yaml` and loaded by
+`src/reliableguard/verifier/sources/loader.py`. Sources are disabled by default
+to keep ablation runs deterministic and offline; enable them for deployment
+experiments or case-study checks where network-backed evidence is acceptable.
+
 ## Project Structure
 
 ```text
@@ -145,7 +188,9 @@ src/
   agent/             # LangGraph agent runtime
   graph/             # Graph state, nodes, and routing
   reliableguard/     # Claim extraction, verification, scoring, intervention
+    verifier/sources # Optional external verifier source registry
   domain/            # Ecommerce and reference domain tools/verifiers
+    reference/sources # CrossRef, Semantic Scholar, and URL source adapters
   db/                # Local database initialization and reset helpers
   config/            # Runtime configuration
 eval/

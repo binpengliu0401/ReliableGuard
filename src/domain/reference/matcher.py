@@ -21,38 +21,21 @@ def title_similarity(a: str, b: str) -> float:
 
 
 def normalize_author(name: str) -> str:
-    """Canonical form: space-separated lowercase tokens, surname last.
-
-    Handles two common input formats:
-      "Breiman, L."  -> "l breiman"
-      "Leo Breiman"  -> "leo breiman"
-    """
-    cleaned = re.sub(r"\s+", " ", name.strip().lower())
-    if not cleaned:
-        return ""
-    if "," in cleaned:
-        left, right = cleaned.split(",", 1)
-        surname = left.strip()
-        given_parts = [p.strip(".") for p in right.split() if p.strip(".")]
-        return " ".join(given_parts + [surname]).strip()
-    return cleaned
+    """Canonical form for set-based author comparison."""
+    return re.sub(r"\s+", " ", name.strip().lower())
 
 
 def author_overlap(extracted: list[str], canonical: list[str]) -> float:
-    """Fraction of canonical authors that fuzzy-match at least one extracted author.
+    """Fraction of claimed authors present in the fixture author list.
 
-    Uses 0.75 as the per-pair similarity floor. Returns 0.0 when either list is empty.
-    This is a soft signal — the caller decides whether to fail or only warn.
+    A claimed subset of the complete fixture author list returns 1.0.
     """
     if not canonical or not extracted:
         return 0.0
-    norm_ext = [normalize_author(a) for a in extracted]
-    matched = 0
-    for canon in canonical:
-        nc = normalize_author(canon)
-        best = max(
-            difflib.SequenceMatcher(None, nc, ne).ratio() for ne in norm_ext
-        )
-        if best >= 0.75:
-            matched += 1
-    return matched / len(canonical)
+    claimed = {normalize_author(author) for author in extracted}
+    fixture = {normalize_author(author) for author in canonical}
+    claimed.discard("")
+    fixture.discard("")
+    if not claimed or not fixture:
+        return 0.0
+    return len(claimed & fixture) / len(claimed)

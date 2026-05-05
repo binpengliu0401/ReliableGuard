@@ -3,16 +3,23 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from src.domain.reference.api_client import query_authors, query_doi
+from src.domain.reference.api_client import (
+    lookup_by_metadata,
+    normalize_doi,
+    query_authors,
+    query_doi,
+)
 from src.domain.reference.matcher import author_overlap, title_similarity
 from src.domain.reference.tools import init_reference_db
 from src.reliableguard.schema import Claim, VerificationResult, Verifiability
+from src.reliableguard.verifier.sources.router import query_configured_sources
+from src.reliableguard.verifier.sources.scorer import verification_from_evidence
 
 
 def verify_reference_claim(claim: Claim, verifiability: Verifiability) -> VerificationResult:
     doi = claim.entities.get("doi") or (claim.value if claim.attribute == "doi" else None)
     if doi:
-        return _verify_doi_claim(claim, str(doi))
+        return _verify_doi_claim(claim, normalize_doi(str(doi)))
 
     ref_id = _as_int(claim.entities.get("ref_id"))
     if ref_id is not None:
@@ -24,13 +31,18 @@ def verify_reference_claim(claim: Claim, verifiability: Verifiability) -> Verifi
     if claim.attribute == "authors" and claim.entities.get("paper_title"):
         return _verify_authors_claim(claim, str(claim.entities["paper_title"]))
 
-    if claim.attribute == "title":
-        return VerificationResult(
-            claim_id=claim.claim_id,
-            evidence_state="unsupported",
-            source="reference_metadata",
-            confidence=0.5,
-            reason="Title-only claims require DOI or ref_id context for reliable verification.",
+    fallback = _lookup_claim_metadata(claim)
+    if fallback is not None:
+        return _verify_record_fields(claim, fallback, "reference_metadata")
+
+    source_result = _verify_with_configured_sources(claim)
+    if source_result is not None:
+        return source_result
+
+    if _has_metadata_hint(claim):
+        return _unverifiable_metadata_result(
+            claim,
+            "No DOI/ref_id verifier path matched and metadata fallback found no fixture record.",
         )
 
     return VerificationResult(
@@ -45,35 +57,41 @@ def verify_reference_claim(claim: Claim, verifiability: Verifiability) -> Verifi
 def _verify_doi_claim(claim: Claim, doi: str) -> VerificationResult:
     result = query_doi(doi)
     if not result.get("exists", False):
-        return VerificationResult(
-            claim_id=claim.claim_id,
-            evidence_state="not_found",
-            evidence_value=result,
-            source="crossref",
-            confidence=1.0,
-            reason=f"DOI {doi} was not found in the configured reference source.",
+        fallback = _lookup_claim_metadata(claim)
+        if fallback is not None:
+            return _verify_record_fields(claim, fallback, "reference_metadata")
+        source_result = _verify_with_configured_sources(claim)
+        if source_result is not None:
+            return source_result
+        if not _has_metadata_hint(claim):
+            return VerificationResult(
+                claim_id=claim.claim_id,
+                evidence_state="not_found",
+                evidence_value=result,
+                source="crossref",
+                confidence=1.0,
+                reason=f"DOI {doi} was not found in the configured reference source.",
+            )
+        return _unverifiable_metadata_result(
+            claim,
+            f"DOI {doi} was not found in the configured reference source and metadata fallback found no fixture record.",
+            result,
         )
 
     metadata = result.get("metadata", {})
-    title = claim.entities.get("paper_title")
-    if title:
-        score = title_similarity(str(title), metadata.get("title", ""))
-        return VerificationResult(
-            claim_id=claim.claim_id,
-            evidence_state="supported" if score >= 0.8 else "contradicted",
-            evidence_value=metadata,
-            source="crossref",
-            confidence=score,
-            reason=f"DOI exists; title similarity={score:.3f}.",
+    if not isinstance(metadata, dict) or not metadata:
+        return _unverifiable_metadata_result(
+            claim,
+            f"DOI {doi} exists but no fixture metadata is available for field verification.",
+            result,
         )
-
-    return VerificationResult(
-        claim_id=claim.claim_id,
-        evidence_state="supported",
-        evidence_value=metadata,
-        source="crossref",
-        confidence=1.0,
-        reason=f"DOI {doi} exists in the configured reference source.",
+    metadata = dict(metadata)
+    metadata.setdefault("doi", doi)
+    return _verify_record_fields(
+        claim,
+        metadata,
+        "crossref",
+        default_reason=f"DOI {doi} exists in the configured reference source.",
     )
 
 
@@ -107,17 +125,7 @@ def _verify_reference_db_claim(claim: Claim, ref_id: int) -> VerificationResult:
     }
     attr = claim.attribute
     if attr and attr in evidence and claim.value is not None:
-        actual = evidence[attr]
-        claimed = claim.value
-        supported = _normalize(actual) == _normalize(claimed)
-        return VerificationResult(
-            claim_id=claim.claim_id,
-            evidence_state="supported" if supported else "contradicted",
-            evidence_value=evidence,
-            source="references_db",
-            confidence=1.0,
-            reason=f"Claimed {attr}={claimed}; database {attr}={actual}.",
-        )
+        return _verify_record_fields(claim, evidence, "references_db")
 
     if attr in {"author_count", "authors_count"}:
         try:
@@ -153,6 +161,9 @@ def _verify_reference_count_claim(claim: Claim, paper_id: str) -> VerificationRe
 def _verify_authors_claim(claim: Claim, title: str) -> VerificationResult:
     result = query_authors(title)
     if not result.get("found", False):
+        source_result = _verify_with_configured_sources(claim)
+        if source_result is not None:
+            return source_result
         return VerificationResult(
             claim_id=claim.claim_id,
             evidence_state="unsupported",
@@ -171,6 +182,198 @@ def _verify_authors_claim(claim: Claim, title: str) -> VerificationResult:
         source="semantic_scholar",
         confidence=overlap,
         reason=f"Author overlap={overlap:.3f}.",
+    )
+
+
+def _lookup_claim_metadata(claim: Claim) -> dict[str, Any] | None:
+    title, authors, year = _metadata_hints(claim)
+    if not title or not authors:
+        return None
+    return lookup_by_metadata(title, authors, year)
+
+
+def _verify_with_configured_sources(claim: Claim) -> VerificationResult | None:
+    evidence = query_configured_sources("reference", claim)
+    return verification_from_evidence(claim, evidence, default_source="reference_configured_sources")
+
+
+def _has_metadata_hint(claim: Claim) -> bool:
+    title, authors, year = _metadata_hints(claim)
+    return bool(title or authors or year is not None)
+
+
+def _metadata_hints(claim: Claim) -> tuple[str | None, list[str], int | None]:
+    title = claim.entities.get("paper_title") or claim.entities.get("title")
+    if claim.attribute == "title" and claim.value is not None:
+        title = claim.value
+
+    raw_authors = claim.entities.get("authors")
+    if claim.attribute == "authors" and claim.value is not None:
+        raw_authors = claim.value
+    authors = _as_author_list(raw_authors)
+
+    raw_year = claim.entities.get("year")
+    if claim.attribute == "year" and claim.value is not None:
+        raw_year = claim.value
+    year = _as_int(raw_year)
+    return str(title).strip() if title is not None else None, authors, year
+
+
+def _verify_record_fields(
+    claim: Claim,
+    record: dict[str, Any],
+    source: str,
+    *,
+    default_reason: str | None = None,
+) -> VerificationResult:
+    checks: list[tuple[str, bool | None, float, str]] = []
+
+    attr = claim.attribute
+    if attr and claim.value is not None:
+        checks.append(_compare_field(attr, claim.value, record))
+
+    title = claim.entities.get("paper_title") or claim.entities.get("title")
+    if title is not None and attr != "title":
+        checks.append(_compare_field("title", title, record))
+
+    authors = claim.entities.get("authors")
+    if authors is not None and attr != "authors":
+        checks.append(_compare_field("authors", authors, record))
+
+    year = claim.entities.get("year")
+    if year is not None and attr != "year":
+        checks.append(_compare_field("year", year, record))
+
+    material_checks = [check for check in checks if check[1] is not None]
+    missing_checks = [check for check in checks if check[1] is None]
+
+    if any(supported is False for _, supported, _, _ in material_checks):
+        return VerificationResult(
+            claim_id=claim.claim_id,
+            evidence_state="contradicted",
+            evidence_value=record,
+            source=source,
+            confidence=min(score for _, _, score, _ in material_checks),
+            reason="; ".join(reason for _, supported, _, reason in material_checks if supported is False),
+        )
+
+    if missing_checks:
+        return _unverifiable_metadata_result(
+            claim,
+            "; ".join(reason for _, _, _, reason in missing_checks),
+            record,
+            source,
+        )
+
+    if material_checks:
+        return VerificationResult(
+            claim_id=claim.claim_id,
+            evidence_state="supported",
+            evidence_value=record,
+            source=source,
+            confidence=min(score for _, _, score, _ in material_checks),
+            reason="; ".join(reason for _, _, _, reason in material_checks),
+        )
+
+    return VerificationResult(
+        claim_id=claim.claim_id,
+        evidence_state="supported",
+        evidence_value=record,
+        source=source,
+        confidence=1.0,
+        reason=default_reason or "Reference metadata record exists in the configured source.",
+    )
+
+
+def _compare_field(
+    attr: str,
+    claimed: Any,
+    record: dict[str, Any],
+) -> tuple[str, bool | None, float, str]:
+    actual = record.get(attr)
+    if attr not in record or actual is None or actual == "":
+        return attr, None, 0.0, f"Fixture metadata has no {attr} field."
+
+    if attr == "authors":
+        claimed_authors = _as_author_list(claimed)
+        actual_authors = _as_author_list(actual)
+        overlap = author_overlap(claimed_authors, actual_authors)
+        return (
+            attr,
+            overlap >= 0.8,
+            overlap,
+            f"Author overlap={overlap:.3f}.",
+        )
+
+    if attr == "title":
+        score = title_similarity(str(claimed), str(actual))
+        return (
+            attr,
+            score >= 0.8,
+            score,
+            f"Title similarity={score:.3f}.",
+        )
+
+    if attr == "doi":
+        claimed_doi = normalize_doi(str(claimed))
+        actual_doi = normalize_doi(str(actual))
+        supported = claimed_doi == actual_doi
+        return (
+            attr,
+            supported,
+            1.0 if supported else 0.0,
+            f"Claimed doi={claimed_doi}; fixture doi={actual_doi}.",
+        )
+
+    if attr == "year":
+        claimed_year = _as_int(claimed)
+        actual_year = _as_int(actual)
+        supported = claimed_year is not None and claimed_year == actual_year
+        return (
+            attr,
+            supported,
+            1.0 if supported else 0.0,
+            f"Claimed year={claimed_year}; fixture year={actual_year}.",
+        )
+
+    supported = _normalize(actual) == _normalize(claimed)
+    return (
+        attr,
+        supported,
+        1.0 if supported else 0.0,
+        f"Claimed {attr}={claimed}; fixture {attr}={actual}.",
+    )
+
+
+def _as_author_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item).strip()]
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, list):
+            return [str(item) for item in parsed if str(item).strip()]
+        return [value] if value.strip() else []
+    return [str(value)] if str(value).strip() else []
+
+
+def _unverifiable_metadata_result(
+    claim: Claim,
+    reason: str,
+    evidence_value: Any | None = None,
+    source: str = "reference_metadata",
+) -> VerificationResult:
+    return VerificationResult(
+        claim_id=claim.claim_id,
+        evidence_state="unverifiable",
+        evidence_value=evidence_value,
+        source=source,
+        confidence=0.0,
+        reason=reason,
     )
 
 

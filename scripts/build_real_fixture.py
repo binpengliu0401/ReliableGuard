@@ -26,15 +26,26 @@ REAL_FIXTURE_PATH = (
 DOI_URL_PATTERN = re.compile(r"https?://doi\.org/([^\s]+)", re.IGNORECASE)
 DOI_PATTERN = re.compile(r"\b(10\.\d{4,}/[^\s]+)", re.IGNORECASE)
 YEAR_PATTERN = re.compile(r"\((\d{4})\)")
+YEAR_ND_PATTERN = re.compile(r"\((?:n\.d\.|n\.d)\)", re.IGNORECASE)
+LEADING_YEAR_PATTERN = re.compile(
+    r"^\((?:\d{4}[a-z]?|n\.d\.|n\.d)\)",
+    re.IGNORECASE,
+)
 YEAR_BARE_PATTERN = re.compile(r"\b((?:19|20)\d{2})\b")
+URL_PATTERN = re.compile(r"https?://[^\s]+", re.IGNORECASE)
 HEADER_PATTERN = re.compile(
-    r"^(?:\d+(?:\.\d+)*)?\s*(?:references?|bibliography)$", re.IGNORECASE
+    r"^(?:\d+(?:\.\d+)*)?\s*(?:references?(?:\s+continued)?|bibliography)$",
+    re.IGNORECASE,
 )
 NUMBERED_REF_START_PATTERN = re.compile(
     r"^(?:\[\d+\]|\d+\s*[\.\)]|[A-Z]\d+\.)\s+"
 )
 AUTHOR_YEAR_START_PATTERN = re.compile(
     r"^[A-Z][^()]{0,140}\(\d{4}[a-z]?\)",
+)
+ORG_ND_START_PATTERN = re.compile(
+    r"^[A-Z][^()]{0,140}\.\s*\((?:n\.d\.|n\.d)\)",
+    re.IGNORECASE,
 )
 
 
@@ -126,14 +137,17 @@ def _looks_like_reference_start(line: str) -> bool:
     return bool(
         NUMBERED_REF_START_PATTERN.match(line)
         or AUTHOR_YEAR_START_PATTERN.match(line)
+        or ORG_ND_START_PATTERN.match(line)
     )
 
 
 def _is_reference_candidate(entry: str) -> bool:
     return bool(
         YEAR_PATTERN.search(entry)
+        or YEAR_ND_PATTERN.search(entry)
         or DOI_PATTERN.search(entry)
         or DOI_URL_PATTERN.search(entry)
+        or URL_PATTERN.search(entry)
         or YEAR_BARE_PATTERN.search(entry)
     )
 
@@ -147,6 +161,7 @@ def _extract_reference_fields(entry: str) -> dict:
     doi_url_match = re.search(r"https?://doi\.org/\S+", compact, flags=re.IGNORECASE)
     doi_match = DOI_PATTERN.search(compact) if doi else None
     year_match = YEAR_PATTERN.search(compact)
+    nd_match = YEAR_ND_PATTERN.search(compact)
 
     year = None
     title = ""
@@ -174,6 +189,11 @@ def _extract_reference_fields(entry: str) -> dict:
                 journal = journal_source.strip(" .:-")
         else:
             title = after_year.strip(" .:-")
+    elif nd_match:
+        authors_source = _clean_author_source(compact[: nd_match.start()])
+        authors = _extract_authors(authors_source)
+        after_year = compact[nd_match.end() :].strip(" .:-")
+        title, journal = _split_title_journal_once(after_year)
     else:
         # Fallback for IEEE/ACM style: "Author. Title. Journal, 2019." (bare year, no parens).
         bare_match = YEAR_BARE_PATTERN.search(compact)
@@ -216,6 +236,13 @@ def _find_references_section_start(lines: list[str]) -> int:
     return 0
 
 
+def _split_title_journal_once(text: str) -> tuple[str, str]:
+    parts = [p.strip(" .:-") for p in text.split(".", 1)]
+    if not parts or not parts[0]:
+        return "", ""
+    return parts[0], parts[1] if len(parts) > 1 else ""
+
+
 def extract_references_from_pdf(pdf_path: Path) -> list[dict]:
     lines: list[str] = []
     with pdfplumber.open(pdf_path) as pdf:
@@ -235,6 +262,7 @@ def extract_references_from_pdf(pdf_path: Path) -> list[dict]:
     # For reference-list-only PDFs (no heading found), ref_start=0 so all lines are used.
     ref_start = _find_references_section_start(lines)
     lines = lines[ref_start:]
+    lines = _join_leading_year_lines(lines)
 
     # Stateful line-accumulation parser:
     # start a new reference when we see a new reference-like line.
@@ -266,9 +294,23 @@ def extract_references_from_pdf(pdf_path: Path) -> list[dict]:
         if not _is_reference_candidate(entry):
             continue
         ref = _extract_reference_fields(entry)
-        if ref and (ref.get("year") or ref.get("doi")):
+        if ref and (
+            ref.get("year")
+            or ref.get("doi")
+            or URL_PATTERN.search(str(ref.get("journal") or ""))
+        ):
             references.append(ref)
     return references
+
+
+def _join_leading_year_lines(lines: list[str]) -> list[str]:
+    joined: list[str] = []
+    for line in lines:
+        if joined and LEADING_YEAR_PATTERN.match(line.strip()):
+            joined[-1] = f"{joined[-1]} {line.strip()}"
+        else:
+            joined.append(line)
+    return joined
 
 
 def build_fixture(pdf_paths: list[Path]) -> dict:

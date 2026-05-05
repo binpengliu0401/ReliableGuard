@@ -110,3 +110,36 @@ tools:
     dependencies:
       - parse_pdf
     assertions: []
+
+verifier_sources:
+  # Disabled by default to keep benchmark runs deterministic and offline.
+  # Enable the sources needed for a deployment or a case study.
+  - name: crossref
+    adapter: src.domain.reference.sources.crossref:CrossRefSource
+    supports:
+      - doi
+      - title_author_year
+    priority: 10
+    enabled: false
+    options:
+      timeout: 15
+      rows: 5
+
+  - name: semantic_scholar
+    adapter: src.domain.reference.sources.semantic_scholar:SemanticScholarSource
+    supports:
+      - title_author_year
+    priority: 20
+    enabled: false
+    options:
+      timeout: 15
+      limit: 5
+
+  - name: url
+    adapter: src.domain.reference.sources.url:UrlSource
+    supports:
+      - url
+    priority: 30
+    enabled: false
+    options:
+      timeout: 10

@@ -1,3 +1,4 @@
+import difflib
 import json
 import os
 import re
@@ -11,18 +12,31 @@ _REAL_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "real_data.json"
 _mock_cache: dict[str, Any] | None = None
 _real_cache: dict[str, Any] | None = None
 
-DOI_URL_PATTERN = re.compile(r"https?://doi\.org/([^\s]+)", re.IGNORECASE)
+DOI_URL_PATTERN = re.compile(
+    r"(?:https?://)?(?:dx\.)?doi\.org/([^\s]+)",
+    re.IGNORECASE,
+)
 DOI_PATTERN = re.compile(r"\b(10\.\d{4,}/[^\s]+)", re.IGNORECASE)
 YEAR_PATTERN = re.compile(r"\((\d{4})\)")
+YEAR_ND_PATTERN = re.compile(r"\((?:n\.d\.|n\.d)\)", re.IGNORECASE)
+LEADING_YEAR_PATTERN = re.compile(
+    r"^\((?:\d{4}[a-z]?|n\.d\.|n\.d)\)",
+    re.IGNORECASE,
+)
 YEAR_BARE_PATTERN = re.compile(r"\b((?:19|20)\d{2})\b")
+URL_PATTERN = re.compile(r"https?://[^\s]+", re.IGNORECASE)
 HEADER_PATTERN = re.compile(
-    r"^(?:\d+(?:\.\d+)*)?\s*(?:references?|bibliography)$",
+    r"^(?:\d+(?:\.\d+)*)?\s*(?:references?(?:\s+continued)?|bibliography)$",
     re.IGNORECASE,
 )
 NUMBERED_REF_START_PATTERN = re.compile(
     r"^(?:\[\d+\]|\d+\s*[\.\)]|[A-Z]\d+\.)\s+"
 )
 AUTHOR_YEAR_START_PATTERN = re.compile(r"^[A-Z][^()]{0,140}\(\d{4}[a-z]?\)")
+ORG_ND_START_PATTERN = re.compile(
+    r"^[A-Z][^()]{0,140}\.\s*\((?:n\.d\.|n\.d)\)",
+    re.IGNORECASE,
+)
 
 
 def _load_mock() -> dict[str, Any]:
@@ -68,15 +82,16 @@ def get_references_from_pdf(pdf_path: str) -> list[dict]:
 
 # verify_doi
 def query_doi(doi: str) -> dict[str, Any]:
+    doi = normalize_doi(doi)
     if _MODE == "mock":
         data = _load_mock()
-        entry = data.get("dois", {}).get(doi)
+        entry = _lookup_doi_entry(data, doi)
         if entry is None:
             return {"exists": False, "matches": False, "metadata": {}}
         return entry
     elif _MODE == "real":
         data = _load_real()
-        entry = data.get("dois", {}).get(doi)
+        entry = _lookup_doi_entry(data, doi)
         if entry is None:
             return {"exists": False, "matches": False, "metadata": {}}
         return entry
@@ -104,6 +119,40 @@ def query_doi(doi: str) -> dict[str, Any]:
         return {"exists": True, "matches": True, "metadata": metadata}
     except urllib.error.HTTPError:
         return {"exists": False, "matches": False, "metadata": {}}
+
+
+def normalize_doi(doi: str) -> str:
+    normalized = str(doi or "").strip()
+    normalized = re.sub(
+        r"^(?:https?://)?(?:dx\.)?doi\.org/",
+        "",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    return _clean_doi(normalized)
+
+
+def lookup_by_metadata(title: str, authors: list, year: int | None = None) -> dict | None:
+    title_key = _normalize_title(title)
+    claimed_authors = [str(author) for author in authors if str(author).strip()]
+    if not title_key or not claimed_authors:
+        return None
+
+    data = _load_real() if _MODE == "real" else _load_mock()
+    for record in _iter_fixture_records(data):
+        record_title = _normalize_title(str(record.get("title") or ""))
+        if not record_title:
+            continue
+        if _title_similarity(title_key, record_title) < 0.85:
+            continue
+        if year is not None and record.get("year") not in {None, year}:
+            continue
+        fixture_authors = record.get("authors") or []
+        if not isinstance(fixture_authors, list):
+            continue
+        if _has_author_match(claimed_authors, [str(author) for author in fixture_authors]):
+            return dict(record)
+    return None
 
 
 # verify_authors
@@ -151,6 +200,63 @@ def _normalize_title(title: str) -> str:
     return re.sub(r"\s+", " ", title.strip().lower())
 
 
+def _title_similarity(a: str, b: str) -> float:
+    if not a or not b:
+        return 0.0
+    return difflib.SequenceMatcher(None, _normalize_title(a), _normalize_title(b)).ratio()
+
+
+def _lookup_doi_entry(data: dict[str, Any], doi: str) -> dict[str, Any] | None:
+    dois = data.get("dois", {})
+    if not isinstance(dois, dict):
+        return None
+    entry = dois.get(doi)
+    if entry is not None:
+        return entry
+    for raw_key, raw_entry in dois.items():
+        if normalize_doi(str(raw_key)) == doi:
+            return raw_entry if isinstance(raw_entry, dict) else None
+    return None
+
+
+def _iter_fixture_records(data: dict[str, Any]) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    pdfs = data.get("pdfs", {})
+    if isinstance(pdfs, dict):
+        for pdf_data in pdfs.values():
+            if not isinstance(pdf_data, dict):
+                continue
+            for ref in pdf_data.get("references", []) or []:
+                if isinstance(ref, dict):
+                    records.append(ref)
+
+    dois = data.get("dois", {})
+    if isinstance(dois, dict):
+        for doi, entry in dois.items():
+            if not isinstance(entry, dict):
+                continue
+            metadata = entry.get("metadata") or {}
+            if isinstance(metadata, dict) and metadata:
+                record = dict(metadata)
+                record.setdefault("doi", normalize_doi(str(doi)))
+                records.append(record)
+    return records
+
+
+def _has_author_match(claimed_authors: list[str], fixture_authors: list[str]) -> bool:
+    fixture_normalized = {_normalize_author(author) for author in fixture_authors}
+    fixture_normalized.discard("")
+    if not fixture_normalized:
+        return False
+    for author in claimed_authors:
+        normalized = _normalize_author(author)
+        if not normalized:
+            continue
+        if normalized in fixture_normalized:
+            return True
+    return False
+
+
 def _resolve_pdf_path(pdf_path: str) -> Path:
     path = Path(pdf_path)
     if path.exists():
@@ -183,6 +289,7 @@ def _extract_references_from_pdf(pdf_path: Path) -> list[dict]:
 
     ref_start = _find_references_section_start(lines)
     lines = lines[ref_start:]
+    lines = _join_leading_year_lines(lines)
 
     blocks: list[str] = []
     current: list[str] = []
@@ -207,7 +314,11 @@ def _extract_references_from_pdf(pdf_path: Path) -> list[dict]:
         if not entry or not _is_reference_candidate(entry):
             continue
         ref = _extract_reference_fields(entry)
-        if ref and (ref.get("year") or ref.get("doi")):
+        if ref and (
+            ref.get("year")
+            or ref.get("doi")
+            or URL_PATTERN.search(str(ref.get("journal") or ""))
+        ):
             references.append(ref)
     return references
 
@@ -230,15 +341,18 @@ def _looks_like_reference_start(line: str) -> bool:
     return bool(
         NUMBERED_REF_START_PATTERN.match(line)
         or AUTHOR_YEAR_START_PATTERN.match(line)
+        or ORG_ND_START_PATTERN.match(line)
     )
 
 
 def _is_reference_candidate(entry: str) -> bool:
     return bool(
         YEAR_PATTERN.search(entry)
+        or YEAR_ND_PATTERN.search(entry)
         or YEAR_BARE_PATTERN.search(entry)
         or DOI_PATTERN.search(entry)
         or DOI_URL_PATTERN.search(entry)
+        or URL_PATTERN.search(entry)
     )
 
 
@@ -246,6 +360,7 @@ def _extract_reference_fields(entry: str) -> dict[str, Any]:
     compact = re.sub(r"\s+", " ", entry).strip()
     doi = _extract_doi(compact)
     year_match = YEAR_PATTERN.search(compact)
+    nd_match = YEAR_ND_PATTERN.search(compact)
 
     year = None
     title = ""
@@ -258,6 +373,11 @@ def _extract_reference_fields(entry: str) -> dict[str, Any]:
         authors = _extract_authors(authors_source)
         after_year = _remove_doi_from_text(compact[year_match.end() :]).strip(" .:-")
         title, journal = _split_title_journal(after_year)
+    elif nd_match:
+        authors_source = _clean_author_source(compact[: nd_match.start()])
+        authors = _extract_authors(authors_source)
+        after_year = _remove_doi_from_text(compact[nd_match.end() :]).strip(" .:-")
+        title, journal = _split_title_journal_once(after_year)
     else:
         bare_match = YEAR_BARE_PATTERN.search(compact)
         if bare_match:
@@ -286,6 +406,16 @@ def _extract_reference_fields(entry: str) -> dict[str, Any]:
     }
 
 
+def _join_leading_year_lines(lines: list[str]) -> list[str]:
+    joined: list[str] = []
+    for line in lines:
+        if joined and LEADING_YEAR_PATTERN.match(line.strip()):
+            joined[-1] = f"{joined[-1]} {line.strip()}"
+        else:
+            joined.append(line)
+    return joined
+
+
 def _split_title_journal(text: str) -> tuple[str, str]:
     parts = [p.strip(" .:-") for p in text.split(".") if p.strip(" .:-")]
     if not parts:
@@ -295,13 +425,20 @@ def _split_title_journal(text: str) -> tuple[str, str]:
     return parts[0], " ".join(parts[1:]).strip(" .:-")
 
 
+def _split_title_journal_once(text: str) -> tuple[str, str]:
+    parts = [p.strip(" .:-") for p in text.split(".", 1)]
+    if not parts or not parts[0]:
+        return "", ""
+    return parts[0], parts[1] if len(parts) > 1 else ""
+
+
 def _extract_doi(text: str) -> str | None:
     url_match = DOI_URL_PATTERN.search(text)
     if url_match:
-        return _clean_doi(url_match.group(1))
+        return normalize_doi(url_match.group(1))
     doi_match = DOI_PATTERN.search(text)
     if doi_match:
-        return _clean_doi(doi_match.group(1))
+        return normalize_doi(doi_match.group(1))
     return None
 
 
@@ -310,7 +447,7 @@ def _clean_doi(doi: str) -> str:
 
 
 def _trim_doi_from_text(text: str) -> str:
-    url_match = re.search(r"https?://doi\.org/\S+", text, flags=re.IGNORECASE)
+    url_match = DOI_URL_PATTERN.search(text)
     if url_match:
         return text[: url_match.start()].strip(" .:-")
     doi_match = DOI_PATTERN.search(text)
@@ -320,7 +457,7 @@ def _trim_doi_from_text(text: str) -> str:
 
 
 def _remove_doi_from_text(text: str) -> str:
-    text = re.sub(r"https?://doi\.org/\S+", "", text, flags=re.IGNORECASE)
+    text = DOI_URL_PATTERN.sub("", text)
     text = DOI_PATTERN.sub("", text)
     return re.sub(r"\s+", " ", text).strip(" .:-")
 
