@@ -201,7 +201,11 @@ def execute_node(state: AgentState) -> AgentState:
     func_args = tc["func_args"]  # type: ignore[index]
     domain = state["domain"]
     config = state["config"]
-    structural_guard_enabled = domain == "ecommerce" and config.enforce_intervention
+    structural_guard_enabled = (
+        domain == "ecommerce"
+        and config.enforce_intervention
+        and config.use_structural_audit
+    )
 
     if "_argument_parse_error" in func_args:
         result = {

@@ -512,6 +512,97 @@ def test_ecommerce_order_create_confirm_full_business_flow(
     assert result["reliability_report"]["not_found_count"] == 0
 
 
+def _execute_create_order_state(config_key: str, amount: float) -> dict:
+    from src.graph.nodes import execute_node
+
+    return execute_node(
+        {
+            "messages": [],
+            "tool_call": {
+                "tool_call_id": "call_create",
+                "func_name": "create_order",
+                "func_args": {"amount": amount},
+            },
+            "trace": [],
+            "final_answer": None,
+            "reliability_report": None,
+            "reliability_verdict": None,
+            "reliability_verdict_audit": None,
+            "reliability_score": None,
+            "structural_audit": [],
+            "executed_tools": [],
+            "config": VERSIONS[config_key],
+            "domain": "ecommerce",
+            "verifier_context": None,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "run_id": "test-run",
+            "run_stamp": "test-stamp",
+            "run_started_at": "test-stamp",
+            "seed": 42,
+        }
+    )
+
+
+def test_structural_audit_toggle_controls_pre_execution_policy(
+    isolated_ecommerce_db,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        "src.domain.ecommerce.structural_audit.cursor",
+        isolated_ecommerce_db,
+    )
+
+    blocked = _execute_create_order_state("V3_Intervention", 6000)
+    assert blocked["executed_tools"] == []
+    assert blocked["structural_audit"][0]["rule_name"] == "amount_requires_approval"
+    assert blocked["structural_audit"][0]["action"] == "BLOCK"
+    assert isolated_ecommerce_db.execute("SELECT COUNT(*) FROM orders").fetchone()[0] == 0
+
+    executed = _execute_create_order_state("V3_NoStructural", 6000)
+    assert executed["executed_tools"] == ["create_order"]
+    assert executed["structural_audit"] == []
+    assert isolated_ecommerce_db.execute("SELECT COUNT(*) FROM orders").fetchone()[0] == 1
+
+
+def test_structural_audit_toggle_controls_false_success_detection(
+    isolated_ecommerce_db,
+    monkeypatch,
+):
+    from src.graph import nodes
+
+    def false_success_create_order(amount: float) -> dict:
+        return {
+            "success": True,
+            "order_id": 1,
+            "amount": amount,
+            "status": "pending",
+            "injected_fault": "test_false_success_no_db_write",
+        }
+
+    monkeypatch.setattr(
+        "src.domain.ecommerce.structural_audit.cursor",
+        isolated_ecommerce_db,
+    )
+    monkeypatch.setitem(
+        nodes.ECOMMERCE_TOOL_REGISTRY,
+        "create_order",
+        false_success_create_order,
+    )
+
+    blocked = _execute_create_order_state("V3_Intervention", 100)
+    assert blocked["executed_tools"] == ["create_order"]
+    assert blocked["structural_audit"][0]["rule_name"] == "tool_success_requires_state_change"
+    assert blocked["structural_audit"][0]["action"] == "BLOCK"
+    assert isolated_ecommerce_db.execute("SELECT COUNT(*) FROM orders").fetchone()[0] == 0
+
+    executed = _execute_create_order_state("V3_NoStructural", 100)
+    assert executed["executed_tools"] == ["create_order"]
+    assert executed["structural_audit"] == []
+    assert isolated_ecommerce_db.execute("SELECT COUNT(*) FROM orders").fetchone()[0] == 0
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
 

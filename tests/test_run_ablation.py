@@ -16,14 +16,26 @@ def test_version_aliases():
     }
 
 
-def test_versions_dict_has_three_entries():
+def test_versions_dict_has_expected_entries():
     from eval.config.ablation_versions import VERSIONS
 
     assert set(VERSIONS.keys()) == {
         "V1_Baseline",
         "V2_AuditOnly",
         "V3_Intervention",
+        "V3_NoStructural",
     }
+    assert VERSIONS["V3_Intervention"].enforce_intervention is True
+    assert VERSIONS["V3_Intervention"].use_structural_audit is True
+    assert VERSIONS["V3_NoStructural"].enforce_intervention is True
+    assert VERSIONS["V3_NoStructural"].use_structural_audit is False
+    assert VERSIONS["V3_NoStructural"].version_name == "V3_NoStructural"
+
+
+def test_v3_no_structural_is_supported_as_explicit_version():
+    args = run_ablation._parse_args(["--versions", "V3_NoStructural"])
+
+    assert args.versions == ["V3_NoStructural"]
 
 
 def _write_scenarios(tmp_path: Path) -> tuple[Path, Path, Path]:

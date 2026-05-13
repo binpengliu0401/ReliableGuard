@@ -55,11 +55,12 @@ Scenario files under `tasks/`, logs under `logs/`, and benchmark outputs under
 
 ## Ablation Versions
 
-| Key | `use_verifier` | `enforce_intervention` | Meaning |
-| --- | --- | --- | --- |
-| `V1_Baseline` | False | False | Agent-only baseline; no reliability audit or gate |
-| `V2_AuditOnly` | True | False | Runs the reliability audit, but still releases the original answer |
-| `V3_Intervention` | True | True | Runs the audit and enforces PASS/WARN/BLOCK intervention |
+| Key | `use_verifier` | `enforce_intervention` | `use_structural_audit` | Meaning |
+| --- | --- | --- | --- | --- |
+| `V1_Baseline` | False | False | True | Agent-only baseline; no reliability audit or gate |
+| `V2_AuditOnly` | True | False | True | Runs the reliability audit, but still releases the original answer |
+| `V3_Intervention` | True | True | True | Runs the audit and enforces PASS/WARN/BLOCK intervention |
+| `V3_NoStructural` | True | True | False | Same as V3, but disables ecommerce structural audit for RQ3 |
 
 ## Running Evaluations
 
@@ -69,6 +70,7 @@ Recommended ablation commands:
 python scripts/run_ablation.py --set A --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
 python scripts/run_ablation.py --set B --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
 python scripts/run_ablation.py --set both --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
+python scripts/run_ablation.py --set A --versions V3_NoStructural --seeds 42 --timestamped-output
 ```
 
 Reusable full-run scripts:
@@ -167,9 +169,9 @@ LLM-based claim pipeline. The required controlled ablation is still pending:
 - `V3_Intervention` with structural audit enabled: LLM claim pipeline plus
   symbolic trace/state checks.
 
-The current implementation enables ecommerce structural audit when
-`enforce_intervention=True`; a separate off-switch or runner path is needed for
-the pending RQ3 ablation.
+Use `V3_NoStructural` for the structural-audit-disabled condition. It keeps
+`use_verifier=True` and `enforce_intervention=True`, but sets
+`use_structural_audit=False`.
 
 Set B measures generalization stress tests from `tasks/tier_b_prompts.json`.
 Its summary is organized as an audit-to-gate chain:
