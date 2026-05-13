@@ -1,17 +1,27 @@
 # Reliable Guard
 
 Reliable Guard is a LangGraph-based agent benchmark framework with a post-hoc,
-domain-grounded reliability audit and intervention layer.
+domain-grounded reliability audit and intervention layer. It is a black-box,
+monitor-only system: it audits tool-using LLM agents but does not fine-tune,
+optimize, or otherwise modify the underlying model.
 
 ## Overview
 
-Reliable Guard runs tool-using LLM agents and audits their final answers after
-execution. The reliability pipeline extracts factual claims, checks them against
-domain evidence, scores risk, and optionally blocks unsafe answers. The project
-currently supports two domains: ecommerce workflows backed by SQLite order state,
-and reference/citation workflows backed by parsed reference metadata. The
-ablation study compares baseline execution, audit-only detection, and enforced
-intervention. OpenRouter is used through the OpenAI-compatible client.
+Reliable Guard runs tool-using LLM agents and audits their behavior after or
+during execution. The reliability pipeline extracts factual claims, checks them
+against domain evidence, scores risk, and optionally blocks unsafe answers. The
+thesis positioning is **claim-level runtime auditing**, not general hallucination
+detection.
+
+The project currently supports two complementary deployment-style domains:
+
+- **Ecommerce**: an industrial, state-grounded workflow backed by SQLite order
+  state, tool execution traces, and high-value operation policies.
+- **Academic reference**: an evidence-grounded scholarly workflow backed by DOI
+  values, PDF reference lists, and bibliographic metadata.
+
+The ablation study compares baseline execution, audit-only detection, and
+enforced intervention. OpenRouter is used through the OpenAI-compatible client.
 
 ## Quick Start
 
@@ -132,14 +142,34 @@ Set A scenario counts:
 Full Set A runs normally use three seeds (`42`, `123`, `7`), so one version
 evaluates 3000 ecommerce rows and 1650 reference rows.
 
-For ecommerce Set A, V3 also includes additive structural checks for failure
-modes that are not well represented as final-answer text claims:
+## Ecommerce Structural Audit and RQ3
+
+For ecommerce Set A, `V3_Intervention` currently includes additive structural
+checks for failure modes that are not well represented as final-answer text
+claims:
 
 - `F2`: block `create_order` requests where `amount > 5000` using the named
   `amount_requires_approval` policy rule.
 - `F4`: detect false-success tool executions where a tool reports success but
   the ecommerce database state is unchanged. F4 fault injection is limited to
   the evaluation runner for scenarios marked `note: f4_injection`.
+
+These checks are implemented in `src/domain/ecommerce/structural_audit.py` and
+are wired through `execute_node`, then merged into the final verdict in
+`reliability_node`.
+
+For thesis interpretation, structural audit is the symbolic trace/state
+component that answers RQ3: final-answer-only auditing versus
+trace/state-augmented auditing. It should be reported separately from the
+LLM-based claim pipeline. The required controlled ablation is still pending:
+
+- `V3_Intervention` with structural audit disabled: LLM claim pipeline only.
+- `V3_Intervention` with structural audit enabled: LLM claim pipeline plus
+  symbolic trace/state checks.
+
+The current implementation enables ecommerce structural audit when
+`enforce_intervention=True`; a separate off-switch or runner path is needed for
+the pending RQ3 ablation.
 
 Set B measures generalization stress tests from `tasks/tier_b_prompts.json`.
 Its summary is organized as an audit-to-gate chain:
@@ -180,6 +210,33 @@ The registry is configured in `src/domain/reference/config.yaml` and loaded by
 `src/reliableguard/verifier/sources/loader.py`. Sources are disabled by default
 to keep ablation runs deterministic and offline; enable them for deployment
 experiments or case-study checks where network-backed evidence is acceptable.
+
+## Current Local Artifacts
+
+`results/` is gitignored. The current cleaned local result tree keeps only the
+useful thesis result groups:
+
+- `results/calibration/`
+- `results/set_a_full/20260501/`
+- `results/set_a_ecommerce_full/20260503/`
+- `results/set_b_full/20260428/`
+
+One-off smoke runs and completed external-check outputs have been removed. The
+external reference diagnostic scripts still recreate their output directories
+under `results/` when run.
+
+Local thesis planning documents such as `thesis_scope.md`,
+`formal_definitions.md`, `related_work_skeleton.md`, and `thesis_outline.md`
+are intentionally ignored and are not part of the repository upload.
+
+## Pending Thesis Work
+
+- Run the RQ3 ecommerce ablation with structural audit disabled to establish the
+  final-answer-only baseline.
+- Manually annotate about 50-80 samples to measure claim extraction precision,
+  recall, and F1.
+- Measure runtime latency and token cost; add per-stage timing instrumentation
+  if trace logs do not already contain enough timing detail.
 
 ## Project Structure
 

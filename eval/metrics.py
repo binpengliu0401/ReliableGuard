@@ -182,7 +182,7 @@ def compute_metrics(results: list[dict]) -> dict:
         if state is not None and state.get("reliability_score") is not None:
             reliability_scores.append(float(state["reliability_score"]))
 
-        claim_type = task.get("injected_error_type") or task.get("claim_type")
+        claim_type = task.get("failure_mode") or task.get("injected_error_type") or task.get("claim_type")
         if claim_type:
             bucket = detection_by_type.setdefault(str(claim_type), {"total": 0, "detected": 0})
             bucket["total"] += 1

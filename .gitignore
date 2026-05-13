@@ -10,6 +10,12 @@ __pycache__/
 CLAUDE.md
 AGENTS.md
 
+# local thesis planning drafts
+thesis_scope.md
+formal_definitions.md
+related_work_skeleton.md
+thesis_outline.md
+
 # ignore large or sensitive files
 logs/*.txt
 
