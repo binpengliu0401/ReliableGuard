@@ -83,4 +83,4 @@ class ReliabilityReport(BaseModel):
     unsupported_count: int = 0
     unverifiable_count: int = 0
     not_found_count: int = 0
-
+    stage_latencies: dict[str, float] = Field(default_factory=dict)
