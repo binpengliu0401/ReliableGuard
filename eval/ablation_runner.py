@@ -1,7 +1,13 @@
 import json
+import sys
 from contextlib import contextmanager
 from dataclasses import replace
+from pathlib import Path
 from typing import Any, Iterator
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from eval.config.ablation_versions import VERSIONS
 from eval.fact_scorer import (
@@ -24,6 +30,7 @@ def run_version(
     verbose: bool = True,
     config_override: RuntimeConfig | None = None,
     seeds: list[int] | None = None,
+    enable_fault_injection: bool = True,
 ) -> list[dict]:
     base_config = config_override if config_override else VERSIONS[version_key]
     selected_seeds = seeds or [42]
@@ -50,7 +57,11 @@ def run_version(
                 if task.get("mode", "e2e") == "verifier_only":
                     state = _run_verifier_only(task, config, seed)
                 else:
-                    with _maybe_inject_ecommerce_f4_false_success(task, domain):
+                    with _maybe_inject_ecommerce_f4_false_success(
+                        task,
+                        domain,
+                        enabled=enable_fault_injection,
+                    ):
                         state = run_agent(
                             task["input"],
                             domain=domain,
@@ -145,8 +156,9 @@ def run_version(
 def _maybe_inject_ecommerce_f4_false_success(
     task: dict[str, Any],
     domain: str,
+    enabled: bool = True,
 ) -> Iterator[None]:
-    if domain != "ecommerce" or task.get("note") not in {
+    if not enabled or domain != "ecommerce" or task.get("note") not in {
         "f4_injection",
         "f4b_injection",
     }:
@@ -362,6 +374,11 @@ if __name__ == "__main__":
         default="logs/ablation_metrics.json",
         help="Output file for metrics",
     )
+    parser.add_argument(
+        "--disable-fault-injection",
+        action="store_true",
+        help="Disable ecommerce F4 false-success fault injection.",
+    )
     args = parser.parse_args()
 
     with open(args.input, "r", encoding="utf-8") as f:
@@ -395,7 +412,12 @@ if __name__ == "__main__":
 
     all_metrics = {}
     for version_key in args.versions:
-        results = run_version(version_key, scenarios, seeds=args.seeds)
+        results = run_version(
+            version_key,
+            scenarios,
+            seeds=args.seeds,
+            enable_fault_injection=not args.disable_fault_injection,
+        )
         metrics = compute_metrics(results)
         all_metrics[version_key] = metrics
         print(f"\n[METRICS] {version_key}: {metrics}")

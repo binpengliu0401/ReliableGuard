@@ -126,6 +126,7 @@ def compute_metrics(results: list[dict]) -> dict:
     safe_passed = 0
     blocked = 0
     warned = 0
+    tccr_count = 0
     outcome_scores = []
     reliability_scores = []
     fact_accuracy_blocked: list[float] = []
@@ -181,6 +182,19 @@ def compute_metrics(results: list[dict]) -> dict:
                     fact_accuracy_correct_pass.append(float(fa))
         if state is not None and state.get("reliability_score") is not None:
             reliability_scores.append(float(state["reliability_score"]))
+        report = state.get("reliability_report") if state is not None else None
+        if isinstance(report, dict):
+            grounded_count = sum(
+                int(report.get(key) or 0)
+                for key in (
+                    "supported_count",
+                    "contradicted_count",
+                    "unsupported_count",
+                    "not_found_count",
+                )
+            )
+            if grounded_count > 0:
+                tccr_count += 1
 
         claim_type = task.get("failure_mode") or task.get("injected_error_type") or task.get("claim_type")
         if claim_type:
@@ -254,6 +268,7 @@ def compute_metrics(results: list[dict]) -> dict:
         if fact_accuracy_correct_pass
         else None,
         "fact_accuracy_coverage": round(len(fact_accuracy_values) / total, 3),
+        "tccr": round(tccr_count / total, 3),
         "avg_trace_fact_accuracy": round(
             sum(1 for value in all_trace_scores if value) / len(all_trace_scores), 3
         )

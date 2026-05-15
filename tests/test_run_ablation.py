@@ -92,7 +92,12 @@ def _write_scenarios(tmp_path: Path) -> tuple[Path, Path, Path]:
     return ecommerce, reference, tier_b
 
 
-def _fake_results(version: str, scenarios: list[dict], seeds: list[int]) -> list[dict]:
+def _fake_results(
+    version: str,
+    scenarios: list[dict],
+    seeds: list[int],
+    enable_fault_injection: bool = True,
+) -> list[dict]:
     results = []
     for i in range(5):
         task = dict(scenarios[i % len(scenarios)])
@@ -266,7 +271,12 @@ def test_missing_openrouter_api_key_exits_with_error(tmp_path, monkeypatch, caps
 def test_group_exception_does_not_abort_remaining_groups(tmp_path, monkeypatch):
     calls = []
 
-    def flaky_run_version(version: str, scenarios: list[dict], seeds: list[int]):
+    def flaky_run_version(
+        version: str,
+        scenarios: list[dict],
+        seeds: list[int],
+        enable_fault_injection: bool = True,
+    ):
         domain = scenarios[0].get("domain", "ecommerce")
         calls.append((version, domain))
         if version == "V1_Baseline" and domain == "ecommerce":

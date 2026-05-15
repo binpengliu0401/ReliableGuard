@@ -59,12 +59,20 @@ def main(argv: list[str] | None = None) -> int:
         set_a = _run_set(
             label="Set A",
             set_slug="set_a",
-            scenarios_by_domain=_load_set_a(args.ecommerce, args.reference),
+            scenarios_by_domain=_select_domain(
+                _load_set_a(
+                    args.ecommerce,
+                    args.reference,
+                    args.domain,
+                ),
+                args.domain,
+            ),
             versions=args.versions,
             seeds=args.seeds,
             output_dir=output_dir,
             save_states=args.save_states,
             debug_false_alarms=args.debug_false_alarms,
+            enable_fault_injection=not args.disable_fault_injection,
         )
         _write_outputs(
             output_dir=output_dir,
@@ -76,6 +84,7 @@ def main(argv: list[str] | None = None) -> int:
         all_summaries.append(
             _format_summary_section(
                 title="SET A: Known Failure Modes (F0-F5)",
+                domain=args.domain,
                 aggregate_results=set_a["aggregate_results"],
                 versions=args.versions,
                 include_fact_accuracy=False,
@@ -86,12 +95,13 @@ def main(argv: list[str] | None = None) -> int:
         set_b = _run_set(
             label="Set B",
             set_slug="set_b",
-            scenarios_by_domain=_load_set_b(args.tier_b),
+            scenarios_by_domain=_select_domain(_load_set_b(args.tier_b), args.domain),
             versions=args.versions,
             seeds=args.seeds,
             output_dir=output_dir,
             save_states=args.save_states,
             debug_false_alarms=args.debug_false_alarms,
+            enable_fault_injection=not args.disable_fault_injection,
         )
         _write_outputs(
             output_dir=output_dir,
@@ -103,13 +113,25 @@ def main(argv: list[str] | None = None) -> int:
         all_summaries.append(
             _format_summary_section(
                 title="SET B: Generalization Stress Test (Tier B)",
+                domain=args.domain,
                 aggregate_results=set_b["aggregate_results"],
                 versions=args.versions,
                 include_fact_accuracy=True,
             )
         )
 
-    summary = "\n\n".join(all_summaries)
+    import subprocess
+    try:
+        git_commit = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+    except Exception:
+        git_commit = "unknown"
+
+    header = f"git_commit: {git_commit}"
+    summary = header + "\n\n" + "\n\n".join(all_summaries)
     print(summary)
     (output_dir / "summary.txt").write_text(summary + "\n", encoding="utf-8")
     return 0
@@ -120,6 +142,12 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--set", choices=["A", "B", "both"], default="both")
     parser.add_argument("--versions", nargs="+", default=DEFAULT_VERSIONS)
     parser.add_argument("--seeds", nargs="+", type=int, default=DEFAULT_SEEDS)
+    parser.add_argument(
+        "--domain",
+        choices=["all", "ecommerce", "reference"],
+        default="all",
+        help="Limit benchmark execution to one domain without modifying scenario files.",
+    )
     parser.add_argument("--ecommerce", default="tasks/ecommerce_scenarios.json")
     parser.add_argument("--reference", default="tasks/reference_scenarios.json")
     parser.add_argument("--tier-b", default="tasks/tier_b_prompts.json")
@@ -139,6 +167,14 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--debug-false-alarms",
         action="store_true",
         help="Print reliability reports for expected PASS rows that do not PASS.",
+    )
+    parser.add_argument(
+        "--disable-fault-injection",
+        action="store_true",
+        help=(
+            "Do not apply evaluation-only ecommerce F4 false-success fault injection. "
+            "This keeps normal tool/database execution intact."
+        ),
     )
     args = parser.parse_args(argv)
 
@@ -164,20 +200,32 @@ def _load_json(path: str) -> list[dict[str, Any]]:
     return data
 
 
-def _load_set_a(ecommerce_path: str, reference_path: str) -> dict[str, list[dict[str, Any]]]:
-    ecommerce = []
-    for scenario in _load_json(ecommerce_path):
-        tagged = dict(scenario)
-        tagged.setdefault("domain", "ecommerce")
-        ecommerce.append(tagged)
+def _load_set_a(
+    ecommerce_path: str,
+    reference_path: str,
+    domain: str,
+) -> dict[str, list[dict[str, Any]]]:
+    scenarios_by_domain: dict[str, list[dict[str, Any]]] = {}
+    if domain in {"all", "ecommerce"}:
+        scenarios_by_domain["ecommerce"] = _load_domain_scenarios(
+            ecommerce_path,
+            "ecommerce",
+        )
+    if domain in {"all", "reference"}:
+        scenarios_by_domain["reference"] = _load_domain_scenarios(
+            reference_path,
+            "reference",
+        )
+    return scenarios_by_domain
 
-    reference = []
-    for scenario in _load_json(reference_path):
-        tagged = dict(scenario)
-        tagged.setdefault("domain", "reference")
-        reference.append(tagged)
 
-    return {"ecommerce": ecommerce, "reference": reference}
+def _load_domain_scenarios(path: str, domain: str) -> list[dict[str, Any]]:
+    tagged_scenarios = []
+    for scenario in _load_json(path):
+        tagged = dict(scenario)
+        tagged.setdefault("domain", domain)
+        tagged_scenarios.append(tagged)
+    return tagged_scenarios
 
 
 def _load_set_b(tier_b_path: str) -> dict[str, list[dict[str, Any]]]:
@@ -186,6 +234,21 @@ def _load_set_b(tier_b_path: str) -> dict[str, list[dict[str, Any]]]:
         domain = str(scenario.get("domain", "unknown"))
         grouped.setdefault(domain, []).append(dict(scenario))
     return grouped
+
+
+def _select_domain(
+    scenarios_by_domain: dict[str, list[dict[str, Any]]],
+    domain: str,
+) -> dict[str, list[dict[str, Any]]]:
+    if domain == "all":
+        return scenarios_by_domain
+    selected = scenarios_by_domain.get(domain)
+    if not selected:
+        available = ", ".join(sorted(scenarios_by_domain)) or "none"
+        raise ValueError(
+            f"No scenarios found for domain '{domain}' (available domains: {available})"
+        )
+    return {domain: selected}
 
 
 def _run_set(
@@ -197,6 +260,7 @@ def _run_set(
     output_dir: Path,
     save_states: str,
     debug_false_alarms: bool,
+    enable_fault_injection: bool,
 ) -> dict[str, Any]:
     metrics: dict[str, dict[str, dict[str, Any]]] = {
         version: {} for version in versions
@@ -214,7 +278,12 @@ def _run_set(
             )
             status = "ok"
             try:
-                results = run_version(version, scenarios, seeds=seeds)
+                results = run_version(
+                    version,
+                    scenarios,
+                    seeds=seeds,
+                    enable_fault_injection=enable_fault_injection,
+                )
             except Exception as exc:
                 error_label = f"{type(exc).__name__}: {exc}"
                 status = "error"
@@ -307,6 +376,7 @@ def _result_to_csv_row(result: dict[str, Any]) -> dict[str, Any]:
 
 def _format_summary_section(
     title: str,
+    domain: str,
     aggregate_results: dict[str, list[dict[str, Any]]],
     versions: list[str],
     include_fact_accuracy: bool,
@@ -322,7 +392,8 @@ def _format_summary_section(
         cfg = VERSIONS.get(version)
         return "ON" if cfg and cfg.enforce_intervention else "OFF"
 
-    lines = [f"=== {title} ==="]
+    domain_suffix = "" if domain == "all" else f" ({domain} only)"
+    lines = [f"=== {title}{domain_suffix} ==="]
 
     if not include_fact_accuracy:
         # Set A: gate | avg_reliability | false_acceptance_rate | risk_detection_rate | false_alarm_rate | safe_pass_rate | pass_rate
