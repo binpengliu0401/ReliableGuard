@@ -28,7 +28,7 @@ enforced intervention. OpenRouter is used through the OpenAI-compatible client.
 Install dependencies:
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -42,7 +42,7 @@ export OPENROUTER_API_KEY=your_key_here
 Run the main ablation runner:
 
 ```bash
-python scripts/run_ablation.py \
+python3 scripts/run_ablation.py \
   --set both \
   --versions V1 V2 V3 \
   --seeds 42 123 7 \
@@ -67,10 +67,10 @@ Scenario files under `tasks/`, logs under `logs/`, and benchmark outputs under
 Recommended ablation commands:
 
 ```bash
-python scripts/run_ablation.py --set A --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
-python scripts/run_ablation.py --set B --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
-python scripts/run_ablation.py --set both --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
-python scripts/run_ablation.py --set A --versions V3_NoStructural --seeds 42 --timestamped-output
+python3 scripts/run_ablation.py --set A --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
+python3 scripts/run_ablation.py --set B --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
+python3 scripts/run_ablation.py --set both --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
+python3 scripts/run_ablation.py --set A --versions V3_NoStructural --seeds 42 123 7 --domain ecommerce --timestamped-output
 ```
 
 Reusable full-run scripts:
@@ -78,19 +78,21 @@ Reusable full-run scripts:
 ```bash
 ./scripts/run_set_a_full.sh
 ./scripts/run_set_b_full.sh
+./scripts/run_rq3_ablation.sh
 ./scripts/run_set_a_ecommerce_full.sh
 ```
 
-These scripts run all three ablation versions with seeds `42 123 7` and write
-timestamped outputs under `results/set_a_full/`, `results/set_b_full/`, or
-`results/set_a_ecommerce_full/`. The ecommerce-only Set A script runs the full
-ecommerce suite while passing an empty reference scenario file.
+The Set A and Set B full-run scripts run V1/V2/V3 with seeds `42 123 7` and
+write timestamped outputs under `results/set_a_full/` and
+`results/set_b_full/`. `run_rq3_ablation.sh` runs the controlled ecommerce-only
+`V3_NoStructural` condition under `results/rq3_ablation/`. The ecommerce-only
+Set A script is kept for focused diagnostics.
 
 Useful debugging options:
 
 ```bash
-python scripts/run_ablation.py --set B --versions V1 V2 V3 --seeds 42 --save-states false-alarms
-python scripts/run_ablation.py --set B --versions V3 --seeds 42 --debug-false-alarms
+python3 scripts/run_ablation.py --set B --versions V1 V2 V3 --seeds 42 --save-states false-alarms
+python3 scripts/run_ablation.py --set B --versions V3 --seeds 42 --debug-false-alarms
 ```
 
 The runner writes `summary.txt`, per-domain metrics JSON, and per-scenario CSV
@@ -108,8 +110,8 @@ Additional focused runs:
 
 ```bash
 ./scripts/run_ecommerce_holdout.sh
-python scripts/check_references_external.py
-python scripts/check_papers_external.py
+python3 scripts/check_references_external.py
+python3 scripts/check_papers_external.py
 ```
 
 The external reference check scripts use live bibliographic sources and write
@@ -133,6 +135,15 @@ Key Set A metrics:
 - `risk_detection_rate`: expected `WARN`/`BLOCK` rows that were handled as `WARN` or `BLOCK`.
 - `false_alarm_rate`: expected `PASS` rows that were gated as `WARN` or `BLOCK`.
 - `safe_pass_rate`: expected `PASS` rows that were released as `PASS`.
+- `tccr`: task claim coverage rate; proportion of tasks with at least one
+  grounded non-unverifiable claim.
+- `avg_supported_count`, `avg_contradicted_count`, `avg_unsupported_count`,
+  `avg_unverifiable_count`, `avg_not_found_count`: evidence-state distribution
+  averages over tasks where the verifier processed at least one claim.
+- `stage_latency_mean` and `stage_latency_p95`: per-stage audit latency
+  summaries from `ReliabilityReport.stage_latencies`.
+- `avg_tokens` and `total_tokens_sum`: positive token counts aggregated from
+  result rows or `state["total_tokens"]`.
 
 Set A scenario counts:
 
@@ -163,7 +174,7 @@ are wired through `execute_node`, then merged into the final verdict in
 For thesis interpretation, structural audit is the symbolic trace/state
 component that answers RQ3: final-answer-only auditing versus
 trace/state-augmented auditing. It should be reported separately from the
-LLM-based claim pipeline. The required controlled ablation is still pending:
+LLM-based claim pipeline:
 
 - `V3_Intervention` with structural audit disabled: LLM claim pipeline only.
 - `V3_Intervention` with structural audit enabled: LLM claim pipeline plus
@@ -171,7 +182,10 @@ LLM-based claim pipeline. The required controlled ablation is still pending:
 
 Use `V3_NoStructural` for the structural-audit-disabled condition. It keeps
 `use_verifier=True` and `enforce_intervention=True`, but sets
-`use_structural_audit=False`.
+`use_structural_audit=False`. The previous RQ3 run from 2026-05-14 has been
+archived under `results/_archive/rq3_ablation_20260514/`; re-run
+`./scripts/run_rq3_ablation.sh` with the current code before reporting final
+TCCR, evidence-state, latency, and token metrics.
 
 Set B measures generalization stress tests from `tasks/tier_b_prompts.json`.
 Its summary is organized as an audit-to-gate chain:
@@ -213,32 +227,41 @@ The registry is configured in `src/domain/reference/config.yaml` and loaded by
 to keep ablation runs deterministic and offline; enable them for deployment
 experiments or case-study checks where network-backed evidence is acceptable.
 
+## Figures and Tables
+
+After experiments are complete, generate thesis artifacts with:
+
+```bash
+python3 scripts/generate_figures.py
+```
+
+The script reads the latest timestamped outputs under `results/set_a_full/`,
+`results/set_b_full/`, and `results/rq3_ablation/`. It writes Figure 1-4 plus
+`table_main_ablation.tex`, `table_evidence_state.tex`, and `table_latency.tex`
+under `figures/`. Missing result directories or metrics from older runs are
+skipped with a warning instead of failing the whole generation step.
+
 ## Current Local Artifacts
 
-`results/` is gitignored. The current cleaned local result tree keeps only the
-useful thesis result groups:
+`results/` is gitignored. Old RQ3 data has been archived locally so it does not
+affect automatic figure discovery:
 
-- `results/calibration/`
-- `results/set_a_full/20260501/`
-- `results/set_a_ecommerce_full/20260503/`
-- `results/set_b_full/20260428/`
+- `results/_archive/rq3_ablation_20260514/`
 
-One-off smoke runs and completed external-check outputs have been removed. The
-external reference diagnostic scripts still recreate their output directories
-under `results/` when run.
-
-Local thesis planning documents such as `thesis_scope.md`,
-`formal_definitions.md`, `related_work_skeleton.md`, and `thesis_outline.md`
-are intentionally ignored and are not part of the repository upload.
+New thesis runs should recreate `results/set_a_full/`, `results/set_b_full/`,
+and `results/rq3_ablation/` from the scripts above. Thesis planning documents
+such as `thesis_scope.md`, `formal_definitions.md`,
+`related_work_skeleton.md`, and `thesis_outline.md` are tracked so the
+experimental protocol and thesis framing remain versioned with the code.
 
 ## Pending Thesis Work
 
-- Run the RQ3 ecommerce ablation with structural audit disabled to establish the
-  final-answer-only baseline.
+- Re-run Set A, Set B, and RQ3 with this frozen code version, then record the
+  commit hash in the experiment report.
 - Manually annotate about 50-80 samples to measure claim extraction precision,
   recall, and F1.
-- Measure runtime latency and token cost; add per-stage timing instrumentation
-  if trace logs do not already contain enough timing detail.
+- Use the newly aggregated evidence-state, latency, and token fields to fill
+  the RQ2 and runtime/cost tables.
 
 ## Project Structure
 

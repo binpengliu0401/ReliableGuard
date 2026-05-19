@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python scripts/run_ablation.py \
+python3 scripts/run_ablation.py \
   --set B \
   --versions V1 V2 V3 \
   --seeds 42 123 7 \

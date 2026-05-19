@@ -3,9 +3,9 @@ set -euo pipefail
 
 python3 scripts/run_ablation.py \
   --set A \
-  --versions V1 V2 V3 \
+  --versions V3_NoStructural \
   --seeds 42 123 7 \
+  --domain ecommerce \
   --ecommerce tasks/ecommerce_scenarios.json \
-  --reference tasks/reference_scenarios.json \
-  --output-dir results/set_a_full \
+  --output-dir results/rq3_ablation \
   --timestamped-output

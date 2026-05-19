@@ -2,6 +2,25 @@ import random
 from typing import Any
 
 
+EVIDENCE_STATE_COUNT_FIELDS = (
+    "supported_count",
+    "contradicted_count",
+    "unsupported_count",
+    "unverifiable_count",
+    "not_found_count",
+)
+
+STAGE_LATENCY_KEYS = (
+    "extract_claims",
+    "classify_verifiability",
+    "verify_claims",
+    "score_risks",
+    "decide_interventions",
+    "generate_report",
+    "total_pipeline",
+)
+
+
 def normalize_expected(task: dict[str, Any]) -> str:
     expected = task.get("expected_verdict") or task.get("expected_outcome") or "PASS"
     mapping = {
@@ -127,6 +146,12 @@ def compute_metrics(results: list[dict]) -> dict:
     blocked = 0
     warned = 0
     tccr_count = 0
+    evidence_state_task_count = 0
+    evidence_state_totals = dict.fromkeys(EVIDENCE_STATE_COUNT_FIELDS, 0)
+    stage_latency_lists: dict[str, list[float]] = {
+        stage: [] for stage in STAGE_LATENCY_KEYS
+    }
+    token_values: list[int] = []
     outcome_scores = []
     reliability_scores = []
     fact_accuracy_blocked: list[float] = []
@@ -184,6 +209,15 @@ def compute_metrics(results: list[dict]) -> dict:
             reliability_scores.append(float(state["reliability_score"]))
         report = state.get("reliability_report") if state is not None else None
         if isinstance(report, dict):
+            evidence_counts = {
+                key: int(report.get(key) or 0)
+                for key in EVIDENCE_STATE_COUNT_FIELDS
+            }
+            if any(evidence_counts.values()):
+                evidence_state_task_count += 1
+                for key, value in evidence_counts.items():
+                    evidence_state_totals[key] += value
+
             grounded_count = sum(
                 int(report.get(key) or 0)
                 for key in (
@@ -195,6 +229,20 @@ def compute_metrics(results: list[dict]) -> dict:
             )
             if grounded_count > 0:
                 tccr_count += 1
+
+            stage_latencies = report.get("stage_latencies")
+            if isinstance(stage_latencies, dict):
+                for key, value in stage_latencies.items():
+                    if value is not None:
+                        stage_latency_lists.setdefault(str(key), []).append(
+                            float(value)
+                        )
+
+        tokens = item.get("tokens")
+        if tokens is None and state is not None:
+            tokens = state.get("total_tokens")
+        if tokens is not None and int(tokens) > 0:
+            token_values.append(int(tokens))
 
         claim_type = task.get("failure_mode") or task.get("injected_error_type") or task.get("claim_type")
         if claim_type:
@@ -220,6 +268,15 @@ def compute_metrics(results: list[dict]) -> dict:
         far_values.append(seed_far)
     pass_rate_ci = bootstrap_ci(pass_values)
     false_acceptance_rate_ci = bootstrap_ci(far_values)
+    stage_latency_mean = {}
+    stage_latency_p95 = {}
+    for stage, vals in stage_latency_lists.items():
+        if not vals:
+            continue
+        sorted_vals = sorted(vals)
+        p95_index = max(0, min(len(sorted_vals) - 1, int(0.95 * len(sorted_vals))))
+        stage_latency_mean[stage] = round(sum(vals) / len(vals), 3)
+        stage_latency_p95[stage] = round(sorted_vals[p95_index], 3)
 
     return {
         "total_tasks": total,
@@ -251,6 +308,32 @@ def compute_metrics(results: list[dict]) -> dict:
         )
         if fact_accuracy_values
         else None,
+        "avg_supported_count": round(
+            evidence_state_totals["supported_count"] / evidence_state_task_count, 3
+        )
+        if evidence_state_task_count
+        else None,
+        "avg_contradicted_count": round(
+            evidence_state_totals["contradicted_count"] / evidence_state_task_count, 3
+        )
+        if evidence_state_task_count
+        else None,
+        "avg_unsupported_count": round(
+            evidence_state_totals["unsupported_count"] / evidence_state_task_count, 3
+        )
+        if evidence_state_task_count
+        else None,
+        "avg_unverifiable_count": round(
+            evidence_state_totals["unverifiable_count"] / evidence_state_task_count, 3
+        )
+        if evidence_state_task_count
+        else None,
+        "avg_not_found_count": round(
+            evidence_state_totals["not_found_count"] / evidence_state_task_count, 3
+        )
+        if evidence_state_task_count
+        else None,
+        "evidence_state_coverage": round(evidence_state_task_count / total, 3),
         "false_alarm_rate": round(false_alarm / false_alarm_denominator, 3)
         if false_alarm_denominator
         else None,
@@ -274,6 +357,12 @@ def compute_metrics(results: list[dict]) -> dict:
         )
         if all_trace_scores
         else None,
+        "stage_latency_mean": stage_latency_mean,
+        "stage_latency_p95": stage_latency_p95,
+        "avg_tokens": round(sum(token_values) / len(token_values), 1)
+        if token_values
+        else None,
+        "total_tokens_sum": sum(token_values) if token_values else None,
         "avg_outcome_score": round(sum(outcome_scores) / total, 3),
         "detection_rate_by_type": detection_rates,
         "outcome_scores": outcome_scores,

@@ -45,6 +45,15 @@ METRIC_COLORS = {
     "safe_pass_rate": "#6ACC65",
 }
 DOMAIN_ORDER = ["ecommerce", "reference"]
+STAGE_LATENCY_ORDER = [
+    "extract_claims",
+    "classify_verifiability",
+    "verify_claims",
+    "score_risks",
+    "decide_interventions",
+    "generate_report",
+    "total_pipeline",
+]
 
 
 def main() -> None:
@@ -59,6 +68,19 @@ def main() -> None:
     generate_fig3_rq3_structural(set_a_dir, rq3_dir)
     generate_fig4_set_b_generalization(set_b_dir)
     generate_table_main_ablation(set_a_dir)
+    if set_a_dir is None:
+        print("SKIP table_evidence_state.tex: result directory not found")
+        print("SKIP table_latency.tex: result directory not found")
+    else:
+        set_a_metrics_path = set_a_dir / "set_a_metrics.json"
+        generate_table_evidence_state(
+            str(set_a_metrics_path),
+            str(FIGURES_DIR / "table_evidence_state.tex"),
+        )
+        generate_table_latency(
+            str(set_a_metrics_path),
+            str(FIGURES_DIR / "table_latency.tex"),
+        )
 
 
 def _configure_style() -> None:
@@ -361,6 +383,110 @@ def generate_table_main_ablation(base_dir: Path | None) -> None:
     print(f"WROTE {output}")
 
 
+def generate_table_evidence_state(set_a_metrics_path: str, output_path: str) -> None:
+    output = Path(output_path)
+    metrics = _load_metrics(Path(set_a_metrics_path), output.name)
+    if metrics is None:
+        return
+
+    rows = []
+    for version in _ordered_versions(metrics):
+        for domain in DOMAIN_ORDER:
+            domain_metrics = _domain_metrics(metrics, version, domain)
+            if "evidence_state_coverage" not in domain_metrics:
+                continue
+            rows.append(
+                [
+                    _latex_escape(version),
+                    domain,
+                    _format_decimal(domain_metrics.get("avg_supported_count"), 3),
+                    _format_decimal(domain_metrics.get("avg_contradicted_count"), 3),
+                    _format_decimal(domain_metrics.get("avg_unsupported_count"), 3),
+                    _format_decimal(domain_metrics.get("avg_unverifiable_count"), 3),
+                    _format_decimal(domain_metrics.get("avg_not_found_count"), 3),
+                    _format_rate(domain_metrics.get("evidence_state_coverage")),
+                ]
+            )
+
+    if not rows:
+        print(f"SKIP {output.name}: missing evidence state metrics")
+        return
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{Set A Evidence State Distribution}",
+        r"\label{tab:evidence_state}",
+        r"\begin{tabular}{llrrrrrr}",
+        r"\toprule",
+        r"Version & Domain & Supported & Contradicted & Unsupported & Unverifiable & Not Found & Coverage \\",
+        r"\midrule",
+    ]
+    lines.extend(" & ".join(row) + r" \\" for row in rows)
+    lines.extend(
+        [
+            r"\bottomrule",
+            r"\end{tabular}",
+            r"\end{table}",
+        ]
+    )
+    output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"WROTE {output}")
+
+
+def generate_table_latency(set_a_metrics_path: str, output_path: str) -> None:
+    output = Path(output_path)
+    metrics = _load_metrics(Path(set_a_metrics_path), output.name)
+    if metrics is None:
+        return
+
+    domain_metrics = _domain_metrics(metrics, "V3_Intervention", "ecommerce")
+    means = domain_metrics.get("stage_latency_mean")
+    p95s = domain_metrics.get("stage_latency_p95")
+    if not isinstance(means, dict) or not isinstance(p95s, dict):
+        print(f"SKIP {output.name}: missing stage latency metrics")
+        return
+
+    rows = []
+    for stage in STAGE_LATENCY_ORDER:
+        mean_value = means.get(stage)
+        p95_value = p95s.get(stage)
+        rows.append(
+            [
+                _latex_escape(stage),
+                _format_decimal(mean_value, 3),
+                _format_decimal(p95_value, 3),
+            ]
+        )
+
+    if not any(row[1] != "--" or row[2] != "--" for row in rows):
+        print(f"SKIP {output.name}: missing stage latency metrics")
+        return
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\caption{Set A V3 Ecommerce Audit Latency}",
+        r"\label{tab:latency}",
+        r"\begin{tabular}{lrr}",
+        r"\toprule",
+        r"Stage & Mean (s) & P95 (s) \\",
+        r"\midrule",
+    ]
+    lines.extend(" & ".join(row) + r" \\" for row in rows)
+    lines.extend(
+        [
+            r"\bottomrule",
+            r"\end{tabular}",
+            r"\end{table}",
+        ]
+    )
+    output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"WROTE {output}")
+
+
 def _load_metrics(path: Path, output_name: str) -> dict[str, Any] | None:
     if not _path_exists(path, output_name):
         return None
@@ -409,10 +535,44 @@ def _metric_value(
     domain: str,
     metric: str,
 ) -> float:
-    value = metrics.get(version, {}).get(domain, {}).get(metric)
+    value = _domain_metrics(metrics, version, domain).get(metric)
     if value is None:
         return 0.0
     return float(value)
+
+
+def _domain_metrics(
+    metrics: dict[str, Any],
+    version: str,
+    domain: str,
+) -> dict[str, Any]:
+    nested_version = metrics.get(version)
+    if isinstance(nested_version, dict):
+        nested_domain = nested_version.get(domain)
+        if isinstance(nested_domain, dict):
+            return nested_domain
+
+    flat_domain = metrics.get(f"{version}_{domain}")
+    if isinstance(flat_domain, dict):
+        return flat_domain
+
+    return {}
+
+
+def _ordered_versions(metrics: dict[str, Any]) -> list[str]:
+    configured = [*VERSION_ORDER, "V3_NoStructural"]
+    discovered = []
+    for version in configured:
+        if version in metrics or any(f"{version}_{domain}" in metrics for domain in DOMAIN_ORDER):
+            discovered.append(version)
+    extra = sorted(
+        key
+        for key, value in metrics.items()
+        if isinstance(value, dict)
+        and key not in discovered
+        and not any(key.endswith(f"_{domain}") for domain in DOMAIN_ORDER)
+    )
+    return discovered + extra
 
 
 def _failure_mode_detection_rates(
@@ -529,6 +689,12 @@ def _format_rate(value: Any) -> str:
     if value is None:
         return "--"
     return f"{float(value):.2f}"
+
+
+def _format_decimal(value: Any, digits: int) -> str:
+    if value is None:
+        return "--"
+    return f"{float(value):.{digits}f}"
 
 
 def _latex_escape(value: str) -> str:
