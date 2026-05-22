@@ -79,7 +79,7 @@ The first mode is **post-hoc factual verification**: the claim-level pipeline ex
 
 The second mode is **pre-execution policy enforcement**: checking business constraints against tool arguments before execution takes place. F2 policy violations are categorically different from factual errors. When an agent creates a high-value order (amount = 8000), the database state after execution is factually correct: the record exists, the amount matches, the status is as reported. The claim-level pipeline finds all claims supported and returns PASS. The violation is not in the state but in the decision to permit an operation that exceeded a policy threshold. No comparison of the final answer against domain state can expose this, because the state provides no evidence of wrongdoing.
 
-The archived 2026-05-14 RQ3 run preliminarily supports this boundary: F4 detection rate remained 1.0 without structural audit, while F2 detection dropped to 0.0. That run predates the current TCCR, evidence-state, latency, and token aggregation fields, so the final thesis numbers must come from a re-run of `V3_Intervention` and `V3_NoStructural` under the same current code version and seeds.
+The archived 2026-05-14 RQ3 run preliminarily supports this boundary: F4 detection rate remained 1.0 without structural audit, while F2 detection dropped to 0.0. That run predates the current TCCR, evidence-state, latency, and token aggregation fields. A later local full-run snapshot is preserved at `results/_archive/full_experiment_snapshot_20260522.tar.gz`, but it also precedes the latest policy, latency-unit, and reference-output fixes. The final thesis numbers must therefore come from a fresh re-run of `V3_Intervention` and `V3_NoStructural` under the same current code version and seeds.
 
 RQ3 therefore asks: not just how much does structural audit help, but where exactly does the claim-level pipeline reach its fundamental detection boundary, and what architectural component is necessary to cross it?
 
@@ -108,6 +108,10 @@ Earlier runs indicate that ecommerce detection improves strongly from the baseli
 
 **Finding B: Claim extraction coverage is the dominant bottleneck in the reference domain, and domain-dependent differences are explainable within the unified framework.**  
 In the academic reference setting, earlier runs show high false alarm behavior under enforced intervention. The hypothesized bottleneck is that claim extraction produces many unverifiable aggregate claims, which the verifier cannot reliably ground. The refreshed metrics now directly expose this mechanism through `avg_unverifiable_count`, `evidence_state_coverage`, and TCCR, allowing the final thesis to explain false alarms using evidence-state distribution rather than narrative interpretation alone.
+
+Prior full-run outputs are treated as archived reproducibility snapshots, not as
+the source of final reported numbers. The post-fix rerun should use timestamped
+result directories and record the exact paths alongside the commit hash.
 
 ## Out of Scope
 

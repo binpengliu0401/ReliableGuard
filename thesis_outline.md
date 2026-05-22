@@ -336,7 +336,7 @@
 ### 7.4 RQ3: Final-answer-only versus Trace/State-augmented Auditing
 
 - 对比同一代码版本、同一 seeds、同一 Set A ecommerce 场景下的 V3_Intervention 与 V3_NoStructural。
-- 旧批次数据已归档到 `results/_archive/rq3_ablation_20260514/`，只作为 preliminary evidence；最终论文数字必须来自当前代码重跑后的 `results/rq3_ablation/`。
+- 旧批次数据已归档到 `results/_archive/rq3_ablation_20260514/`；后续完整批次快照已保存为 `results/_archive/full_experiment_snapshot_20260522.tar.gz`。这些只作为 preservation / preliminary evidence；最终论文数字必须来自当前修复后代码重跑生成的 timestamped `results/rq3_ablation/` 输出。
 - 关键分析：差距是否主要来自 F2 检测（pre-execution policy）而非 F4（post-hoc claim verification 已能覆盖）。
 - 结论：structural audit 对 ecommerce 的独特贡献是 pre-execution 策略违规检测，而非 post-hoc 状态不一致检测。
 - 将 high-value order policy violation（F2）作为 structural audit 贡献的代表性案例，将 false-success database mutation（F4）作为 claim pipeline 已能覆盖的对照案例。
@@ -370,14 +370,15 @@
 
 - 报告平均 audit latency、p95 latency 与 token cost。
 - 区分 neural stages 和 symbolic stages 的开销。
-- 使用 `stage_latency_mean`、`stage_latency_p95`、`avg_tokens` 和 `total_tokens_sum` 填表。
+- 使用 `stage_latency_mean_ms`、`stage_latency_p95_ms`、`avg_tokens` 和 `total_tokens_sum` 填表。
+- 记录对应的 timestamped results 目录和 commit hash，避免混用归档旧批次与修复后新批次。
 - 讨论该开销对 offline benchmark、interactive agent 和 production monitoring 三种使用方式的影响。
 
 ## 8. Discussion
 
 ### 8.1 Why Trace/State-augmented Auditing Matters—and Where It Does Not
 
-ReliableGuard 的受控消融实验（V3 vs V3_NoStructural）用于揭示 trace/state augmentation 的价值边界，而非只是一个总体检测增益数字。最终论证应使用冻结代码重跑后的同批 RQ3 数据；旧批次只作为设计验证参考。这个边界在架构层面有明确的解释。
+ReliableGuard 的受控消融实验（V3 vs V3_NoStructural）用于揭示 trace/state augmentation 的价值边界，而非只是一个总体检测增益数字。最终论证应使用修复后冻结代码重跑的同批 RQ3 数据；`results/_archive/full_experiment_snapshot_20260522.tar.gz` 和更早旧批次只作为设计验证与复现实验参考。这个边界在架构层面有明确的解释。
 
 **Claim pipeline 在没有 trace/state 的情况下能覆盖的：**
 

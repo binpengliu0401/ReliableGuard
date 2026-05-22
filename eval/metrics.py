@@ -268,15 +268,15 @@ def compute_metrics(results: list[dict]) -> dict:
         far_values.append(seed_far)
     pass_rate_ci = bootstrap_ci(pass_values)
     false_acceptance_rate_ci = bootstrap_ci(far_values)
-    stage_latency_mean = {}
-    stage_latency_p95 = {}
+    stage_latency_mean_ms = {}
+    stage_latency_p95_ms = {}
     for stage, vals in stage_latency_lists.items():
         if not vals:
             continue
         sorted_vals = sorted(vals)
         p95_index = max(0, min(len(sorted_vals) - 1, int(0.95 * len(sorted_vals))))
-        stage_latency_mean[stage] = round(sum(vals) / len(vals), 3)
-        stage_latency_p95[stage] = round(sorted_vals[p95_index], 3)
+        stage_latency_mean_ms[stage] = round(sum(vals) / len(vals) * 1000, 1)
+        stage_latency_p95_ms[stage] = round(sorted_vals[p95_index] * 1000, 1)
 
     return {
         "total_tasks": total,
@@ -357,8 +357,8 @@ def compute_metrics(results: list[dict]) -> dict:
         )
         if all_trace_scores
         else None,
-        "stage_latency_mean": stage_latency_mean,
-        "stage_latency_p95": stage_latency_p95,
+        "stage_latency_mean_ms": stage_latency_mean_ms,
+        "stage_latency_p95_ms": stage_latency_p95_ms,
         "avg_tokens": round(sum(token_values) / len(token_values), 1)
         if token_values
         else None,

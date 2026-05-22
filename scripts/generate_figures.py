@@ -442,8 +442,8 @@ def generate_table_latency(set_a_metrics_path: str, output_path: str) -> None:
         return
 
     domain_metrics = _domain_metrics(metrics, "V3_Intervention", "ecommerce")
-    means = domain_metrics.get("stage_latency_mean")
-    p95s = domain_metrics.get("stage_latency_p95")
+    means = domain_metrics.get("stage_latency_mean_ms")
+    p95s = domain_metrics.get("stage_latency_p95_ms")
     if not isinstance(means, dict) or not isinstance(p95s, dict):
         print(f"SKIP {output.name}: missing stage latency metrics")
         return
@@ -455,8 +455,8 @@ def generate_table_latency(set_a_metrics_path: str, output_path: str) -> None:
         rows.append(
             [
                 _latex_escape(stage),
-                _format_decimal(mean_value, 3),
-                _format_decimal(p95_value, 3),
+                _format_decimal(mean_value, 1),
+                _format_decimal(p95_value, 1),
             ]
         )
 
@@ -472,7 +472,7 @@ def generate_table_latency(set_a_metrics_path: str, output_path: str) -> None:
         r"\label{tab:latency}",
         r"\begin{tabular}{lrr}",
         r"\toprule",
-        r"Stage & Mean (s) & P95 (s) \\",
+        r"Stage & Mean (ms) & P95 (ms) \\",
         r"\midrule",
     ]
     lines.extend(" & ".join(row) + r" \\" for row in rows)

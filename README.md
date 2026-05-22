@@ -51,7 +51,10 @@ python3 scripts/run_ablation.py \
 ```
 
 Scenario files under `tasks/`, logs under `logs/`, and benchmark outputs under
-`results/` are local experiment artifacts and are gitignored.
+`results/` are local experiment artifacts and are gitignored. The ablation
+runner refuses to replace existing `summary.txt`, metrics JSON, or rows CSV
+files unless `--overwrite` is passed; use `--timestamped-output` for thesis
+runs.
 
 ## Ablation Versions
 
@@ -86,7 +89,12 @@ The Set A and Set B full-run scripts run V1/V2/V3 with seeds `42 123 7` and
 write timestamped outputs under `results/set_a_full/` and
 `results/set_b_full/`. `run_rq3_ablation.sh` runs the controlled ecommerce-only
 `V3_NoStructural` condition under `results/rq3_ablation/`. The ecommerce-only
-Set A script is kept for focused diagnostics.
+Set A script is kept for focused diagnostics. Re-running these scripts creates a
+new timestamped directory instead of overwriting previous outputs.
+
+If you intentionally want to reuse a non-timestamped output directory, pass
+`--overwrite`. This should be reserved for scratch diagnostics, not thesis
+artifact generation.
 
 Useful debugging options:
 
@@ -140,7 +148,7 @@ Key Set A metrics:
 - `avg_supported_count`, `avg_contradicted_count`, `avg_unsupported_count`,
   `avg_unverifiable_count`, `avg_not_found_count`: evidence-state distribution
   averages over tasks where the verifier processed at least one claim.
-- `stage_latency_mean` and `stage_latency_p95`: per-stage audit latency
+- `stage_latency_mean_ms` and `stage_latency_p95_ms`: per-stage audit latency
   summaries from `ReliabilityReport.stage_latencies`.
 - `avg_tokens` and `total_tokens_sum`: positive token counts aggregated from
   result rows or `state["total_tokens"]`.
@@ -243,21 +251,31 @@ skipped with a warning instead of failing the whole generation step.
 
 ## Current Local Artifacts
 
-`results/` is gitignored. Old RQ3 data has been archived locally so it does not
-affect automatic figure discovery:
+`results/` is gitignored. Completed local runs are preserved in archive files
+under `results/_archive/` so future reruns do not overwrite the only copy of a
+batch:
 
 - `results/_archive/rq3_ablation_20260514/`
+- `results/_archive/full_experiment_snapshot_20260522.tar.gz`
 
-New thesis runs should recreate `results/set_a_full/`, `results/set_b_full/`,
-and `results/rq3_ablation/` from the scripts above. Thesis planning documents
-such as `thesis_scope.md`, `formal_definitions.md`,
-`related_work_skeleton.md`, and `thesis_outline.md` are tracked so the
-experimental protocol and thesis framing remain versioned with the code.
+The 2026-05-22 snapshot contains the completed full-run directories that were
+present before the latest rerun cycle:
+
+- `results/set_a_full/20260519/170046/`
+- `results/set_b_full/20260521/070559/`
+- `results/rq3_ablation/20260521/014751/`
+
+New thesis runs should recreate fresh timestamped outputs under
+`results/set_a_full/`, `results/set_b_full/`, and `results/rq3_ablation/` from
+the scripts above. Thesis planning documents such as `thesis_scope.md`,
+`formal_definitions.md`, `related_work_skeleton.md`, and `thesis_outline.md`
+are tracked so the experimental protocol and thesis framing remain versioned
+with the code.
 
 ## Pending Thesis Work
 
-- Re-run Set A, Set B, and RQ3 with this frozen code version, then record the
-  commit hash in the experiment report.
+- Re-run Set A, Set B, and RQ3 with the post-fix code version, then record the
+  commit hash and timestamped result directories in the experiment report.
 - Manually annotate about 50-80 samples to measure claim extraction precision,
   recall, and F1.
 - Use the newly aggregated evidence-state, latency, and token fields to fill

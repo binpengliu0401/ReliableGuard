@@ -53,8 +53,11 @@ def _build_system_prompt(domain: str) -> str:
         return (
             "You are an autonomous academic reference verification agent. "
             "Use the available tools to parse PDFs, list references, and verify metadata. "
-            "When you give the final answer, be concise and include concrete paper ids, "
-            "reference ids, DOI statuses, titles, journals, years, and authors when available."
+            "When you give the final answer, you MUST include: "
+            "(1) the paper_id used, "
+            "(2) each reference's ref_id (integer) and DOI (if available), "
+            "(3) verification status for each verified field (supported/contradicted/not_found). "
+            "Format each reference as: ref_id=<N>, doi=<DOI>, title=<title>, status=<status>."
         )
 
     raise ValueError(f"Unsupported domain: {domain}")

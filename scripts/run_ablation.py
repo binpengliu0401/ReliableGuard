@@ -52,6 +52,16 @@ def main(argv: list[str] | None = None) -> int:
 
     output_dir = _resolve_output_dir(Path(args.output_dir), args.timestamped_output)
     output_dir.mkdir(parents=True, exist_ok=True)
+    existing_outputs = _existing_output_files(output_dir, args.set)
+    if existing_outputs and not args.overwrite:
+        print(
+            "ERROR: output files already exist. Use --timestamped-output for a "
+            "new run directory, or pass --overwrite to replace these files:",
+            file=sys.stderr,
+        )
+        for path in existing_outputs:
+            print(f"  {path}", file=sys.stderr)
+        return 1
     print(f"[OUTPUT_DIR] {output_dir}")
 
     all_summaries: list[str] = []
@@ -158,6 +168,14 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         help="Write outputs under output-dir/YYYYMMDD/HHMMSS to avoid overwrites.",
     )
     parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help=(
+            "Allow replacing existing summary, metrics, and CSV files in the "
+            "resolved output directory. Prefer --timestamped-output for thesis runs."
+        ),
+    )
+    parser.add_argument(
         "--save-states",
         choices=["none", "false-alarms", "all"],
         default="none",
@@ -190,6 +208,25 @@ def _resolve_output_dir(base_dir: Path, timestamped: bool) -> Path:
         return base_dir
     now = datetime.now()
     return base_dir / now.strftime("%Y%m%d") / now.strftime("%H%M%S")
+
+
+def _existing_output_files(output_dir: Path, set_name: str) -> list[Path]:
+    candidates = [output_dir / "summary.txt"]
+    if set_name in {"A", "both"}:
+        candidates.extend(
+            [
+                output_dir / "set_a_metrics.json",
+                output_dir / "set_a_rows.csv",
+            ]
+        )
+    if set_name in {"B", "both"}:
+        candidates.extend(
+            [
+                output_dir / "set_b_metrics.json",
+                output_dir / "set_b_rows.csv",
+            ]
+        )
+    return [path for path in candidates if path.exists()]
 
 
 def _load_json(path: str) -> list[dict[str, Any]]:

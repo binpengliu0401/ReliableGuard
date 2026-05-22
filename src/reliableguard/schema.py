@@ -26,7 +26,7 @@ EvidenceState = Literal[
     "not_found",
 ]
 RiskLevel = Literal["low", "medium", "high"]
-InterventionAction = Literal["PASS", "WARN", "BLOCK", "ESCALATE"]
+InterventionAction = Literal["PASS", "WARN", "BLOCK"]
 Certainty = Literal["certain", "uncertain", "abstained"]
 
 

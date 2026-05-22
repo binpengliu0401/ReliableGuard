@@ -221,7 +221,7 @@ $$
 \operatorname{AvgTokens} = \frac{\sum_{t \in T_\tau}\tau_t}{|T_\tau|}
 $$
 
-where \(T_\tau\) contains only tasks with \(\tau_t > 0\). The implementation fields are `stage_latency_mean`, `stage_latency_p95`, `avg_tokens`, and `total_tokens_sum`.
+where \(T_\tau\) contains only tasks with \(\tau_t > 0\). The implementation fields are `stage_latency_mean_ms`, `stage_latency_p95_ms`, `avg_tokens`, and `total_tokens_sum`.
 
 ## 3. Domain Verifier Adapter Interface Contract
 
@@ -591,7 +591,7 @@ The trace report records task-level context and claim-level audit artifacts. The
               },
               "intervention": {
                 "type": "string",
-                "enum": ["PASS", "WARN", "BLOCK", "ESCALATE"]
+                "enum": ["PASS", "WARN", "BLOCK"]
               },
               "reason": { "type": "string" }
             }
@@ -703,7 +703,7 @@ The trace report records task-level context and claim-level audit artifacts. The
               "claim_id": { "type": "string" },
               "action": {
                 "type": "string",
-                "enum": ["PASS", "WARN", "BLOCK", "ESCALATE"]
+                "enum": ["PASS", "WARN", "BLOCK"]
               },
               "reason": { "type": "string" }
             }
