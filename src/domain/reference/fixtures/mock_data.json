@@ -1,99 +1,2377 @@
 {
   "pdfs": {
-    "paper_f0.pdf": {
+    "react.pdf": {
+      "paper_id": "react",
+      "source": "ReAct- Synergizing Reasoning and Acting in Language Models",
       "references": [
         {
-          "title": "Attention Is All You Need",
-          "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"],
-          "doi": "10.48550/arXiv.1706.03762",
-          "journal": "arXiv",
-          "year": 2017
-        }
-      ]
-    },
-    "paper_f2.pdf": {
-      "references": [
+          "ref_id": 1,
+          "title": "FEVER: a Large-scale Dataset for Fact Extraction and VERification",
+          "authors": [
+            "James Thorne",
+            "Andreas Vlachos",
+            "Christos Christodoulopoulos",
+            "Arpit Mittal"
+          ],
+          "doi": "10.18653/v1/N18-1074",
+          "journal": "North American Chapter of the Association for Computational Linguistics",
+          "year": 2018,
+          "doi_status": "verified"
+        },
         {
-          "title": "BERT: Pre-training of Deep Bidirectional Transformers",
-          "authors": ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee"],
-          "doi": "10.18653/v1/N19-1423",
-          "journal": "NAACL",
-          "year": 2019
-        }
-      ]
-    },
-    "paper_nonexistent_doi.pdf": {
-      "references": [
+          "ref_id": 2,
+          "title": "HotpotQA: A Dataset for Diverse, Explainable Multi-hop Question Answering",
+          "authors": [
+            "Zhilin Yang",
+            "Peng Qi",
+            "Saizheng Zhang",
+            "Yoshua Bengio",
+            "William W. Cohen",
+            "R. Salakhutdinov",
+            "Christopher D. Manning"
+          ],
+          "doi": "10.18653/v1/D18-1259",
+          "journal": "Conference on Empirical Methods in Natural Language Processing",
+          "year": 2018,
+          "doi_status": "verified"
+        },
         {
-          "title": "A Fake Paper That Does Not Exist",
-          "authors": ["Ghost Author"],
-          "doi": "10.99999/fake.0000",
-          "journal": "Phantom Journal",
-          "year": 2023
-        }
-      ]
-    },
-    "paper_invaliddoi.pdf": {
-      "references": [
-        {
-          "title": "A Paper With Invalid DOI Format",
-          "authors": ["Test Author"],
-          "doi": "invalid-doi-format",
-          "journal": "Test Journal",
-          "year": 2023
-        }
-      ]
-    },
-    "paper_nodoi.pdf": {
-      "references": [
-        {
-          "title": "A Paper With No DOI",
-          "authors": ["Unknown Author"],
+          "ref_id": 3,
+          "title": "ALFWorld: Aligning Text and Embodied Environments for Interactive Learning",
+          "authors": [
+            "Mohit Shridhar",
+            "Xingdi Yuan",
+            "Marc-Alexandre Côté",
+            "Yonatan Bisk",
+            "Adam Trischler",
+            "Matthew J. Hausknecht"
+          ],
           "doi": "",
-          "journal": "Journal of Unknown",
-          "year": 2022
+          "journal": "International Conference on Learning Representations",
+          "year": 2020,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 4,
+          "title": "Imitating Interactive Intelligence",
+          "authors": [
+            "Josh Abramson",
+            "Arun Ahuja",
+            "Arthur Brussee",
+            "Federico Carnevale",
+            "Mary Cassin",
+            "S. Clark",
+            "A. Dudzik",
+            "Petko Georgiev",
+            "Aurelia Guy",
+            "Tim Harley",
+            "Felix Hill",
+            "Alden Hung",
+            "Zachary Kenton",
+            "Jessica Landon",
+            "T. Lillicrap",
+            "K. Mathewson",
+            "Alistair Muldal",
+            "Adam Santoro",
+            "N. Savinov",
+            "Vikrant Varma",
+            "Greg Wayne",
+            "Nathaniel Wong",
+            "Chen Yan",
+            "Rui Zhu"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2020,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 5,
+          "title": "Language Models are Few-Shot Butlers",
+          "authors": [
+            "Vincent Micheli",
+            "Franccois Fleuret"
+          ],
+          "doi": "10.18653/v1/2021.emnlp-main.734",
+          "journal": "Conference on Empirical Methods in Natural Language Processing",
+          "year": 2021,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 6,
+          "title": "Adaptive Information Seeking for Open-Domain Question Answering",
+          "authors": [
+            "Yunchang Zhu",
+            "Liang Pang",
+            "Yanyan Lan",
+            "Huawei Shen",
+            "Xueqi Cheng"
+          ],
+          "doi": "10.18653/v1/2021.emnlp-main.293",
+          "journal": "Conference on Empirical Methods in Natural Language Processing",
+          "year": 2021,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 7,
+          "title": "Show Your Work: Scratchpads for Intermediate Computation with Language Models",
+          "authors": [
+            "Maxwell Nye",
+            "Anders Andreassen",
+            "Guy Gur-Ari",
+            "H. Michalewski",
+            "Jacob Austin",
+            "David Bieber",
+            "David Dohan",
+            "Aitor Lewkowycz",
+            "Maarten Bosma",
+            "D. Luan",
+            "Charles Sutton",
+            "Augustus Odena"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 8,
+          "title": "Language Models as Zero-Shot Planners: Extracting Actionable Knowledge for Embodied Agents",
+          "authors": [
+            "Wenlong Huang",
+            "P. Abbeel",
+            "Deepak Pathak",
+            "Igor Mordatch"
+          ],
+          "doi": "",
+          "journal": "International Conference on Machine Learning",
+          "year": 2022,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 9,
+          "title": "Chain of Thought Prompting Elicits Reasoning in Large Language Models",
+          "authors": [
+            "Jason Wei",
+            "Xuezhi Wang",
+            "Dale Schuurmans",
+            "Maarten Bosma",
+            "Ed H. Chi",
+            "F. Xia",
+            "Quoc Le",
+            "Denny Zhou"
+          ],
+          "doi": "10.52202/068431-1800",
+          "journal": "Neural Information Processing Systems",
+          "year": 2022,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 10,
+          "title": "Pre-Trained Language Models for Interactive Decision-Making",
+          "authors": [
+            "Shuang Li",
+            "Xavier Puig",
+            "Yilun Du",
+            "Clinton Jia Wang",
+            "Ekin Akyürek",
+            "A. Torralba",
+            "Jacob Andreas",
+            "Igor Mordatch"
+          ],
+          "doi": "10.52202/068431-2262",
+          "journal": "Neural Information Processing Systems",
+          "year": 2022,
+          "doi_status": "verified"
+        }
+      ]
+    },
+    "critic.pdf": {
+      "paper_id": "critic",
+      "source": "CRITIC- Large Language Models Can Self-Correct with Tool-Interactive Critiquing",
+      "references": [
+        {
+          "ref_id": 1,
+          "title": "Fine-Tuning Language Models from Human Preferences",
+          "authors": [
+            "Daniel M. Ziegler",
+            "Nisan Stiennon",
+            "Jeff Wu",
+            "Tom B. Brown",
+            "Alec Radford",
+            "Dario Amodei",
+            "Paul Christiano",
+            "G. Irving"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2019,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 2,
+          "title": "Truthful AI: Developing and governing AI that does not lie",
+          "authors": [
+            "Owain Evans",
+            "Owen Cotton-Barratt",
+            "Lukas Finnveden",
+            "Adam Bales",
+            "Avital Balwit",
+            "Peter Wills",
+            "Luca Righetti",
+            "W. Saunders"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 3,
+          "title": "A General Language Assistant as a Laboratory for Alignment",
+          "authors": [
+            "Amanda Askell",
+            "Yuntao Bai",
+            "Anna Chen",
+            "Dawn Drain",
+            "Deep Ganguli",
+            "T. Henighan",
+            "Andy Jones",
+            "Nicholas Joseph",
+            "Benjamin Mann",
+            "Nova Dassarma",
+            "Nelson Elhage",
+            "Zac Hatfield-Dodds",
+            "Danny Hernandez",
+            "John Kernion",
+            "Kamal Ndousse",
+            "Catherine Olsson",
+            "Dario Amodei",
+            "Tom B. Brown",
+            "Jack Clark",
+            "Sam McCandlish",
+            "Chris Olah",
+            "Jared Kaplan"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 4,
+          "title": "WebGPT: Browser-assisted question-answering with human feedback",
+          "authors": [
+            "Reiichiro Nakano",
+            "Jacob Hilton",
+            "S. Balaji",
+            "Jeff Wu",
+            "Ouyang Long",
+            "Christina Kim",
+            "Christopher Hesse",
+            "Shantanu Jain",
+            "Vineet Kosaraju",
+            "W. Saunders",
+            "Xu Jiang",
+            "K. Cobbe",
+            "Tyna Eloundou",
+            "Gretchen Krueger",
+            "Kevin Button",
+            "Matthew Knight",
+            "Benjamin Chess",
+            "John Schulman"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 5,
+          "title": "Self-Consistency Improves Chain of Thought Reasoning in Language Models",
+          "authors": [
+            "Xuezhi Wang",
+            "Jason Wei",
+            "D. Schuurmans",
+            "Quoc Le",
+            "Ed H. Chi",
+            "Denny Zhou"
+          ],
+          "doi": "",
+          "journal": "International Conference on Learning Representations",
+          "year": 2022,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 6,
+          "title": "Training a Helpful and Harmless Assistant with Reinforcement Learning from Human Feedback",
+          "authors": [
+            "Yuntao Bai",
+            "Andy Jones",
+            "Kamal Ndousse",
+            "Amanda Askell",
+            "Anna Chen",
+            "Nova Dassarma",
+            "Dawn Drain",
+            "Stanislav Fort",
+            "Deep Ganguli",
+            "T. Henighan",
+            "Nicholas Joseph",
+            "Saurav Kadavath",
+            "John Kernion",
+            "Tom Conerly",
+            "S. El-Showk",
+            "Nelson Elhage",
+            "Zac Hatfield-Dodds",
+            "Danny Hernandez",
+            "Tristan Hume",
+            "Scott Johnston",
+            "Shauna Kravec",
+            "Liane Lovitt",
+            "Neel Nanda",
+            "Catherine Olsson",
+            "Dario Amodei",
+            "Tom B. Brown",
+            "Jack Clark",
+            "Sam McCandlish",
+            "Chris Olah",
+            "Benjamin Mann",
+            "Jared Kaplan"
+          ],
+          "doi": "10.48550/arXiv.2204.05862",
+          "journal": "arXiv.org",
+          "year": 2022,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 7,
+          "title": "Training Language Models with Language Feedback",
+          "authors": [
+            "J'er'emy Scheurer",
+            "Jon Ander Campos",
+            "Jun Shern Chan",
+            "Angelica Chen",
+            "Kyunghyun Cho",
+            "Ethan Perez"
+          ],
+          "doi": "",
+          "journal": "",
+          "year": 2022,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 8,
+          "title": "TALM: Tool Augmented Language Models",
+          "authors": [
+            "Aaron Parisi",
+            "Yao Zhao",
+            "Noah Fiedel"
+          ],
+          "doi": "10.48550/arXiv.2205.12255",
+          "journal": "arXiv.org",
+          "year": 2022,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 9,
+          "title": "Making Language Models Better Reasoners with Step-Aware Verifier",
+          "authors": [
+            "Yifei Li",
+            "Zeqi Lin",
+            "S. Zhang",
+            "Qiang Fu",
+            "B. Chen",
+            "Jian-Guang Lou",
+            "Weizhu Chen"
+          ],
+          "doi": "10.18653/v1/2023.acl-long.291",
+          "journal": "Annual Meeting of the Association for Computational Linguistics",
+          "year": 2022,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 10,
+          "title": "Language Models (Mostly) Know What They Know",
+          "authors": [
+            "Saurav Kadavath",
+            "Tom Conerly",
+            "Amanda Askell",
+            "T. Henighan",
+            "Dawn Drain",
+            "Ethan Perez",
+            "Nicholas Schiefer",
+            "Zachary Dodds",
+            "Nova Dassarma",
+            "Eli Tran-Johnson",
+            "Scott Johnston",
+            "S. El-Showk",
+            "Andy Jones",
+            "Nelson Elhage",
+            "Tristan Hume",
+            "Anna Chen",
+            "Yuntao Bai",
+            "Sam Bowman",
+            "Stanislav Fort",
+            "Deep Ganguli",
+            "Danny Hernandez",
+            "Josh Jacobson",
+            "John Kernion",
+            "Shauna Kravec",
+            "Liane Lovitt",
+            "Kamal Ndousse",
+            "Catherine Olsson",
+            "Sam Ringer",
+            "Dario Amodei",
+            "Tom B. Brown",
+            "Jack Clark",
+            "Nicholas Joseph",
+            "Benjamin Mann",
+            "Sam McCandlish",
+            "Chris Olah",
+            "Jared Kaplan"
+          ],
+          "doi": "10.48550/arXiv.2207.05221",
+          "journal": "arXiv.org",
+          "year": 2022,
+          "doi_status": "verified"
+        }
+      ]
+    },
+    "gorilla.pdf": {
+      "paper_id": "gorilla",
+      "source": "Gorilla- Large Language Model Connected with Massive APIs",
+      "references": [
+        {
+          "ref_id": 1,
+          "title": "Giving BERT a Calculator: Finding Operations and Arguments with Reading Comprehension",
+          "authors": [
+            "D. Andor",
+            "Luheng He",
+            "Kenton Lee",
+            "Emily Pitler"
+          ],
+          "doi": "10.18653/v1/D19-1609",
+          "journal": "Conference on Empirical Methods in Natural Language Processing",
+          "year": 2019,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 2,
+          "title": "Exploiting Cloze-Questions for Few-Shot Text Classification and Natural Language Inference",
+          "authors": [
+            "Timo Schick",
+            "Hinrich Schütze"
+          ],
+          "doi": "10.18653/v1/2021.eacl-main.20",
+          "journal": "Conference of the European Chapter of the Association for Computational Linguistics",
+          "year": 2020,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 3,
+          "title": "Unsupervised Translation of Programming Languages",
+          "authors": [
+            "M. Lachaux",
+            "Baptiste Rozière",
+            "Lowik Chanussot",
+            "Guillaume Lample"
+          ],
+          "doi": "10.70675/416f6582z4576z444eza710z5e930d59bf97",
+          "journal": "Neural Information Processing Systems",
+          "year": 2020,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 4,
+          "title": "Evaluating Large Language Models Trained on Code",
+          "authors": [
+            "Mark Chen",
+            "Jerry Tworek",
+            "Heewoo Jun",
+            "Qiming Yuan",
+            "Henrique Pondé",
+            "Jared Kaplan",
+            "Harrison Edwards",
+            "Yura Burda",
+            "Nicholas Joseph",
+            "Greg Brockman",
+            "Alex Ray",
+            "Raul Puri",
+            "Gretchen Krueger",
+            "Michael Petrov",
+            "Heidy Khlaaf",
+            "G. Sastry",
+            "Pamela Mishkin",
+            "Brooke Chan",
+            "Scott Gray",
+            "Nick Ryder",
+            "Mikhail Pavlov",
+            "Alethea Power",
+            "Lukasz Kaiser",
+            "Mo Bavarian",
+            "Clemens Winter",
+            "P. Tillet",
+            "F. Such",
+            "D. Cummings",
+            "Matthias Plappert",
+            "Fotios Chantzis",
+            "Elizabeth Barnes",
+            "Ariel Herbert-Voss",
+            "William H. Guss",
+            "Alex Nichol",
+            "Igor Babuschkin",
+            "S. Balaji",
+            "Shantanu Jain",
+            "A. Carr",
+            "Jan Leike",
+            "Josh Achiam",
+            "Vedant Misra",
+            "Evan Morikawa",
+            "Alec Radford",
+            "M. Knight",
+            "Miles Brundage",
+            "M. Murati",
+            "Katie Mayer",
+            "Peter Welinder",
+            "Bob McGrew",
+            "Dario Amodei",
+            "Sam McCandlish",
+            "I. Sutskever",
+            "Wojciech Zaremba"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 5,
+          "title": "Internet-Augmented Dialogue Generation",
+          "authors": [
+            "M. Komeili",
+            "Kurt Shuster",
+            "J. Weston"
+          ],
+          "doi": "10.18653/v1/2022.acl-long.579",
+          "journal": "Annual Meeting of the Association for Computational Linguistics",
+          "year": 2021,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 6,
+          "title": "Multitask Prompted Training Enables Zero-Shot Task Generalization",
+          "authors": [
+            "Victor Sanh",
+            "Albert Webson",
+            "Colin Raffel",
+            "Stephen H. Bach",
+            "Lintang Sutawika",
+            "Zaid Alyafeai",
+            "Antoine Chaffin",
+            "Arnaud Stiegler",
+            "Teven Le Scao",
+            "Arun Raja",
+            "Manan Dey",
+            "M Saiful Bari",
+            "Canwen Xu",
+            "Urmish Thakker",
+            "S. Sharma",
+            "Eliza Szczechla",
+            "Taewoon Kim",
+            "Gunjan Chhablani",
+            "Nihal V. Nayak",
+            "Debajyoti Datta",
+            "Jonathan D. Chang",
+            "Mike Tian-Jian Jiang",
+            "Han Wang",
+            "Matteo Manica",
+            "Sheng Shen",
+            "Zheng-Xin Yong",
+            "Harshit Pandey",
+            "Rachel Bawden",
+            "Thomas Wang",
+            "Trishala Neeraj",
+            "Jos Rozen",
+            "Abheesht Sharma",
+            "Andrea Santilli",
+            "Thibault Févry",
+            "Jason Alan Fries",
+            "R. Teehan",
+            "Stella Biderman",
+            "Leo Gao",
+            "T. Bers",
+            "Thomas Wolf",
+            "Alexander M. Rush"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 7,
+          "title": "Training Verifiers to Solve Math Word Problems",
+          "authors": [
+            "K. Cobbe",
+            "Vineet Kosaraju",
+            "Mo Bavarian",
+            "Mark Chen",
+            "Heewoo Jun",
+            "Lukasz Kaiser",
+            "Matthias Plappert",
+            "Jerry Tworek",
+            "Jacob Hilton",
+            "Reiichiro Nakano",
+            "Christopher Hesse",
+            "John Schulman"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 8,
+          "title": "WebGPT: Browser-assisted question-answering with human feedback",
+          "authors": [
+            "Reiichiro Nakano",
+            "Jacob Hilton",
+            "S. Balaji",
+            "Jeff Wu",
+            "Ouyang Long",
+            "Christina Kim",
+            "Christopher Hesse",
+            "Shantanu Jain",
+            "Vineet Kosaraju",
+            "W. Saunders",
+            "Xu Jiang",
+            "K. Cobbe",
+            "Tyna Eloundou",
+            "Gretchen Krueger",
+            "Kevin Button",
+            "Matthew Knight",
+            "Benjamin Chess",
+            "John Schulman"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 9,
+          "title": "LaMDA: Language Models for Dialog Applications",
+          "authors": [
+            "R. Thoppilan",
+            "Daniel De Freitas",
+            "Jamie Hall",
+            "Noam Shazeer",
+            "Apoorv Kulshreshtha",
+            "Heng-Tze Cheng",
+            "A. Jin",
+            "Taylor Bos",
+            "Leslie W. Baker",
+            "Yu Du",
+            "Yaguang Li",
+            "Hongrae Lee",
+            "H. Zheng",
+            "Amin Ghafouri",
+            "Marcelo Menegali",
+            "Yanping Huang",
+            "M. Krikun",
+            "Dmitry Lepikhin",
+            "James Qin",
+            "Dehao Chen",
+            "Yuanzhong Xu",
+            "Zhifeng Chen",
+            "Adam Roberts",
+            "Maarten Bosma",
+            "Yanqi Zhou",
+            "Chung-Ching Chang",
+            "I. Krivokon",
+            "W. Rusch",
+            "Marc Pickett",
+            "K. Meier-Hellstern",
+            "M. Morris",
+            "Tulsee Doshi",
+            "Renelito Delos Santos",
+            "Toju Duke",
+            "J. Søraker",
+            "Ben Zevenbergen",
+            "Vinodkumar Prabhakaran",
+            "Mark Díaz",
+            "Ben Hutchinson",
+            "Kristen Olson",
+            "Alejandra Molina",
+            "Erin Hoffman-John",
+            "Josh Lee",
+            "Lora Aroyo",
+            "Ravi Rajakumar",
+            "Alena Butryna",
+            "Matthew Lamm",
+            "V. Kuzmina",
+            "Joseph Fenton",
+            "Aaron Cohen",
+            "R. Bernstein",
+            "R. Kurzweil",
+            "Blaise Aguera-Arcas",
+            "Claire Cui",
+            "M. Croak",
+            "Ed H. Chi",
+            "Quoc Le"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2022,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 10,
+          "title": "Chain of Thought Prompting Elicits Reasoning in Large Language Models",
+          "authors": [
+            "Jason Wei",
+            "Xuezhi Wang",
+            "Dale Schuurmans",
+            "Maarten Bosma",
+            "Ed H. Chi",
+            "F. Xia",
+            "Quoc Le",
+            "Denny Zhou"
+          ],
+          "doi": "10.52202/068431-1800",
+          "journal": "Neural Information Processing Systems",
+          "year": 2022,
+          "doi_status": "verified"
+        }
+      ]
+    },
+    "reflexion.pdf": {
+      "paper_id": "reflexion",
+      "source": "Reflexion- Language Agents with Verbal Reinforcement Learning",
+      "references": [
+        {
+          "ref_id": 1,
+          "title": "Evaluating Large Language Models Trained on Code",
+          "authors": [
+            "Mark Chen",
+            "Jerry Tworek",
+            "Heewoo Jun",
+            "Qiming Yuan",
+            "Henrique Pondé",
+            "Jared Kaplan",
+            "Harrison Edwards",
+            "Yura Burda",
+            "Nicholas Joseph",
+            "Greg Brockman",
+            "Alex Ray",
+            "Raul Puri",
+            "Gretchen Krueger",
+            "Michael Petrov",
+            "Heidy Khlaaf",
+            "G. Sastry",
+            "Pamela Mishkin",
+            "Brooke Chan",
+            "Scott Gray",
+            "Nick Ryder",
+            "Mikhail Pavlov",
+            "Alethea Power",
+            "Lukasz Kaiser",
+            "Mo Bavarian",
+            "Clemens Winter",
+            "P. Tillet",
+            "F. Such",
+            "D. Cummings",
+            "Matthias Plappert",
+            "Fotios Chantzis",
+            "Elizabeth Barnes",
+            "Ariel Herbert-Voss",
+            "William H. Guss",
+            "Alex Nichol",
+            "Igor Babuschkin",
+            "S. Balaji",
+            "Shantanu Jain",
+            "A. Carr",
+            "Jan Leike",
+            "Josh Achiam",
+            "Vedant Misra",
+            "Evan Morikawa",
+            "Alec Radford",
+            "M. Knight",
+            "Miles Brundage",
+            "M. Murati",
+            "Katie Mayer",
+            "Peter Welinder",
+            "Bob McGrew",
+            "Dario Amodei",
+            "Sam McCandlish",
+            "I. Sutskever",
+            "Wojciech Zaremba"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 2,
+          "title": "Program Synthesis with Large Language Models",
+          "authors": [
+            "Jacob Austin",
+            "Augustus Odena",
+            "Maxwell Nye",
+            "Maarten Bosma",
+            "H. Michalewski",
+            "David Dohan",
+            "Ellen Jiang",
+            "Carrie J. Cai",
+            "Michael Terry",
+            "Quoc V. Le",
+            "Charles Sutton"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 3,
+          "title": "WebGPT: Browser-assisted question-answering with human feedback",
+          "authors": [
+            "Reiichiro Nakano",
+            "Jacob Hilton",
+            "S. Balaji",
+            "Jeff Wu",
+            "Ouyang Long",
+            "Christina Kim",
+            "Christopher Hesse",
+            "Shantanu Jain",
+            "Vineet Kosaraju",
+            "W. Saunders",
+            "Xu Jiang",
+            "K. Cobbe",
+            "Tyna Eloundou",
+            "Gretchen Krueger",
+            "Kevin Button",
+            "Matthew Knight",
+            "Benjamin Chess",
+            "John Schulman"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2021,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 4,
+          "title": "Chain of Thought Prompting Elicits Reasoning in Large Language Models",
+          "authors": [
+            "Jason Wei",
+            "Xuezhi Wang",
+            "Dale Schuurmans",
+            "Maarten Bosma",
+            "Ed H. Chi",
+            "F. Xia",
+            "Quoc Le",
+            "Denny Zhou"
+          ],
+          "doi": "10.52202/068431-1800",
+          "journal": "Neural Information Processing Systems",
+          "year": 2022,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 5,
+          "title": "Do As I Can, Not As I Say: Grounding Language in Robotic Affordances",
+          "authors": [
+            "Michael Ahn",
+            "Anthony Brohan",
+            "Noah Brown",
+            "Yevgen Chebotar",
+            "Omar Cortes",
+            "Byron David",
+            "Chelsea Finn",
+            "K. Gopalakrishnan",
+            "Karol Hausman",
+            "Alexander Herzog",
+            "Daniel Ho",
+            "Jasmine Hsu",
+            "Julian Ibarz",
+            "Brian Ichter",
+            "A. Irpan",
+            "Eric Jang",
+            "Rosario M Jauregui Ruano",
+            "Kyle Jeffrey",
+            "Sally Jesmonth",
+            "N. Joshi",
+            "Ryan C. Julian",
+            "Dmitry Kalashnikov",
+            "Yuheng Kuang",
+            "Kuang-Huei Lee",
+            "S. Levine",
+            "Yao Lu",
+            "Linda Luu",
+            "Carolina Parada",
+            "P. Pastor",
+            "Jornell Quiambao",
+            "Kanishka Rao",
+            "Jarek Rettinghouse",
+            "D. Reyes",
+            "P. Sermanet",
+            "Nicolas Sievers",
+            "Clayton Tan",
+            "Alexander Toshev",
+            "Vincent Vanhoucke",
+            "F. Xia",
+            "Ted Xiao",
+            "Peng Xu",
+            "Sichun Xu",
+            "Mengyuan Yan"
+          ],
+          "doi": "",
+          "journal": "Conference on Robot Learning",
+          "year": 2022,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 6,
+          "title": "Large Language Models can Implement Policy Iteration",
+          "authors": [
+            "Ethan A. Brooks",
+            "Logan A. Walls",
+            "Richard L. Lewis",
+            "Satinder Singh"
+          ],
+          "doi": "10.52202/075280-1321",
+          "journal": "Neural Information Processing Systems",
+          "year": 2022,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 7,
+          "title": "Toolformer: Language Models Can Teach Themselves to Use Tools",
+          "authors": [
+            "Timo Schick",
+            "Jane Dwivedi-Yu",
+            "Roberto Dessì",
+            "R. Raileanu",
+            "M. Lomeli",
+            "Luke Zettlemoyer",
+            "Nicola Cancedda",
+            "Thomas Scialom"
+          ],
+          "doi": "10.48550/arXiv.2302.04761",
+          "journal": "Neural Information Processing Systems",
+          "year": 2023,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 8,
+          "title": "DERA: Enhancing Large Language Model Completions with Dialog-Enabled Resolving Agents",
+          "authors": [
+            "Varun Nair",
+            "Elliot Schumacher",
+            "G. Tso",
+            "Anitha Kannan"
+          ],
+          "doi": "10.48550/arXiv.2303.17071",
+          "journal": "Clinical Natural Language Processing Workshop",
+          "year": 2023,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 9,
+          "title": "HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face",
+          "authors": [
+            "Yongliang Shen",
+            "Kaitao Song",
+            "Xu Tan",
+            "Dongsheng Li",
+            "Weiming Lu",
+            "Y. Zhuang"
+          ],
+          "doi": "10.48550/arXiv.2303.17580",
+          "journal": "Neural Information Processing Systems",
+          "year": 2023,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 10,
+          "title": "Self-Refine: Iterative Refinement with Self-Feedback",
+          "authors": [
+            "Aman Madaan",
+            "Niket Tandon",
+            "Prakhar Gupta",
+            "Skyler Hallinan",
+            "Luyu Gao",
+            "Sarah Wiegreffe",
+            "Uri Alon",
+            "Nouha Dziri",
+            "Shrimai Prabhumoye",
+            "Yiming Yang",
+            "S. Welleck",
+            "Bodhisattwa Prasad Majumder",
+            "Shashank Gupta",
+            "A. Yazdanbakhsh",
+            "Peter Clark"
+          ],
+          "doi": "10.48550/arXiv.2303.17651",
+          "journal": "Neural Information Processing Systems",
+          "year": 2023,
+          "doi_status": "verified"
+        }
+      ]
+    },
+    "cognitive_arch.pdf": {
+      "paper_id": "cognitive_arch",
+      "source": "Cognitive Architectures for Language Agents",
+      "references": [
+        {
+          "ref_id": 1,
+          "title": "Memory Networks",
+          "authors": [
+            "J. Weston",
+            "S. Chopra",
+            "Antoine Bordes"
+          ],
+          "doi": "",
+          "journal": "International Conference on Learning Representations",
+          "year": 2014,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 2,
+          "title": "Model-Free Episodic Control",
+          "authors": [
+            "Charles Blundell",
+            "Benigno Uria",
+            "Alexander Pritzel",
+            "Yazhe Li",
+            "Avraham Ruderman",
+            "Joel Z. Leibo",
+            "Jack W. Rae",
+            "Daan Wierstra",
+            "Demis Hassabis"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2016,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 3,
+          "title": "Reading Wikipedia to Answer Open-Domain Questions",
+          "authors": [
+            "Danqi Chen",
+            "Adam Fisch",
+            "J. Weston",
+            "Antoine Bordes"
+          ],
+          "doi": "10.18653/v1/P17-1171",
+          "journal": "Annual Meeting of the Association for Computational Linguistics",
+          "year": 2017,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 4,
+          "title": "AI safety via debate",
+          "authors": [
+            "G. Irving",
+            "P. Christiano",
+            "Dario Amodei"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2018,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 5,
+          "title": "Go-Explore: a New Approach for Hard-Exploration Problems",
+          "authors": [
+            "Adrien Ecoffet",
+            "Joost Huizinga",
+            "J. Lehman",
+            "Kenneth O. Stanley",
+            "J. Clune"
+          ],
+          "doi": "",
+          "journal": "arXiv.org",
+          "year": 2019,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 6,
+          "title": "Help, Anna! Visual Navigation with Natural Multimodal Assistance via Retrospective Curiosity-Encouraging Imitation Learning",
+          "authors": [
+            "Khanh Nguyen",
+            "Hal Daumé"
+          ],
+          "doi": "10.18653/v1/D19-1063",
+          "journal": "Conference on Empirical Methods in Natural Language Processing",
+          "year": 2019,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 7,
+          "title": "Extending Machine Language Models toward Human-Level Language Understanding",
+          "authors": [
+            "James L. McClelland",
+            "Felix Hill",
+            "Maja R. Rudolph",
+            "Jason Baldridge",
+            "Hinrich Schütze"
+          ],
+          "doi": "10.5282/UBM/EPUB.72201",
+          "journal": "arXiv.org",
+          "year": 2019,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 8,
+          "title": "Keep CALM and Explore: Language Models for Action Generation in Text-based Games",
+          "authors": [
+            "Shunyu Yao",
+            "Rohan Rao",
+            "Matthew J. Hausknecht",
+            "Karthik Narasimhan"
+          ],
+          "doi": "10.18653/v1/2020.emnlp-main.704",
+          "journal": "Conference on Empirical Methods in Natural Language Processing",
+          "year": 2020,
+          "doi_status": "verified"
+        },
+        {
+          "ref_id": 9,
+          "title": "ALFWorld: Aligning Text and Embodied Environments for Interactive Learning",
+          "authors": [
+            "Mohit Shridhar",
+            "Xingdi Yuan",
+            "Marc-Alexandre Côté",
+            "Yonatan Bisk",
+            "Adam Trischler",
+            "Matthew J. Hausknecht"
+          ],
+          "doi": "",
+          "journal": "International Conference on Learning Representations",
+          "year": 2020,
+          "doi_status": "no_doi"
+        },
+        {
+          "ref_id": 10,
+          "title": "Making Pre-trained Language Models Better Few-shot Learners",
+          "authors": [
+            "Tianyu Gao",
+            "Adam Fisch",
+            "Danqi Chen"
+          ],
+          "doi": "10.18653/v1/2021.acl-long.295",
+          "journal": "Annual Meeting of the Association for Computational Linguistics",
+          "year": 2021,
+          "doi_status": "verified"
         }
       ]
     },
     "paper_f4.pdf": {
+      "paper_id": "paper_f4",
+      "source": "synthetic",
       "references": []
     }
   },
   "dois": {
-    "10.48550/arXiv.1706.03762": {
+    "10.18653/v1/N18-1074": {
       "exists": true,
       "matches": true,
       "metadata": {
-        "title": "Attention Is All You Need",
-        "journal": "arXiv",
-        "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"],
-        "year": 2017
+        "title": "FEVER: a Large-scale Dataset for Fact Extraction and VERification",
+        "journal": "North American Chapter of the Association for Computational Linguistics",
+        "authors": [
+          "James Thorne",
+          "Andreas Vlachos",
+          "Christos Christodoulopoulos",
+          "Arpit Mittal"
+        ],
+        "year": 2018
       }
     },
-    "10.18653/v1/N19-1423": {
+    "10.18653/v1/D18-1259": {
       "exists": true,
       "matches": true,
       "metadata": {
-        "title": "BERT: Pre-training of Deep Bidirectional Transformers",
-        "journal": "NAACL",
-        "authors": ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee"],
+        "title": "HotpotQA: A Dataset for Diverse, Explainable Multi-hop Question Answering",
+        "journal": "Conference on Empirical Methods in Natural Language Processing",
+        "authors": [
+          "Zhilin Yang",
+          "Peng Qi",
+          "Saizheng Zhang",
+          "Yoshua Bengio",
+          "William W. Cohen",
+          "R. Salakhutdinov",
+          "Christopher D. Manning"
+        ],
+        "year": 2018
+      }
+    },
+    "10.18653/v1/2021.emnlp-main.734": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Language Models are Few-Shot Butlers",
+        "journal": "Conference on Empirical Methods in Natural Language Processing",
+        "authors": [
+          "Vincent Micheli",
+          "Franccois Fleuret"
+        ],
+        "year": 2021
+      }
+    },
+    "10.18653/v1/2021.emnlp-main.293": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Adaptive Information Seeking for Open-Domain Question Answering",
+        "journal": "Conference on Empirical Methods in Natural Language Processing",
+        "authors": [
+          "Yunchang Zhu",
+          "Liang Pang",
+          "Yanyan Lan",
+          "Huawei Shen",
+          "Xueqi Cheng"
+        ],
+        "year": 2021
+      }
+    },
+    "10.52202/068431-1800": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Chain of Thought Prompting Elicits Reasoning in Large Language Models",
+        "journal": "Neural Information Processing Systems",
+        "authors": [
+          "Jason Wei",
+          "Xuezhi Wang",
+          "Dale Schuurmans",
+          "Maarten Bosma",
+          "Ed H. Chi",
+          "F. Xia",
+          "Quoc Le",
+          "Denny Zhou"
+        ],
+        "year": 2022
+      }
+    },
+    "10.52202/068431-2262": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Pre-Trained Language Models for Interactive Decision-Making",
+        "journal": "Neural Information Processing Systems",
+        "authors": [
+          "Shuang Li",
+          "Xavier Puig",
+          "Yilun Du",
+          "Clinton Jia Wang",
+          "Ekin Akyürek",
+          "A. Torralba",
+          "Jacob Andreas",
+          "Igor Mordatch"
+        ],
+        "year": 2022
+      }
+    },
+    "10.48550/arXiv.2204.05862": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Training a Helpful and Harmless Assistant with Reinforcement Learning from Human Feedback",
+        "journal": "arXiv.org",
+        "authors": [
+          "Yuntao Bai",
+          "Andy Jones",
+          "Kamal Ndousse",
+          "Amanda Askell",
+          "Anna Chen",
+          "Nova Dassarma",
+          "Dawn Drain",
+          "Stanislav Fort",
+          "Deep Ganguli",
+          "T. Henighan",
+          "Nicholas Joseph",
+          "Saurav Kadavath",
+          "John Kernion",
+          "Tom Conerly",
+          "S. El-Showk",
+          "Nelson Elhage",
+          "Zac Hatfield-Dodds",
+          "Danny Hernandez",
+          "Tristan Hume",
+          "Scott Johnston",
+          "Shauna Kravec",
+          "Liane Lovitt",
+          "Neel Nanda",
+          "Catherine Olsson",
+          "Dario Amodei",
+          "Tom B. Brown",
+          "Jack Clark",
+          "Sam McCandlish",
+          "Chris Olah",
+          "Benjamin Mann",
+          "Jared Kaplan"
+        ],
+        "year": 2022
+      }
+    },
+    "10.48550/arXiv.2205.12255": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "TALM: Tool Augmented Language Models",
+        "journal": "arXiv.org",
+        "authors": [
+          "Aaron Parisi",
+          "Yao Zhao",
+          "Noah Fiedel"
+        ],
+        "year": 2022
+      }
+    },
+    "10.18653/v1/2023.acl-long.291": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Making Language Models Better Reasoners with Step-Aware Verifier",
+        "journal": "Annual Meeting of the Association for Computational Linguistics",
+        "authors": [
+          "Yifei Li",
+          "Zeqi Lin",
+          "S. Zhang",
+          "Qiang Fu",
+          "B. Chen",
+          "Jian-Guang Lou",
+          "Weizhu Chen"
+        ],
+        "year": 2022
+      }
+    },
+    "10.48550/arXiv.2207.05221": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Language Models (Mostly) Know What They Know",
+        "journal": "arXiv.org",
+        "authors": [
+          "Saurav Kadavath",
+          "Tom Conerly",
+          "Amanda Askell",
+          "T. Henighan",
+          "Dawn Drain",
+          "Ethan Perez",
+          "Nicholas Schiefer",
+          "Zachary Dodds",
+          "Nova Dassarma",
+          "Eli Tran-Johnson",
+          "Scott Johnston",
+          "S. El-Showk",
+          "Andy Jones",
+          "Nelson Elhage",
+          "Tristan Hume",
+          "Anna Chen",
+          "Yuntao Bai",
+          "Sam Bowman",
+          "Stanislav Fort",
+          "Deep Ganguli",
+          "Danny Hernandez",
+          "Josh Jacobson",
+          "John Kernion",
+          "Shauna Kravec",
+          "Liane Lovitt",
+          "Kamal Ndousse",
+          "Catherine Olsson",
+          "Sam Ringer",
+          "Dario Amodei",
+          "Tom B. Brown",
+          "Jack Clark",
+          "Nicholas Joseph",
+          "Benjamin Mann",
+          "Sam McCandlish",
+          "Chris Olah",
+          "Jared Kaplan"
+        ],
+        "year": 2022
+      }
+    },
+    "10.18653/v1/D19-1609": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Giving BERT a Calculator: Finding Operations and Arguments with Reading Comprehension",
+        "journal": "Conference on Empirical Methods in Natural Language Processing",
+        "authors": [
+          "D. Andor",
+          "Luheng He",
+          "Kenton Lee",
+          "Emily Pitler"
+        ],
         "year": 2019
       }
     },
-    "10.99999/fake.0000": {
-      "exists": false,
-      "matches": false,
-      "metadata": {}
+    "10.18653/v1/2021.eacl-main.20": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Exploiting Cloze-Questions for Few-Shot Text Classification and Natural Language Inference",
+        "journal": "Conference of the European Chapter of the Association for Computational Linguistics",
+        "authors": [
+          "Timo Schick",
+          "Hinrich Schütze"
+        ],
+        "year": 2020
+      }
+    },
+    "10.70675/416f6582z4576z444eza710z5e930d59bf97": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Unsupervised Translation of Programming Languages",
+        "journal": "Neural Information Processing Systems",
+        "authors": [
+          "M. Lachaux",
+          "Baptiste Rozière",
+          "Lowik Chanussot",
+          "Guillaume Lample"
+        ],
+        "year": 2020
+      }
+    },
+    "10.18653/v1/2022.acl-long.579": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Internet-Augmented Dialogue Generation",
+        "journal": "Annual Meeting of the Association for Computational Linguistics",
+        "authors": [
+          "M. Komeili",
+          "Kurt Shuster",
+          "J. Weston"
+        ],
+        "year": 2021
+      }
+    },
+    "10.52202/075280-1321": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Large Language Models can Implement Policy Iteration",
+        "journal": "Neural Information Processing Systems",
+        "authors": [
+          "Ethan A. Brooks",
+          "Logan A. Walls",
+          "Richard L. Lewis",
+          "Satinder Singh"
+        ],
+        "year": 2022
+      }
+    },
+    "10.48550/arXiv.2302.04761": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Toolformer: Language Models Can Teach Themselves to Use Tools",
+        "journal": "Neural Information Processing Systems",
+        "authors": [
+          "Timo Schick",
+          "Jane Dwivedi-Yu",
+          "Roberto Dessì",
+          "R. Raileanu",
+          "M. Lomeli",
+          "Luke Zettlemoyer",
+          "Nicola Cancedda",
+          "Thomas Scialom"
+        ],
+        "year": 2023
+      }
+    },
+    "10.48550/arXiv.2303.17071": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "DERA: Enhancing Large Language Model Completions with Dialog-Enabled Resolving Agents",
+        "journal": "Clinical Natural Language Processing Workshop",
+        "authors": [
+          "Varun Nair",
+          "Elliot Schumacher",
+          "G. Tso",
+          "Anitha Kannan"
+        ],
+        "year": 2023
+      }
+    },
+    "10.48550/arXiv.2303.17580": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face",
+        "journal": "Neural Information Processing Systems",
+        "authors": [
+          "Yongliang Shen",
+          "Kaitao Song",
+          "Xu Tan",
+          "Dongsheng Li",
+          "Weiming Lu",
+          "Y. Zhuang"
+        ],
+        "year": 2023
+      }
+    },
+    "10.48550/arXiv.2303.17651": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Self-Refine: Iterative Refinement with Self-Feedback",
+        "journal": "Neural Information Processing Systems",
+        "authors": [
+          "Aman Madaan",
+          "Niket Tandon",
+          "Prakhar Gupta",
+          "Skyler Hallinan",
+          "Luyu Gao",
+          "Sarah Wiegreffe",
+          "Uri Alon",
+          "Nouha Dziri",
+          "Shrimai Prabhumoye",
+          "Yiming Yang",
+          "S. Welleck",
+          "Bodhisattwa Prasad Majumder",
+          "Shashank Gupta",
+          "A. Yazdanbakhsh",
+          "Peter Clark"
+        ],
+        "year": 2023
+      }
+    },
+    "10.18653/v1/P17-1171": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Reading Wikipedia to Answer Open-Domain Questions",
+        "journal": "Annual Meeting of the Association for Computational Linguistics",
+        "authors": [
+          "Danqi Chen",
+          "Adam Fisch",
+          "J. Weston",
+          "Antoine Bordes"
+        ],
+        "year": 2017
+      }
+    },
+    "10.18653/v1/D19-1063": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Help, Anna! Visual Navigation with Natural Multimodal Assistance via Retrospective Curiosity-Encouraging Imitation Learning",
+        "journal": "Conference on Empirical Methods in Natural Language Processing",
+        "authors": [
+          "Khanh Nguyen",
+          "Hal Daumé"
+        ],
+        "year": 2019
+      }
+    },
+    "10.5282/UBM/EPUB.72201": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Extending Machine Language Models toward Human-Level Language Understanding",
+        "journal": "arXiv.org",
+        "authors": [
+          "James L. McClelland",
+          "Felix Hill",
+          "Maja R. Rudolph",
+          "Jason Baldridge",
+          "Hinrich Schütze"
+        ],
+        "year": 2019
+      }
+    },
+    "10.18653/v1/2020.emnlp-main.704": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Keep CALM and Explore: Language Models for Action Generation in Text-based Games",
+        "journal": "Conference on Empirical Methods in Natural Language Processing",
+        "authors": [
+          "Shunyu Yao",
+          "Rohan Rao",
+          "Matthew J. Hausknecht",
+          "Karthik Narasimhan"
+        ],
+        "year": 2020
+      }
+    },
+    "10.18653/v1/2021.acl-long.295": {
+      "exists": true,
+      "matches": true,
+      "metadata": {
+        "title": "Making Pre-trained Language Models Better Few-shot Learners",
+        "journal": "Annual Meeting of the Association for Computational Linguistics",
+        "authors": [
+          "Tianyu Gao",
+          "Adam Fisch",
+          "Danqi Chen"
+        ],
+        "year": 2021
+      }
     }
   },
   "authors": {
-    "attention is all you need": {
+    "fever: a large-scale dataset for fact extraction and verification": {
       "found": true,
-      "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"]
+      "authors": [
+        "James Thorne",
+        "Andreas Vlachos",
+        "Christos Christodoulopoulos",
+        "Arpit Mittal"
+      ]
     },
-    "bert: pre-training of deep bidirectional transformers": {
+    "hotpotqa: a dataset for diverse, explainable multi-hop question answering": {
       "found": true,
-      "authors": ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee"]
+      "authors": [
+        "Zhilin Yang",
+        "Peng Qi",
+        "Saizheng Zhang",
+        "Yoshua Bengio",
+        "William W. Cohen",
+        "R. Salakhutdinov",
+        "Christopher D. Manning"
+      ]
+    },
+    "alfworld: aligning text and embodied environments for interactive learning": {
+      "found": true,
+      "authors": [
+        "Mohit Shridhar",
+        "Xingdi Yuan",
+        "Marc-Alexandre Côté",
+        "Yonatan Bisk",
+        "Adam Trischler",
+        "Matthew J. Hausknecht"
+      ]
+    },
+    "imitating interactive intelligence": {
+      "found": true,
+      "authors": [
+        "Josh Abramson",
+        "Arun Ahuja",
+        "Arthur Brussee",
+        "Federico Carnevale",
+        "Mary Cassin",
+        "S. Clark",
+        "A. Dudzik",
+        "Petko Georgiev",
+        "Aurelia Guy",
+        "Tim Harley",
+        "Felix Hill",
+        "Alden Hung",
+        "Zachary Kenton",
+        "Jessica Landon",
+        "T. Lillicrap",
+        "K. Mathewson",
+        "Alistair Muldal",
+        "Adam Santoro",
+        "N. Savinov",
+        "Vikrant Varma",
+        "Greg Wayne",
+        "Nathaniel Wong",
+        "Chen Yan",
+        "Rui Zhu"
+      ]
+    },
+    "language models are few-shot butlers": {
+      "found": true,
+      "authors": [
+        "Vincent Micheli",
+        "Franccois Fleuret"
+      ]
+    },
+    "adaptive information seeking for open-domain question answering": {
+      "found": true,
+      "authors": [
+        "Yunchang Zhu",
+        "Liang Pang",
+        "Yanyan Lan",
+        "Huawei Shen",
+        "Xueqi Cheng"
+      ]
+    },
+    "show your work: scratchpads for intermediate computation with language models": {
+      "found": true,
+      "authors": [
+        "Maxwell Nye",
+        "Anders Andreassen",
+        "Guy Gur-Ari",
+        "H. Michalewski",
+        "Jacob Austin",
+        "David Bieber",
+        "David Dohan",
+        "Aitor Lewkowycz",
+        "Maarten Bosma",
+        "D. Luan",
+        "Charles Sutton",
+        "Augustus Odena"
+      ]
+    },
+    "language models as zero-shot planners: extracting actionable knowledge for embodied agents": {
+      "found": true,
+      "authors": [
+        "Wenlong Huang",
+        "P. Abbeel",
+        "Deepak Pathak",
+        "Igor Mordatch"
+      ]
+    },
+    "chain of thought prompting elicits reasoning in large language models": {
+      "found": true,
+      "authors": [
+        "Jason Wei",
+        "Xuezhi Wang",
+        "Dale Schuurmans",
+        "Maarten Bosma",
+        "Ed H. Chi",
+        "F. Xia",
+        "Quoc Le",
+        "Denny Zhou"
+      ]
+    },
+    "pre-trained language models for interactive decision-making": {
+      "found": true,
+      "authors": [
+        "Shuang Li",
+        "Xavier Puig",
+        "Yilun Du",
+        "Clinton Jia Wang",
+        "Ekin Akyürek",
+        "A. Torralba",
+        "Jacob Andreas",
+        "Igor Mordatch"
+      ]
+    },
+    "fine-tuning language models from human preferences": {
+      "found": true,
+      "authors": [
+        "Daniel M. Ziegler",
+        "Nisan Stiennon",
+        "Jeff Wu",
+        "Tom B. Brown",
+        "Alec Radford",
+        "Dario Amodei",
+        "Paul Christiano",
+        "G. Irving"
+      ]
+    },
+    "truthful ai: developing and governing ai that does not lie": {
+      "found": true,
+      "authors": [
+        "Owain Evans",
+        "Owen Cotton-Barratt",
+        "Lukas Finnveden",
+        "Adam Bales",
+        "Avital Balwit",
+        "Peter Wills",
+        "Luca Righetti",
+        "W. Saunders"
+      ]
+    },
+    "a general language assistant as a laboratory for alignment": {
+      "found": true,
+      "authors": [
+        "Amanda Askell",
+        "Yuntao Bai",
+        "Anna Chen",
+        "Dawn Drain",
+        "Deep Ganguli",
+        "T. Henighan",
+        "Andy Jones",
+        "Nicholas Joseph",
+        "Benjamin Mann",
+        "Nova Dassarma",
+        "Nelson Elhage",
+        "Zac Hatfield-Dodds",
+        "Danny Hernandez",
+        "John Kernion",
+        "Kamal Ndousse",
+        "Catherine Olsson",
+        "Dario Amodei",
+        "Tom B. Brown",
+        "Jack Clark",
+        "Sam McCandlish",
+        "Chris Olah",
+        "Jared Kaplan"
+      ]
+    },
+    "webgpt: browser-assisted question-answering with human feedback": {
+      "found": true,
+      "authors": [
+        "Reiichiro Nakano",
+        "Jacob Hilton",
+        "S. Balaji",
+        "Jeff Wu",
+        "Ouyang Long",
+        "Christina Kim",
+        "Christopher Hesse",
+        "Shantanu Jain",
+        "Vineet Kosaraju",
+        "W. Saunders",
+        "Xu Jiang",
+        "K. Cobbe",
+        "Tyna Eloundou",
+        "Gretchen Krueger",
+        "Kevin Button",
+        "Matthew Knight",
+        "Benjamin Chess",
+        "John Schulman"
+      ]
+    },
+    "self-consistency improves chain of thought reasoning in language models": {
+      "found": true,
+      "authors": [
+        "Xuezhi Wang",
+        "Jason Wei",
+        "D. Schuurmans",
+        "Quoc Le",
+        "Ed H. Chi",
+        "Denny Zhou"
+      ]
+    },
+    "training a helpful and harmless assistant with reinforcement learning from human feedback": {
+      "found": true,
+      "authors": [
+        "Yuntao Bai",
+        "Andy Jones",
+        "Kamal Ndousse",
+        "Amanda Askell",
+        "Anna Chen",
+        "Nova Dassarma",
+        "Dawn Drain",
+        "Stanislav Fort",
+        "Deep Ganguli",
+        "T. Henighan",
+        "Nicholas Joseph",
+        "Saurav Kadavath",
+        "John Kernion",
+        "Tom Conerly",
+        "S. El-Showk",
+        "Nelson Elhage",
+        "Zac Hatfield-Dodds",
+        "Danny Hernandez",
+        "Tristan Hume",
+        "Scott Johnston",
+        "Shauna Kravec",
+        "Liane Lovitt",
+        "Neel Nanda",
+        "Catherine Olsson",
+        "Dario Amodei",
+        "Tom B. Brown",
+        "Jack Clark",
+        "Sam McCandlish",
+        "Chris Olah",
+        "Benjamin Mann",
+        "Jared Kaplan"
+      ]
+    },
+    "training language models with language feedback": {
+      "found": true,
+      "authors": [
+        "J'er'emy Scheurer",
+        "Jon Ander Campos",
+        "Jun Shern Chan",
+        "Angelica Chen",
+        "Kyunghyun Cho",
+        "Ethan Perez"
+      ]
+    },
+    "talm: tool augmented language models": {
+      "found": true,
+      "authors": [
+        "Aaron Parisi",
+        "Yao Zhao",
+        "Noah Fiedel"
+      ]
+    },
+    "making language models better reasoners with step-aware verifier": {
+      "found": true,
+      "authors": [
+        "Yifei Li",
+        "Zeqi Lin",
+        "S. Zhang",
+        "Qiang Fu",
+        "B. Chen",
+        "Jian-Guang Lou",
+        "Weizhu Chen"
+      ]
+    },
+    "language models (mostly) know what they know": {
+      "found": true,
+      "authors": [
+        "Saurav Kadavath",
+        "Tom Conerly",
+        "Amanda Askell",
+        "T. Henighan",
+        "Dawn Drain",
+        "Ethan Perez",
+        "Nicholas Schiefer",
+        "Zachary Dodds",
+        "Nova Dassarma",
+        "Eli Tran-Johnson",
+        "Scott Johnston",
+        "S. El-Showk",
+        "Andy Jones",
+        "Nelson Elhage",
+        "Tristan Hume",
+        "Anna Chen",
+        "Yuntao Bai",
+        "Sam Bowman",
+        "Stanislav Fort",
+        "Deep Ganguli",
+        "Danny Hernandez",
+        "Josh Jacobson",
+        "John Kernion",
+        "Shauna Kravec",
+        "Liane Lovitt",
+        "Kamal Ndousse",
+        "Catherine Olsson",
+        "Sam Ringer",
+        "Dario Amodei",
+        "Tom B. Brown",
+        "Jack Clark",
+        "Nicholas Joseph",
+        "Benjamin Mann",
+        "Sam McCandlish",
+        "Chris Olah",
+        "Jared Kaplan"
+      ]
+    },
+    "giving bert a calculator: finding operations and arguments with reading comprehension": {
+      "found": true,
+      "authors": [
+        "D. Andor",
+        "Luheng He",
+        "Kenton Lee",
+        "Emily Pitler"
+      ]
+    },
+    "exploiting cloze-questions for few-shot text classification and natural language inference": {
+      "found": true,
+      "authors": [
+        "Timo Schick",
+        "Hinrich Schütze"
+      ]
+    },
+    "unsupervised translation of programming languages": {
+      "found": true,
+      "authors": [
+        "M. Lachaux",
+        "Baptiste Rozière",
+        "Lowik Chanussot",
+        "Guillaume Lample"
+      ]
+    },
+    "evaluating large language models trained on code": {
+      "found": true,
+      "authors": [
+        "Mark Chen",
+        "Jerry Tworek",
+        "Heewoo Jun",
+        "Qiming Yuan",
+        "Henrique Pondé",
+        "Jared Kaplan",
+        "Harrison Edwards",
+        "Yura Burda",
+        "Nicholas Joseph",
+        "Greg Brockman",
+        "Alex Ray",
+        "Raul Puri",
+        "Gretchen Krueger",
+        "Michael Petrov",
+        "Heidy Khlaaf",
+        "G. Sastry",
+        "Pamela Mishkin",
+        "Brooke Chan",
+        "Scott Gray",
+        "Nick Ryder",
+        "Mikhail Pavlov",
+        "Alethea Power",
+        "Lukasz Kaiser",
+        "Mo Bavarian",
+        "Clemens Winter",
+        "P. Tillet",
+        "F. Such",
+        "D. Cummings",
+        "Matthias Plappert",
+        "Fotios Chantzis",
+        "Elizabeth Barnes",
+        "Ariel Herbert-Voss",
+        "William H. Guss",
+        "Alex Nichol",
+        "Igor Babuschkin",
+        "S. Balaji",
+        "Shantanu Jain",
+        "A. Carr",
+        "Jan Leike",
+        "Josh Achiam",
+        "Vedant Misra",
+        "Evan Morikawa",
+        "Alec Radford",
+        "M. Knight",
+        "Miles Brundage",
+        "M. Murati",
+        "Katie Mayer",
+        "Peter Welinder",
+        "Bob McGrew",
+        "Dario Amodei",
+        "Sam McCandlish",
+        "I. Sutskever",
+        "Wojciech Zaremba"
+      ]
+    },
+    "internet-augmented dialogue generation": {
+      "found": true,
+      "authors": [
+        "M. Komeili",
+        "Kurt Shuster",
+        "J. Weston"
+      ]
+    },
+    "multitask prompted training enables zero-shot task generalization": {
+      "found": true,
+      "authors": [
+        "Victor Sanh",
+        "Albert Webson",
+        "Colin Raffel",
+        "Stephen H. Bach",
+        "Lintang Sutawika",
+        "Zaid Alyafeai",
+        "Antoine Chaffin",
+        "Arnaud Stiegler",
+        "Teven Le Scao",
+        "Arun Raja",
+        "Manan Dey",
+        "M Saiful Bari",
+        "Canwen Xu",
+        "Urmish Thakker",
+        "S. Sharma",
+        "Eliza Szczechla",
+        "Taewoon Kim",
+        "Gunjan Chhablani",
+        "Nihal V. Nayak",
+        "Debajyoti Datta",
+        "Jonathan D. Chang",
+        "Mike Tian-Jian Jiang",
+        "Han Wang",
+        "Matteo Manica",
+        "Sheng Shen",
+        "Zheng-Xin Yong",
+        "Harshit Pandey",
+        "Rachel Bawden",
+        "Thomas Wang",
+        "Trishala Neeraj",
+        "Jos Rozen",
+        "Abheesht Sharma",
+        "Andrea Santilli",
+        "Thibault Févry",
+        "Jason Alan Fries",
+        "R. Teehan",
+        "Stella Biderman",
+        "Leo Gao",
+        "T. Bers",
+        "Thomas Wolf",
+        "Alexander M. Rush"
+      ]
+    },
+    "training verifiers to solve math word problems": {
+      "found": true,
+      "authors": [
+        "K. Cobbe",
+        "Vineet Kosaraju",
+        "Mo Bavarian",
+        "Mark Chen",
+        "Heewoo Jun",
+        "Lukasz Kaiser",
+        "Matthias Plappert",
+        "Jerry Tworek",
+        "Jacob Hilton",
+        "Reiichiro Nakano",
+        "Christopher Hesse",
+        "John Schulman"
+      ]
+    },
+    "lamda: language models for dialog applications": {
+      "found": true,
+      "authors": [
+        "R. Thoppilan",
+        "Daniel De Freitas",
+        "Jamie Hall",
+        "Noam Shazeer",
+        "Apoorv Kulshreshtha",
+        "Heng-Tze Cheng",
+        "A. Jin",
+        "Taylor Bos",
+        "Leslie W. Baker",
+        "Yu Du",
+        "Yaguang Li",
+        "Hongrae Lee",
+        "H. Zheng",
+        "Amin Ghafouri",
+        "Marcelo Menegali",
+        "Yanping Huang",
+        "M. Krikun",
+        "Dmitry Lepikhin",
+        "James Qin",
+        "Dehao Chen",
+        "Yuanzhong Xu",
+        "Zhifeng Chen",
+        "Adam Roberts",
+        "Maarten Bosma",
+        "Yanqi Zhou",
+        "Chung-Ching Chang",
+        "I. Krivokon",
+        "W. Rusch",
+        "Marc Pickett",
+        "K. Meier-Hellstern",
+        "M. Morris",
+        "Tulsee Doshi",
+        "Renelito Delos Santos",
+        "Toju Duke",
+        "J. Søraker",
+        "Ben Zevenbergen",
+        "Vinodkumar Prabhakaran",
+        "Mark Díaz",
+        "Ben Hutchinson",
+        "Kristen Olson",
+        "Alejandra Molina",
+        "Erin Hoffman-John",
+        "Josh Lee",
+        "Lora Aroyo",
+        "Ravi Rajakumar",
+        "Alena Butryna",
+        "Matthew Lamm",
+        "V. Kuzmina",
+        "Joseph Fenton",
+        "Aaron Cohen",
+        "R. Bernstein",
+        "R. Kurzweil",
+        "Blaise Aguera-Arcas",
+        "Claire Cui",
+        "M. Croak",
+        "Ed H. Chi",
+        "Quoc Le"
+      ]
+    },
+    "program synthesis with large language models": {
+      "found": true,
+      "authors": [
+        "Jacob Austin",
+        "Augustus Odena",
+        "Maxwell Nye",
+        "Maarten Bosma",
+        "H. Michalewski",
+        "David Dohan",
+        "Ellen Jiang",
+        "Carrie J. Cai",
+        "Michael Terry",
+        "Quoc V. Le",
+        "Charles Sutton"
+      ]
+    },
+    "do as i can, not as i say: grounding language in robotic affordances": {
+      "found": true,
+      "authors": [
+        "Michael Ahn",
+        "Anthony Brohan",
+        "Noah Brown",
+        "Yevgen Chebotar",
+        "Omar Cortes",
+        "Byron David",
+        "Chelsea Finn",
+        "K. Gopalakrishnan",
+        "Karol Hausman",
+        "Alexander Herzog",
+        "Daniel Ho",
+        "Jasmine Hsu",
+        "Julian Ibarz",
+        "Brian Ichter",
+        "A. Irpan",
+        "Eric Jang",
+        "Rosario M Jauregui Ruano",
+        "Kyle Jeffrey",
+        "Sally Jesmonth",
+        "N. Joshi",
+        "Ryan C. Julian",
+        "Dmitry Kalashnikov",
+        "Yuheng Kuang",
+        "Kuang-Huei Lee",
+        "S. Levine",
+        "Yao Lu",
+        "Linda Luu",
+        "Carolina Parada",
+        "P. Pastor",
+        "Jornell Quiambao",
+        "Kanishka Rao",
+        "Jarek Rettinghouse",
+        "D. Reyes",
+        "P. Sermanet",
+        "Nicolas Sievers",
+        "Clayton Tan",
+        "Alexander Toshev",
+        "Vincent Vanhoucke",
+        "F. Xia",
+        "Ted Xiao",
+        "Peng Xu",
+        "Sichun Xu",
+        "Mengyuan Yan"
+      ]
+    },
+    "large language models can implement policy iteration": {
+      "found": true,
+      "authors": [
+        "Ethan A. Brooks",
+        "Logan A. Walls",
+        "Richard L. Lewis",
+        "Satinder Singh"
+      ]
+    },
+    "toolformer: language models can teach themselves to use tools": {
+      "found": true,
+      "authors": [
+        "Timo Schick",
+        "Jane Dwivedi-Yu",
+        "Roberto Dessì",
+        "R. Raileanu",
+        "M. Lomeli",
+        "Luke Zettlemoyer",
+        "Nicola Cancedda",
+        "Thomas Scialom"
+      ]
+    },
+    "dera: enhancing large language model completions with dialog-enabled resolving agents": {
+      "found": true,
+      "authors": [
+        "Varun Nair",
+        "Elliot Schumacher",
+        "G. Tso",
+        "Anitha Kannan"
+      ]
+    },
+    "hugginggpt: solving ai tasks with chatgpt and its friends in hugging face": {
+      "found": true,
+      "authors": [
+        "Yongliang Shen",
+        "Kaitao Song",
+        "Xu Tan",
+        "Dongsheng Li",
+        "Weiming Lu",
+        "Y. Zhuang"
+      ]
+    },
+    "self-refine: iterative refinement with self-feedback": {
+      "found": true,
+      "authors": [
+        "Aman Madaan",
+        "Niket Tandon",
+        "Prakhar Gupta",
+        "Skyler Hallinan",
+        "Luyu Gao",
+        "Sarah Wiegreffe",
+        "Uri Alon",
+        "Nouha Dziri",
+        "Shrimai Prabhumoye",
+        "Yiming Yang",
+        "S. Welleck",
+        "Bodhisattwa Prasad Majumder",
+        "Shashank Gupta",
+        "A. Yazdanbakhsh",
+        "Peter Clark"
+      ]
+    },
+    "memory networks": {
+      "found": true,
+      "authors": [
+        "J. Weston",
+        "S. Chopra",
+        "Antoine Bordes"
+      ]
+    },
+    "model-free episodic control": {
+      "found": true,
+      "authors": [
+        "Charles Blundell",
+        "Benigno Uria",
+        "Alexander Pritzel",
+        "Yazhe Li",
+        "Avraham Ruderman",
+        "Joel Z. Leibo",
+        "Jack W. Rae",
+        "Daan Wierstra",
+        "Demis Hassabis"
+      ]
+    },
+    "reading wikipedia to answer open-domain questions": {
+      "found": true,
+      "authors": [
+        "Danqi Chen",
+        "Adam Fisch",
+        "J. Weston",
+        "Antoine Bordes"
+      ]
+    },
+    "ai safety via debate": {
+      "found": true,
+      "authors": [
+        "G. Irving",
+        "P. Christiano",
+        "Dario Amodei"
+      ]
+    },
+    "go-explore: a new approach for hard-exploration problems": {
+      "found": true,
+      "authors": [
+        "Adrien Ecoffet",
+        "Joost Huizinga",
+        "J. Lehman",
+        "Kenneth O. Stanley",
+        "J. Clune"
+      ]
+    },
+    "help, anna! visual navigation with natural multimodal assistance via retrospective curiosity-encouraging imitation learning": {
+      "found": true,
+      "authors": [
+        "Khanh Nguyen",
+        "Hal Daumé"
+      ]
+    },
+    "extending machine language models toward human-level language understanding": {
+      "found": true,
+      "authors": [
+        "James L. McClelland",
+        "Felix Hill",
+        "Maja R. Rudolph",
+        "Jason Baldridge",
+        "Hinrich Schütze"
+      ]
+    },
+    "keep calm and explore: language models for action generation in text-based games": {
+      "found": true,
+      "authors": [
+        "Shunyu Yao",
+        "Rohan Rao",
+        "Matthew J. Hausknecht",
+        "Karthik Narasimhan"
+      ]
+    },
+    "making pre-trained language models better few-shot learners": {
+      "found": true,
+      "authors": [
+        "Tianyu Gao",
+        "Adam Fisch",
+        "Danqi Chen"
+      ]
     }
   }
 }

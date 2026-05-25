@@ -44,4 +44,7 @@ reference *.pdf
 tests/papers/
 src/domain/reference/fixtures/real_data.json
 
-tasks/
+# tasks/ — ignore PDFs and raw CSV, but track scenario/prompt JSON files
+tasks/papers/
+tasks/reference_fixture_raw.csv
+tasks/paper_name_mapping.json
