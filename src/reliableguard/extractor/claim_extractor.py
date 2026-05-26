@@ -8,6 +8,7 @@ from typing import Any
 from openai import OpenAI
 
 from src.config.runtime_config import OPENROUTER_BASE_URL, QWEN_PLUS_MODEL
+from src.reliableguard.errors import LLMResponseTruncatedError
 from src.reliableguard.extractor.prompts import build_claim_extraction_prompt
 from src.reliableguard.schema import Claim
 
@@ -21,21 +22,23 @@ def extract_claims(
     base_url: str = OPENROUTER_BASE_URL,
     temperature: float = 0.0,
     seed: int | None = None,
+    max_tokens: int | None = None,
+    usage_accumulator: dict[str, int] | None = None,
 ) -> list[Claim]:
     api_key = os.getenv("OPENROUTER_API_KEY")
     if api_key:
-        try:
-            return _extract_with_llm(
-                domain,
-                query,
-                agent_answer,
-                model=model,
-                base_url=base_url,
-                temperature=temperature,
-                seed=seed,
-            )
-        except Exception as exc:
-            print(f"[CLAIM_EXTRACTOR] Falling back to heuristic extraction: {exc}")
+        claims, usage = _extract_with_llm(
+            domain,
+            query,
+            agent_answer,
+            model=model,
+            base_url=base_url,
+            temperature=temperature,
+            seed=seed,
+            max_tokens=max_tokens,
+        )
+        _merge_usage(usage_accumulator, usage)
+        return claims
     return _extract_with_heuristics(domain, agent_answer)
 
 
@@ -48,23 +51,57 @@ def _extract_with_llm(
     base_url: str,
     temperature: float,
     seed: int | None,
-) -> list[Claim]:
+    max_tokens: int | None,
+) -> tuple[list[Claim], dict[str, int]]:
     client = OpenAI(api_key=os.environ["OPENROUTER_API_KEY"], base_url=base_url)
     options: dict[str, Any] = {"temperature": temperature}
     if seed is not None:
         options["seed"] = seed
+    if max_tokens is not None:
+        options["max_tokens"] = max_tokens
     response = client.chat.completions.create(
         model=model,
         messages=build_claim_extraction_prompt(domain, query, agent_answer),  # type: ignore
         **options,
     )
+    _raise_if_truncated(response, max_tokens)
     content = response.choices[0].message.content or "{}"
     payload = _load_json_object(content)
-    return [
+    claims = [
         Claim(**item)
         for item in payload.get("claims", [])
         if isinstance(item, dict) and item.get("text")
     ]
+    return claims, _usage_from_response(response)
+
+
+def _raise_if_truncated(response: Any, max_tokens: int | None) -> None:
+    if not getattr(response, "choices", None):
+        return
+    finish_reason = getattr(response.choices[0], "finish_reason", None)
+    if finish_reason == "length":
+        raise LLMResponseTruncatedError(
+            "Claim extraction response stopped because "
+            f"max_tokens={max_tokens} was reached"
+        )
+
+
+def _usage_from_response(response: Any) -> dict[str, int]:
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return {}
+    return {
+        "prompt_tokens": int(getattr(usage, "prompt_tokens", 0) or 0),
+        "completion_tokens": int(getattr(usage, "completion_tokens", 0) or 0),
+        "total_tokens": int(getattr(usage, "total_tokens", 0) or 0),
+    }
+
+
+def _merge_usage(accumulator: dict[str, int] | None, usage: dict[str, int]) -> None:
+    if accumulator is None:
+        return
+    for key, value in usage.items():
+        accumulator[key] = accumulator.get(key, 0) + int(value or 0)
 
 
 def _load_json_object(content: str) -> dict[str, Any]:
@@ -94,7 +131,11 @@ def _extract_with_heuristics(domain: str, agent_answer: str) -> list[Claim]:
         )
 
     if domain == "ecommerce":
-        for order_id, status in re.findall(r"order[_\s-]?(\d+).*?(pending|confirmed|refunded|paid)", text, re.I):
+        for order_id, status in re.findall(
+            r"order[_\s-]?(\d+).*?(pending|confirmed|refunded|paid)",
+            text,
+            re.I,
+        ):
             add(
                 "attribute",
                 f"Order {order_id} status is {status}",
@@ -102,7 +143,11 @@ def _extract_with_heuristics(domain: str, agent_answer: str) -> list[Claim]:
                 attribute="status",
                 value=status.lower(),
             )
-        for order_id, amount in re.findall(r"order[_\s-]?(\d+).*?(?:amount|金额).*?(\d+(?:\.\d+)?)", text, re.I):
+        for order_id, amount in re.findall(
+            r"order[_\s-]?(\d+).*?(?:amount|金额).*?(\d+(?:\.\d+)?)",
+            text,
+            re.I,
+        ):
             add(
                 "numeric",
                 f"Order {order_id} amount is {amount}",
@@ -120,7 +165,11 @@ def _extract_with_heuristics(domain: str, agent_answer: str) -> list[Claim]:
                 attribute="doi",
                 value=doi,
             )
-        for ref_id, status in re.findall(r"ref(?:erence)?[_\s-]?(\d+).*?(verified|failed|pending)", text, re.I):
+        for ref_id, status in re.findall(
+            r"ref(?:erence)?[_\s-]?(\d+).*?(verified|failed|pending)",
+            text,
+            re.I,
+        ):
             add(
                 "attribute",
                 f"Reference {ref_id} DOI status is {status}",

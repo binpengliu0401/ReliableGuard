@@ -12,7 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from eval.ablation_runner import run_version
+from eval.ablation_runner import ExperimentAbort, run_version
 from eval.config.ablation_versions import VERSIONS
 from eval.fact_scorer import mismatch_summary, parse_expected_facts
 from eval.metrics import build_result_row, compute_metrics, normalize_expected
@@ -65,70 +65,77 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[OUTPUT_DIR] {output_dir}")
 
     all_summaries: list[str] = []
-    if args.set in {"A", "both"}:
-        set_a = _run_set(
-            label="Set A",
-            set_slug="set_a",
-            scenarios_by_domain=_select_domain(
-                _load_set_a(
-                    args.ecommerce,
-                    args.reference,
+    try:
+        if args.set in {"A", "both"}:
+            set_a = _run_set(
+                label="Set A",
+                set_slug="set_a",
+                scenarios_by_domain=_select_domain(
+                    _load_set_a(
+                        args.ecommerce,
+                        args.reference,
+                        args.domain,
+                    ),
                     args.domain,
                 ),
-                args.domain,
-            ),
-            versions=args.versions,
-            seeds=args.seeds,
-            output_dir=output_dir,
-            save_states=args.save_states,
-            debug_false_alarms=args.debug_false_alarms,
-            enable_fault_injection=not args.disable_fault_injection,
-        )
-        _write_outputs(
-            output_dir=output_dir,
-            metrics_path="set_a_metrics.json",
-            rows_path="set_a_rows.csv",
-            metrics=set_a["metrics"],
-            rows=set_a["rows"],
-        )
-        all_summaries.append(
-            _format_summary_section(
-                title="SET A: Known Failure Modes (F0-F5)",
-                domain=args.domain,
-                aggregate_results=set_a["aggregate_results"],
                 versions=args.versions,
-                include_fact_accuracy=False,
+                seeds=args.seeds,
+                output_dir=output_dir,
+                save_states=args.save_states,
+                debug_false_alarms=args.debug_false_alarms,
+                enable_fault_injection=not args.disable_fault_injection,
             )
-        )
+            _write_outputs(
+                output_dir=output_dir,
+                metrics_path="set_a_metrics.json",
+                rows_path="set_a_rows.csv",
+                metrics=set_a["metrics"],
+                rows=set_a["rows"],
+            )
+            all_summaries.append(
+                _format_summary_section(
+                    title="SET A: Known Failure Modes (F0-F5)",
+                    domain=args.domain,
+                    aggregate_results=set_a["aggregate_results"],
+                    versions=args.versions,
+                    include_fact_accuracy=False,
+                )
+            )
 
-    if args.set in {"B", "both"}:
-        set_b = _run_set(
-            label="Set B",
-            set_slug="set_b",
-            scenarios_by_domain=_select_domain(_load_set_b(args.tier_b), args.domain),
-            versions=args.versions,
-            seeds=args.seeds,
-            output_dir=output_dir,
-            save_states=args.save_states,
-            debug_false_alarms=args.debug_false_alarms,
-            enable_fault_injection=not args.disable_fault_injection,
-        )
-        _write_outputs(
-            output_dir=output_dir,
-            metrics_path="set_b_metrics.json",
-            rows_path="set_b_rows.csv",
-            metrics=set_b["metrics"],
-            rows=set_b["rows"],
-        )
-        all_summaries.append(
-            _format_summary_section(
-                title="SET B: Generalization Stress Test (Tier B)",
-                domain=args.domain,
-                aggregate_results=set_b["aggregate_results"],
+        if args.set in {"B", "both"}:
+            set_b = _run_set(
+                label="Set B",
+                set_slug="set_b",
+                scenarios_by_domain=_select_domain(_load_set_b(args.tier_b), args.domain),
                 versions=args.versions,
-                include_fact_accuracy=True,
+                seeds=args.seeds,
+                output_dir=output_dir,
+                save_states=args.save_states,
+                debug_false_alarms=args.debug_false_alarms,
+                enable_fault_injection=not args.disable_fault_injection,
             )
-        )
+            _write_outputs(
+                output_dir=output_dir,
+                metrics_path="set_b_metrics.json",
+                rows_path="set_b_rows.csv",
+                metrics=set_b["metrics"],
+                rows=set_b["rows"],
+            )
+            all_summaries.append(
+                _format_summary_section(
+                    title="SET B: Generalization Stress Test (Tier B)",
+                    domain=args.domain,
+                    aggregate_results=set_b["aggregate_results"],
+                    versions=args.versions,
+                    include_fact_accuracy=True,
+                )
+            )
+    except ExperimentAbort as exc:
+        print(f"ERROR: benchmark aborted: {exc}", file=sys.stderr)
+        return 1
+    except Exception as exc:
+        print(f"ERROR: benchmark failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return 1
 
     import subprocess
     try:
@@ -321,6 +328,18 @@ def _run_set(
                     seeds=seeds,
                     enable_fault_injection=enable_fault_injection,
                 )
+            except ExperimentAbort as exc:
+                status = "aborted"
+                print(
+                    f"[{_timestamp()}] ABORT {label} version={version} "
+                    f"domain={domain} {exc}",
+                    file=sys.stderr,
+                )
+                print(
+                    f"[{_timestamp()}] END {label} version={version} "
+                    f"domain={domain} status={status}"
+                )
+                raise
             except Exception as exc:
                 error_label = f"{type(exc).__name__}: {exc}"
                 status = "error"
@@ -334,7 +353,9 @@ def _run_set(
                     f"[{_timestamp()}] END {label} version={version} "
                     f"domain={domain} status={status}"
                 )
-                continue
+                raise ExperimentAbort(
+                    f"{label} version={version} domain={domain} failed: {error_label}"
+                ) from exc
 
             metrics[version][domain] = compute_metrics(results)
             aggregate_results[version].extend(results)

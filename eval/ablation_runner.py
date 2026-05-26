@@ -24,6 +24,23 @@ from src.reliableguard.pipeline import run_reliability_pipeline
 from src.reliableguard.schema import Claim
 
 
+LLM_INFRASTRUCTURE_ERRORS = {
+    "APIStatusError",
+    "APIConnectionError",
+    "APITimeoutError",
+    "AuthenticationError",
+    "BadRequestError",
+    "InternalServerError",
+    "LLMResponseTruncatedError",
+    "PermissionDeniedError",
+    "RateLimitError",
+}
+
+
+class ExperimentAbort(RuntimeError):
+    """Raised when a benchmark run should stop instead of producing more ERROR rows."""
+
+
 def run_version(
     version_key: str,
     scenarios: list[dict],
@@ -31,10 +48,13 @@ def run_version(
     config_override: RuntimeConfig | None = None,
     seeds: list[int] | None = None,
     enable_fault_injection: bool = True,
+    fail_fast: bool = True,
+    max_consecutive_errors: int = 3,
 ) -> list[dict]:
     base_config = config_override if config_override else VERSIONS[version_key]
     selected_seeds = seeds or [42]
     results = []
+    consecutive_errors = 0
 
     print(f"\n{'#'*60}")
     print(f"# VERSION: {base_config.version_name}")
@@ -110,6 +130,7 @@ def run_version(
                         "trace_fact_scores": trace_fact_scores,
                     }
                 )
+                consecutive_errors = 0
 
                 if verbose:
                     actual = row["actual_outcome"]
@@ -123,6 +144,7 @@ def run_version(
             except Exception as e:
                 error_label = type(e).__name__
                 print(f"[ERROR] seed={seed} {task['id']} | {error_label}: {e}")
+                consecutive_errors += 1
 
                 row = build_result_row(
                     task=task,
@@ -148,8 +170,29 @@ def run_version(
                         "trace_fact_scores": {},
                     }
                 )
+                if fail_fast and _should_abort_run(
+                    error_label,
+                    consecutive_errors,
+                    max_consecutive_errors,
+                ):
+                    raise ExperimentAbort(
+                        "aborting benchmark after "
+                        f"{consecutive_errors} consecutive error(s); "
+                        f"latest seed={seed} scenario={task['id']} "
+                        f"error={error_label}: {e}"
+                    ) from e
 
     return results
+
+
+def _should_abort_run(
+    error_label: str,
+    consecutive_errors: int,
+    max_consecutive_errors: int,
+) -> bool:
+    if error_label in LLM_INFRASTRUCTURE_ERRORS:
+        return True
+    return consecutive_errors >= max_consecutive_errors
 
 
 @contextmanager
@@ -249,13 +292,18 @@ def _run_verifier_only(task: dict, config: RuntimeConfig, seed: int) -> dict:
         base_url=config.llm_base_url,
         write_logs=False,
         claims=injected_claims or None,
-        temperature=config.llm_temperature,
+        temperature=config.claim_extraction_temperature,
         seed=config.llm_seed,
+        max_tokens=config.claim_extraction_max_tokens,
     )
     state["reliability_report"] = report.model_dump()
     state["reliability_verdict_audit"] = report.verdict
     state["reliability_score"] = report.reliability_score
     state["reliability_verdict"] = report.verdict if config.enforce_intervention else "PASS"
+    token_usage = report.token_usage or {}
+    state["prompt_tokens"] = int(token_usage.get("prompt_tokens", 0) or 0)
+    state["completion_tokens"] = int(token_usage.get("completion_tokens", 0) or 0)
+    state["total_tokens"] = int(token_usage.get("total_tokens", 0) or 0)
     return state
 
 

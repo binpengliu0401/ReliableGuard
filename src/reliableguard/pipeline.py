@@ -22,8 +22,10 @@ def run_reliability_pipeline(
     claims: list[Claim] | None = None,
     temperature: float = 0.0,
     seed: int | None = None,
+    max_tokens: int | None = None,
 ) -> ReliabilityReport:
     t0 = time.perf_counter()
+    token_usage: dict[str, int] = {}
     if claims is None:
         claims = extract_claims(
             domain,
@@ -33,6 +35,8 @@ def run_reliability_pipeline(
             base_url=base_url,
             temperature=temperature,
             seed=seed,
+            max_tokens=max_tokens,
+            usage_accumulator=token_usage,
         )
     t1 = time.perf_counter()
 
@@ -82,4 +86,6 @@ def run_reliability_pipeline(
         "generate_report": round(t6 - t5, 4),
         "total_pipeline": round(t6 - t0, 4),
     }
-    return report.model_copy(update={"stage_latencies": stage_latencies})
+    return report.model_copy(
+        update={"stage_latencies": stage_latencies, "token_usage": token_usage}
+    )

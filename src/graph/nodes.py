@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from src.graph.state import AgentState, ToolCallInfo, TraceEntry
+from src.reliableguard.errors import LLMResponseTruncatedError
 from src.reliableguard.pipeline import run_reliability_pipeline
 
 # ecommerce runtime
@@ -25,6 +26,8 @@ def _completion_options(config) -> dict:
     options = {"temperature": config.llm_temperature}
     if config.llm_seed is not None:
         options["seed"] = config.llm_seed
+    if config.llm_max_tokens is not None:
+        options["max_tokens"] = config.llm_max_tokens
     return options
 
 
@@ -74,6 +77,16 @@ def _accumulate_usage(state: AgentState, response) -> None:
     state["prompt_tokens"] = state.get("prompt_tokens", 0) + prompt_tokens
     state["completion_tokens"] = state.get("completion_tokens", 0) + completion_tokens
     state["total_tokens"] = state.get("total_tokens", 0) + total_tokens
+
+
+def _raise_if_truncated(response, max_tokens: int | None) -> None:
+    if not getattr(response, "choices", None):
+        return
+    finish_reason = getattr(response.choices[0], "finish_reason", None)
+    if finish_reason == "length":
+        raise LLMResponseTruncatedError(
+            f"LLM response stopped because max_tokens={max_tokens} was reached"
+        )
 
 
 def _first_user_query(state: AgentState) -> str:
@@ -167,6 +180,7 @@ def plan_node(state: AgentState) -> AgentState:
         **_completion_options(config),
     )
     _accumulate_usage(state, response)
+    _raise_if_truncated(response, config.llm_max_tokens)
 
     msg = response.choices[0].message
     tool_calls = msg.tool_calls
@@ -308,8 +322,19 @@ def reliability_node(state: AgentState) -> AgentState:
         base_url=config.llm_base_url,
         write_logs=True,
         run_stamp=state.get("run_stamp"),
-        temperature=config.llm_temperature,
+        temperature=config.claim_extraction_temperature,
         seed=config.llm_seed,
+        max_tokens=config.claim_extraction_max_tokens,
+    )
+    token_usage = report.token_usage or {}
+    state["prompt_tokens"] = state.get("prompt_tokens", 0) + int(
+        token_usage.get("prompt_tokens", 0) or 0
+    )
+    state["completion_tokens"] = state.get("completion_tokens", 0) + int(
+        token_usage.get("completion_tokens", 0) or 0
+    )
+    state["total_tokens"] = state.get("total_tokens", 0) + int(
+        token_usage.get("total_tokens", 0) or 0
     )
     state["reliability_report"] = report.model_dump()
     state["reliability_verdict_audit"] = report.verdict

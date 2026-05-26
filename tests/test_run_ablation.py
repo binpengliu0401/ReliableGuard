@@ -268,7 +268,28 @@ def test_missing_openrouter_api_key_exits_with_error(tmp_path, monkeypatch, caps
     assert "OPENROUTER_API_KEY is not set" in captured.err
 
 
-def test_group_exception_does_not_abort_remaining_groups(tmp_path, monkeypatch):
+def test_missing_scenario_file_returns_failure(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+
+    code = run_ablation.main(
+        [
+            "--ecommerce",
+            str(tmp_path / "missing_ecommerce.json"),
+            "--reference",
+            str(tmp_path / "missing_reference.json"),
+            "--tier-b",
+            str(tmp_path / "missing_tier_b.json"),
+            "--output-dir",
+            str(tmp_path / "results"),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert code == 1
+    assert "benchmark failed" in captured.err
+
+
+def test_group_exception_aborts_remaining_groups(tmp_path, monkeypatch, capsys):
     calls = []
 
     def flaky_run_version(
@@ -283,9 +304,60 @@ def test_group_exception_does_not_abort_remaining_groups(tmp_path, monkeypatch):
             raise RuntimeError("boom")
         return _fake_results(version, scenarios, seeds)
 
-    output_dir = _run_main(tmp_path, monkeypatch, flaky_run_version)
-    metrics = json.loads((output_dir / "set_a_metrics.json").read_text(encoding="utf-8"))
+    ecommerce, reference, tier_b = _write_scenarios(tmp_path)
+    output_dir = tmp_path / "results"
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(run_ablation, "run_version", flaky_run_version)
 
-    assert metrics["V1_Baseline"]["ecommerce"]["error"] == "RuntimeError: boom"
-    assert metrics["V1_Baseline"]["reference"]["total_tasks"] == 5
-    assert ("V3_Intervention", "reference") in calls
+    code = run_ablation.main(
+        [
+            "--ecommerce",
+            str(ecommerce),
+            "--reference",
+            str(reference),
+            "--tier-b",
+            str(tier_b),
+            "--output-dir",
+            str(output_dir),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert code == 1
+    assert "benchmark aborted" in captured.err
+    assert calls == [("V1_Baseline", "ecommerce")]
+    assert not (output_dir / "set_a_metrics.json").exists()
+
+
+def test_experiment_abort_stops_main_with_error(tmp_path, monkeypatch, capsys):
+    ecommerce, reference, tier_b = _write_scenarios(tmp_path)
+    output_dir = tmp_path / "results"
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+
+    def aborting_run_version(
+        version: str,
+        scenarios: list[dict],
+        seeds: list[int],
+        enable_fault_injection: bool = True,
+    ):
+        raise run_ablation.ExperimentAbort("LLM failure")
+
+    monkeypatch.setattr(run_ablation, "run_version", aborting_run_version)
+
+    code = run_ablation.main(
+        [
+            "--ecommerce",
+            str(ecommerce),
+            "--reference",
+            str(reference),
+            "--tier-b",
+            str(tier_b),
+            "--output-dir",
+            str(output_dir),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert code == 1
+    assert "benchmark aborted" in captured.err
+    assert not (output_dir / "summary.txt").exists()

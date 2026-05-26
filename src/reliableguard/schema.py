@@ -84,3 +84,4 @@ class ReliabilityReport(BaseModel):
     unverifiable_count: int = 0
     not_found_count: int = 0
     stage_latencies: dict[str, float] = Field(default_factory=dict)
+    token_usage: dict[str, int] = Field(default_factory=dict)

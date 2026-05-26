@@ -38,13 +38,9 @@ VERSIONS = {
 
 
 def with_deepseek(config: RuntimeConfig) -> RuntimeConfig:
-    return RuntimeConfig(
-        use_verifier=config.use_verifier,
-        enforce_intervention=config.enforce_intervention,
-        use_structural_audit=config.use_structural_audit,
-        version_name=config.version_name + "_DeepSeek",
+    return replace(
+        config,
         llm_model=DEEPSEEK_MODEL,
         llm_base_url=OPENROUTER_BASE_URL,
-        llm_temperature=config.llm_temperature,
-        llm_seed=config.llm_seed,
+        version_name=config.version_name + "_DeepSeek",
     )

@@ -15,6 +15,9 @@ class RuntimeConfig:
     llm_base_url: str = OPENROUTER_BASE_URL
     llm_temperature: float = 0.0
     llm_seed: int | None = None
+    llm_max_tokens: int = 2048
+    claim_extraction_max_tokens: int = 2048
+    claim_extraction_temperature: float = 0.0
 
 
 DEFAULT_RUNTIME_CONFIG = RuntimeConfig()

@@ -83,12 +83,16 @@ src/
   reliableguard/   # Claim extraction, verification, scoring, intervention
   domain/          # Ecommerce and reference domain tools and verifiers
   db/              # Database initialization helpers
-  config/          # Runtime configuration
+  config/          # Runtime configuration (RuntimeConfig dataclass)
 eval/
-  benchmark.py       # Benchmark entry point
-  ablation_runner.py # Per-version scenario runner
+  ablation_runner.py # Per-version scenario runner; ExperimentAbort on infra errors
   metrics.py         # Aggregate metrics and summary statistics
-scripts/           # Experiment runners and utility scripts
+  benchmark.py       # Lower-level entry point (use scripts/run_ablation.py for thesis runs)
+scripts/
+  run_ablation.py              # Primary benchmark entry point (Set A / Set B)
+  run_full_experiment_sequence.sh  # Runs Set A → Set B → RQ3 → figures in sequence
+  run_set_a_full.sh / run_set_b_full.sh / run_rq3_ablation.sh
+  generate_figures.py          # Produces thesis figures and LaTeX tables
 tasks/             # Scenario files (ecommerce and reference)
 tests/             # Pytest unit tests
 ReliableGuard.py   # Single-run CLI entry point
