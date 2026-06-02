@@ -1,6 +1,6 @@
 # ReliableGuard
 
-A LangGraph-based runtime verification harness for tool-using LLM agents. It audits agent answers post-hoc using domain evidence — without modifying the underlying model.
+A LangGraph-based runtime verification harness for tool-using LLM agents. It audits agent answers, tool traces, and domain evidence post-hoc, without modifying the underlying model.
 
 ## Overview
 
@@ -12,6 +12,33 @@ Two domains are supported:
 - **Reference**: DOI/PDF-backed academic citation verification.
 
 Ablation versions compare baseline execution, audit-only detection, and enforced PASS/WARN/BLOCK intervention.
+
+## Latest Experiment Snapshot
+
+The current consolidated experiment batch was run on git commit `3759744`.
+
+| Output | Directory |
+| --- | --- |
+| Set A full ablation | `results/set_a_full/20260526/173346/` |
+| Set B full ablation | `results/set_b_full/20260531/045635/` |
+| RQ3 structural ablation | `results/rq3_ablation/20260531/073500/` |
+| Final figures and LaTeX tables | `figures/` |
+| Protected archive copy | `results/_archive/final_experiment_snapshot_20260602_3759744/` |
+| Compressed archive | `results/_archive/final_experiment_snapshot_20260602_3759744.tar.gz` |
+
+Key Set A results:
+
+- Overall V3 false acceptance rate: `0.389`; risk detection rate: `0.466`.
+- Ecommerce V3 risk detection rate: `0.640`; false acceptance rate: `0.231`.
+- Reference V3 risk detection rate: `0.162`; false acceptance rate: `0.666`.
+
+RQ3 ecommerce structural ablation:
+
+- `V3_NoStructural`: risk detection `0.237`, false acceptance `0.762`.
+- `V3_Intervention`: risk detection `0.640`, false acceptance `0.231`.
+- F2 detection improved from `0.225` to `0.735`; F4 detection improved from `0.353` to `0.827`.
+
+Set B remains a stress test rather than the main success claim: V3 overall false acceptance is `0.783`, with `0.178` gate action rate. Use these results to discuss generalization limits.
 
 ## Quick Start
 
@@ -25,14 +52,10 @@ export OPENROUTER_API_KEY=your_key_here
 Run the full ablation:
 
 ```bash
-python3 scripts/run_ablation.py \
-  --set both \
-  --versions V1 V2 V3 \
-  --seeds 42 123 7 \
-  --timestamped-output
+./scripts/run_full_experiment_sequence.sh
 ```
 
-Output is written to `results/` (gitignored). Use `--timestamped-output` to avoid overwriting previous runs; pass `--overwrite` only for scratch diagnostics.
+This runs Set A, Set B, the RQ3 structural ablation, and figure generation in sequence. Output is written to `results/` and `figures/`. Use `scripts/run_ablation.py --timestamped-output` for targeted runs; pass `--overwrite` only for scratch diagnostics.
 
 ## Ablation Versions
 
@@ -74,15 +97,23 @@ python3 scripts/generate_figures.py
 
 Reads the latest timestamped results under `results/set_a_full/`, `results/set_b_full/`, and `results/rq3_ablation/`. Writes Figure 1–4 and three LaTeX tables to `figures/`.
 
+Current generated artifacts:
+
+- `figures/fig1_set_a_main.pdf`
+- `figures/fig2_set_a_failure_modes.pdf`
+- `figures/fig3_rq3_structural.pdf`
+- `figures/fig4_set_b_generalization.pdf`
+- `figures/table_main_ablation.tex`
+- `figures/table_evidence_state.tex`
+- `figures/table_latency.tex`
+
 ## Project Structure
 
 ```text
 src/
-  agent/           # LangGraph agent runtime
   graph/           # Graph state, nodes, and routing
   reliableguard/   # Claim extraction, verification, scoring, intervention
   domain/          # Ecommerce and reference domain tools and verifiers
-  db/              # Database initialization helpers
   config/          # Runtime configuration (RuntimeConfig dataclass)
 eval/
   ablation_runner.py # Per-version scenario runner; ExperimentAbort on infra errors

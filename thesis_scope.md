@@ -71,17 +71,17 @@ This question evaluates whether the same scoring framework—evidence-state clas
 
 ### RQ3: Final-answer-only versus Trace/State-augmented Auditing
 
-For which categories of agent failure does final-answer-level auditing suffice, and for which is pre-execution structural checking irreplaceable?
+For which categories of agent failure does final-answer-level auditing suffice, and for which are tool-trace and state-transition checks necessary?
 
-This question goes beyond measuring an aggregate detection gain. It distinguishes two structurally different failure detection modes that the label "final-answer versus trace/state" conflates.
+This question goes beyond measuring an aggregate detection gain. It distinguishes two structural signals that final-answer-only auditing does not reliably provide.
 
-The first mode is **post-hoc factual verification**: the claim-level pipeline extracts claims from the final answer and verifies them against the current domain state. This mode naturally covers failures where the agent's output contradicts observable evidence. F4 false-success is an example: if a tool reports success but the database does not change, the agent will claim "order confirmed" while the database still shows status = pending. The claim pipeline detects this contradiction post-hoc without any trace or pre-execution visibility, because the inconsistency is present in the current state at audit time.
+The first signal is **pre-execution policy enforcement**: checking business constraints against tool arguments before execution takes place. F2 policy violations are categorically different from factual errors. When an agent creates a high-value order (amount = 8000), the database state after execution may be factually consistent: the record exists, the amount matches, and the status is as reported. The violation is not necessarily in the final state but in the decision to permit an operation that exceeded a policy threshold. A post-hoc claim verifier cannot reliably infer this policy violation unless the policy condition itself is exposed as an audit signal.
 
-The second mode is **pre-execution policy enforcement**: checking business constraints against tool arguments before execution takes place. F2 policy violations are categorically different from factual errors. When an agent creates a high-value order (amount = 8000), the database state after execution is factually correct: the record exists, the amount matches, the status is as reported. The claim-level pipeline finds all claims supported and returns PASS. The violation is not in the state but in the decision to permit an operation that exceeded a policy threshold. No comparison of the final answer against domain state can expose this, because the state provides no evidence of wrongdoing.
+The second signal is **post-execution state-transition validation**: checking whether a tool that reports success actually caused the expected environment mutation. F4 false-success failures can sometimes be detected by final-answer claim verification if the final answer contains an extractable claim that contradicts the database state. However, this depends on the answer wording and the extractor. Structural audit checks the transition directly by comparing pre- and post-execution database snapshots, so it does not need to rely on the final answer containing the right claim.
 
-The archived 2026-05-14 RQ3 run preliminarily supports this boundary: F4 detection rate remained 1.0 without structural audit, while F2 detection dropped to 0.0. That run predates the current TCCR, evidence-state, latency, and token aggregation fields. A later local full-run snapshot is preserved at `results/_archive/full_experiment_snapshot_20260522.tar.gz`, but it also precedes the latest policy, latency-unit, reference-output, and token-limit fixes. The codebase is now stable (token limits, fail-fast, claim extraction temperature all corrected). The final thesis numbers must come from a fresh re-run of `V3_Intervention` and `V3_NoStructural` under the current code version and seeds, using `./scripts/run_full_experiment_sequence.sh --timestamped-output`.
+The current post-fix RQ3 run confirms this boundary on Set A ecommerce. With structural audit disabled, `V3_NoStructural` reaches only `0.237` risk detection and `0.762` false acceptance. With structural audit enabled, V3 reaches `0.640` risk detection and `0.231` false acceptance. The targeted F2 detection rate improves from `0.225` to `0.735`, and F4 improves from `0.353` to `0.827`.
 
-RQ3 therefore asks: not just how much does structural audit help, but where exactly does the claim-level pipeline reach its fundamental detection boundary, and what architectural component is necessary to cross it?
+RQ3 therefore asks not only how much structural audit helps, but which hidden runtime properties claim-level final-answer auditing fails to expose: policy preconditions before execution and state-transition correctness after execution.
 
 ## Contributions
 
@@ -101,15 +101,16 @@ This thesis makes four main contributions.
 
 ## Empirical Findings
 
-The thesis is expected to support two central empirical findings.
+The current post-fix experiment batch was run on commit `3759744`. The relevant result directories are `results/set_a_full/20260526/173346/`, `results/set_b_full/20260531/045635/`, and `results/rq3_ablation/20260531/073500/`. A protected copy is archived at `results/_archive/final_experiment_snapshot_20260602_3759744/`.
 
-**Finding A: Trace/state-augmented auditing substantially improves detection in the ecommerce domain, primarily through pre-execution policy enforcement.**  
-Earlier runs indicate that ecommerce detection improves strongly from the baseline to V3 and that the controlled `V3_NoStructural` ablation isolates F2 policy violations as the key structural-audit contribution. These numbers must be refreshed after the code freeze so Set A, Set B, and RQ3 share the same commit, seeds, metrics schema, and output format. The final thesis should report the refreshed RDR and F2/F4 detection values rather than mixing old batches.
+**Finding A: Trace/state-augmented auditing substantially improves ecommerce risk interception.**
+On Set A ecommerce, V3 reaches `0.640` risk detection and `0.231` false acceptance. The claim-only RQ3 variant (`V3_NoStructural`) reaches only `0.237` risk detection and `0.762` false acceptance. The structural audit gain is especially visible on the two runtime-sensitive failure modes: F2 policy violation improves from `0.225` to `0.735`, and F4 false-success detection improves from `0.353` to `0.827`.
 
-**Finding B: Claim extraction coverage is the dominant bottleneck in the reference domain, and domain-dependent differences are explainable within the unified framework.**  
-In the academic reference setting, earlier runs show high false alarm behavior under enforced intervention. The hypothesized bottleneck is that claim extraction produces many unverifiable aggregate claims, which the verifier cannot reliably ground. The refreshed metrics now directly expose this mechanism through `avg_unverifiable_count`, `evidence_state_coverage`, and TCCR, allowing the final thesis to explain false alarms using evidence-state distribution rather than narrative interpretation alone.
+**Finding B: Reference auditing is limited by claim grounding and verifier coverage rather than by the same trace/state mechanism.**
+On Set A reference, V3 reaches only `0.162` risk detection and still has `0.666` false acceptance. Its evidence-state coverage is `0.321`, TCCR is `0.188`, and the average unverifiable count among covered tasks is `2.512`. These values support a bounded conclusion: the unified evidence-state framework exposes the reference bottleneck, but the current extractor/verifier combination does not deliver strong intervention performance for heterogeneous citation evidence.
 
-Prior full-run outputs are treated as archived reproducibility snapshots, not as the source of final reported numbers. The post-fix rerun should use `--timestamped-output` and record the exact result directory paths alongside the git commit hash (`git rev-parse --short HEAD`).
+**Finding C: Set B shows limited generalization under open-ended stress prompts.**
+On Set B, overall V3 false acceptance remains `0.783`, with `0.178` gate action rate and `0.569` pass rate. These results should be reported as a stress-test limitation rather than as the main success claim.
 
 ## Out of Scope
 

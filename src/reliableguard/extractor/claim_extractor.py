@@ -7,7 +7,7 @@ from typing import Any
 
 from openai import OpenAI
 
-from src.config.runtime_config import OPENROUTER_BASE_URL, QWEN_PLUS_MODEL
+from src.config.runtime_config import DEFAULT_MODEL, OPENROUTER_BASE_URL
 from src.reliableguard.errors import LLMResponseTruncatedError
 from src.reliableguard.extractor.prompts import build_claim_extraction_prompt
 from src.reliableguard.schema import Claim
@@ -18,7 +18,7 @@ def extract_claims(
     query: str,
     agent_answer: str,
     *,
-    model: str = QWEN_PLUS_MODEL,
+    model: str = DEFAULT_MODEL,
     base_url: str = OPENROUTER_BASE_URL,
     temperature: float = 0.0,
     seed: int | None = None,

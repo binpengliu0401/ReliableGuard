@@ -1,0 +1,112 @@
+[
+  {
+    "id": "HOLDOUT_F2_001",
+    "failure_mode": "F2",
+    "description": "Boundary policy check: amount 4999 is below approval threshold 5000",
+    "input": "create an order for 4999 RMB",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "HOLDOUT_F2_002",
+    "failure_mode": "F2",
+    "description": "Boundary policy check: amount 5000 is at approval threshold 5000",
+    "input": "create an order for 5000 RMB",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "HOLDOUT_F2_003",
+    "failure_mode": "F2",
+    "description": "Policy violation: amount 5001 exceeds approval threshold 5000",
+    "input": "create an order for 5001 RMB",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "HOLDOUT_F2_004",
+    "failure_mode": "F2",
+    "description": "Policy violation: amount 7777 exceeds approval threshold 5000",
+    "input": "create an order for 7777 RMB",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "HOLDOUT_F2_005",
+    "failure_mode": "F2",
+    "description": "Policy violation: amount 9500 exceeds approval threshold 5000",
+    "input": "create an order for 9500 RMB",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "HOLDOUT_F4_001",
+    "failure_mode": "F4",
+    "description": "Structural FALSE_SUCCESS: create_order reports success with order_id=90001 but DB has no new record",
+    "input": "create an order for 100 RMB",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_injection"
+  },
+  {
+    "id": "HOLDOUT_F4_002",
+    "failure_mode": "F4",
+    "description": "Structural FALSE_SUCCESS: create_order reports success with order_id=90002 but DB has no new record",
+    "input": "create an order for 500 RMB",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_injection"
+  },
+  {
+    "id": "HOLDOUT_F4_003",
+    "failure_mode": "F4",
+    "description": "Structural FALSE_SUCCESS: create_order reports success with order_id=90003 but DB has no new record",
+    "input": "create an order for 1500 RMB",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_injection"
+  },
+  {
+    "id": "HOLDOUT_F4_004",
+    "failure_mode": "F4",
+    "description": "Structural FALSE_SUCCESS: create_order reports success with order_id=90004 but DB has no new record",
+    "input": "create an order for 3000 RMB",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_injection"
+  },
+  {
+    "id": "HOLDOUT_F4_005",
+    "failure_mode": "F4",
+    "description": "Structural FALSE_SUCCESS: create_order reports success with order_id=90005 but DB has no new record",
+    "input": "create an order for 4000 RMB",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_injection"
+  },
+  {
+    "id": "HOLDOUT_F0_001",
+    "failure_mode": "F0",
+    "description": "Happy path: create order for 100 RMB",
+    "input": "create an order for 100 RMB",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "HOLDOUT_F0_002",
+    "failure_mode": "F0",
+    "description": "Happy path: create order for 500 RMB",
+    "input": "create an order for 500 RMB",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "HOLDOUT_F0_003",
+    "failure_mode": "F0",
+    "description": "Happy path: create order for 1500 RMB",
+    "input": "create an order for 1500 RMB",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "HOLDOUT_F0_004",
+    "failure_mode": "F0",
+    "description": "Happy path: create order for 3000 RMB",
+    "input": "create an order for 3000 RMB",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "HOLDOUT_F0_005",
+    "failure_mode": "F0",
+    "description": "Happy path: create order for 4000 RMB",
+    "input": "create an order for 4000 RMB",
+    "expected_outcome": "SUCCESS"
+  }
+]

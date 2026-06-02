@@ -127,7 +127,7 @@ $$
 \operatorname{RDR} = 1 - \operatorname{FAR}
 $$
 
-when every risky task receives exactly one aggregate verdict in \(\{\text{PASS}, \text{WARN}, \text{BLOCK}\}\).
+when every risky task receives exactly one aggregate verdict in \(\{\text{PASS}, \text{WARN}, \text{BLOCK}\}\). In the implementation, some rows may produce `ERROR` or `NOT_TRIGGERED`. These rows remain in the denominator but are neither false acceptances nor detected risks, so \(\operatorname{RDR} + \operatorname{FAR}\) can be less than 1.
 
 **Range.**
 
@@ -137,7 +137,39 @@ $$
 
 **Intuition.** Higher is better. RDR is the positive counterpart of FAR for risky tasks.
 
-### 2.4 Task Claim Coverage Rate (TCCR)
+### 2.4 Safe Pass, Pass Rate, and Gate Action Rate
+
+**Safe Pass Rate.** Safe Pass Rate measures the proportion of safe tasks that are correctly accepted:
+
+$$
+\operatorname{SafePassRate}
+= \frac{\sum_{t \in T_{\text{safe}}} \mathbb{1}[v_t = \text{PASS}]}
+{|T_{\text{safe}}|}
+$$
+
+Higher is better. In the implementation, \(\operatorname{SafePassRate} + \operatorname{FalseAlarmRate}\) can be less than 1 when safe tasks produce `ERROR` or `NOT_TRIGGERED`.
+
+**Pass Rate.** Pass Rate is exact task-level verdict accuracy:
+
+$$
+\operatorname{PassRate}
+= \frac{\sum_{t \in T} \mathbb{1}[v_t = \hat{v}_t]}
+{|T|}
+$$
+
+where \(\hat{v}_t\) is the expected benchmark verdict after normalizing scenario labels. This metric is stricter than RDR: if a risky task expects `BLOCK` but the system returns `WARN`, it counts as detected risk for RDR but not as an exact pass.
+
+**Gate Action Rate.** Gate Action Rate measures how often the system actively warns or blocks:
+
+$$
+\operatorname{GateActionRate}
+= \frac{\sum_{t \in T} \mathbb{1}[v_t \in \{\text{WARN}, \text{BLOCK}\}]}
+{|T|}
+$$
+
+It is especially useful for Set B, where the question is not only whether the system is correct but also how often it intervenes under generalization stress.
+
+### 2.5 Task Claim Coverage Rate (TCCR)
 
 **Purpose.** Task Claim Coverage Rate measures the proportion of tasks for which the reliability pipeline produced at least one grounded (non-unverifiable) claim. A grounded claim is one whose evidence state is supported, contradicted, unsupported, or not_found.
 
@@ -162,7 +194,7 @@ $$
 
 **Intuition.** Higher is better. A low TCCR indicates that the claim extractor is producing mostly unverifiable aggregate claims, preventing the verifier from grounding its audit. For V1 (no verifier), TCCR should be interpreted as no verifier coverage rather than as an extractor-quality signal.
 
-### 2.5 Evidence State Distribution
+### 2.6 Evidence State Distribution
 
 **Purpose.** Evidence-state distribution reports the average number of claims in each evidence state among tasks where the verifier produced at least one claim-level evidence count.
 
@@ -195,7 +227,7 @@ $$
 
 **Implementation fields.** `compute_metrics` reports `avg_supported_count`, `avg_contradicted_count`, `avg_unsupported_count`, `avg_unverifiable_count`, `avg_not_found_count`, and `evidence_state_coverage`.
 
-### 2.6 Stage Latency and Token Cost
+### 2.7 Stage Latency and Token Cost
 
 ReliableGuard records per-stage audit latency in `ReliabilityReport.stage_latencies`. The aggregated metrics report mean and p95 latency for:
 
@@ -399,10 +431,10 @@ $$
 \text{ when } V(c_i, D_{\text{after}}) \text{ is evaluated.}
 $$
 
-Type I failures are detectable by post-hoc claim verification because the inconsistency is present in \(D_{\text{after}}\). The claim pipeline acts as a post-hoc consistency checker between \(A\) and the current domain state.
+Type I failures are detectable by post-hoc claim verification when the relevant claim is present in \(A\) and extracted into \(C\). The claim pipeline acts as a post-hoc consistency checker between extracted claims and the current domain state, so its empirical coverage still depends on final-answer wording and claim extraction quality.
 
 - **F3 (fabricated claim)**: The agent asserts an entity that does not exist in \(D_{\text{after}}\). Evidence state: \(\texttt{not\_found}\).
-- **F4 (false-success)**: The tool reports success but \(D_{\text{after}} = D_{\text{before}}\). The agent's claim of a completed operation contradicts \(D_{\text{after}}\). Evidence state: \(\texttt{contradicted}\).
+- **F4 (false-success)**: The tool reports success but \(D_{\text{after}} = D_{\text{before}}\). If the agent's answer contains an extracted claim of a completed operation, that claim contradicts \(D_{\text{after}}\). Evidence state: \(\texttt{contradicted}\). Structural audit covers this case more directly by checking the state transition itself.
 
 **Type II: Policy violation failures.**
 
@@ -422,16 +454,18 @@ Type II failures are not detectable by post-hoc claim verification. The domain s
 
 **Empirical confirmation.**
 
-The V3 versus V3\_NoStructural controlled ablation on the ecommerce Set A benchmark confirms this boundary:
+The current post-fix V3 versus V3\_NoStructural controlled ablation on the ecommerce Set A benchmark confirms that structural audit improves both policy precondition checking and state-transition checking:
 
-| Failure type | V3\_NoStructural (no structural audit) | V3 (structural audit enabled) |
-| --- | --- | --- |
-| F4 (Type I) | 1.0 | 1.0 |
-| F2 (Type II) | 0.0 | ~1.0 |
+| Metric / failure type | V3\_NoStructural (no structural audit) | V3 (structural audit enabled) |
+| --- | ---: | ---: |
+| Overall ecommerce RDR | 0.237 | 0.640 |
+| Overall ecommerce FAR | 0.762 | 0.231 |
+| F2 policy violation detection | 0.225 | 0.735 |
+| F4 false-success detection | 0.353 | 0.827 |
 
-F4 detection is unchanged without structural audit because it is a Type I failure: the claim pipeline detects the contradiction in \(D_{\text{after}}\). F2 detection collapses to zero without structural audit because it is a Type II failure: \(D_{\text{after}}\) provides no evidence of wrongdoing after the operation completes.
+F2 remains the clearest Type II case: the resulting database state may be factually consistent with the agent answer, while the operation violates a pre-execution policy. F4 is a Type I state inconsistency, but the latest result shows that final-answer claim verification is not sufficient in practice because it depends on the answer wording and the extractor. The post-execution structural check detects the state-transition anomaly directly.
 
-This boundary has a design implication for new domain instantiations: structural audit is necessary if and only if the target domain contains Type II failures—operations whose outcomes are factually correct but whose pre-conditions violate domain policies.
+This boundary has a design implication for new domain instantiations: structural audit is necessary when target failures involve policy preconditions, permission constraints, transaction side effects, or environment state transitions that are not reliably exposed as final-answer claims.
 
 ## 5. Risk Scoring Framework
 

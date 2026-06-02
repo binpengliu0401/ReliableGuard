@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-QWEN_PLUS_MODEL = "qwen/qwen-plus"
+DEFAULT_MODEL = "deepseek/deepseek-v4-flash"
 DEEPSEEK_MODEL = "deepseek/deepseek-chat-v3-0324"
 
 
@@ -11,7 +11,7 @@ class RuntimeConfig:
     enforce_intervention: bool = True
     use_structural_audit: bool = True
     version_name: str = "V3_Intervention"
-    llm_model: str = QWEN_PLUS_MODEL
+    llm_model: str = DEFAULT_MODEL
     llm_base_url: str = OPENROUTER_BASE_URL
     llm_temperature: float = 0.0
     llm_seed: int | None = None

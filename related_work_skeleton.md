@@ -1,6 +1,8 @@
 # Related Work Skeleton for ReliableGuard
 
-ReliableGuard is positioned as a neuro-symbolic post-hoc runtime verification harness for tool-using LLM agents. This related work skeleton organizes the literature around four research directions: runtime verification, neuro-symbolic AI, factuality and hallucination detection, and LLM agent evaluation and observability.
+ReliableGuard is positioned as a neuro-symbolic post-hoc runtime verification harness for tool-using LLM agents. For the final thesis, the related-work chapter should foreground three direct comparison lines: runtime verification, factuality and hallucination detection, and LLM agent evaluation/observability. Neuro-symbolic AI remains in this skeleton as architecture motivation, but it should be used to explain the framework design rather than treated as the primary empirical comparison group.
+
+The current empirical framing should remain bounded: the strongest evidence is in state-grounded ecommerce with trace/state structural audit; academic reference and Set B stress-test results show claim grounding and generalization limits. Related work comparisons should therefore avoid presenting ReliableGuard as a universal hallucination detector or a drop-in replacement for broad observability platforms.
 
 ## 1. Runtime Verification
 

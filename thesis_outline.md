@@ -16,7 +16,7 @@
 - **研究问题**：现有 factuality evaluation、agent benchmarks 和 observability tools 难以同时完成失败量化、失败标准化和失败追踪。
 - **方法**：提出 ReliableGuard，一个 claim-level runtime auditing harness，通过 claim extraction、verifiability classification、domain verification、risk scoring、intervention policy 和 trace reporting 对 agent 行为进行审计。正文中进一步解释其 post-hoc runtime verification 与 neuro-symbolic 架构属性。
 - **实验设计**：在 ecommerce 和 academic reference 两个领域评估，比较 baseline、audit-only 和 enforced-intervention 三种设置，并补充计算开销与 claim extraction 质量分析。
-- **核心发现**：state-grounded ecommerce 任务中，trace/state-augmented auditing 显著提升检测能力；reference 任务中，claim extraction coverage 和 verifier calibration 是主要瓶颈。
+- **核心发现**：state-grounded ecommerce 任务中，trace/state-augmented auditing 显著提升检测能力；reference 任务中，claim grounding coverage 和 verifier coverage 是主要瓶颈；Set B 压力测试显示当前 intervention 的泛化能力仍有限。
 - **贡献**：提出 externally verifiable agent failures 的 taxonomy、claim-level audit pipeline、domain verifier adapter contract，以及跨领域消融评估。
 
 ## 1. Introduction
@@ -50,7 +50,7 @@
   统一的 evidence-state 分类体系和风险打分框架，能否在结构差异显著的两个域（ecommerce state-grounded vs reference evidence-grounded）上产生一致且可解释的可靠性度量？
 
 - **RQ3: Final-answer-only versus Trace/State-augmented Auditing**  
-  相比只审计最终回答，引入 tool traces 和 environment state 能带来多少增益？
+  相比只审计最终回答，引入 tool arguments、execution traces 和 environment state transitions 能带来多少增益？
 
 ### 1.5 Contributions
 
@@ -336,10 +336,10 @@
 ### 7.4 RQ3: Final-answer-only versus Trace/State-augmented Auditing
 
 - 对比同一代码版本、同一 seeds、同一 Set A ecommerce 场景下的 V3_Intervention 与 V3_NoStructural。
-- 旧批次数据已归档到 `results/_archive/rq3_ablation_20260514/`；后续完整批次快照已保存为 `results/_archive/full_experiment_snapshot_20260522.tar.gz`。这些只作为 preservation / preliminary evidence；最终论文数字必须来自当前修复后代码重跑生成的 timestamped `results/rq3_ablation/` 输出。
-- 关键分析：差距是否主要来自 F2 检测（pre-execution policy）而非 F4（post-hoc claim verification 已能覆盖）。
-- 结论：structural audit 对 ecommerce 的独特贡献是 pre-execution 策略违规检测，而非 post-hoc 状态不一致检测。
-- 将 high-value order policy violation（F2）作为 structural audit 贡献的代表性案例，将 false-success database mutation（F4）作为 claim pipeline 已能覆盖的对照案例。
+- 当前 post-fix RQ3 输出目录为 `results/rq3_ablation/20260531/073500/`；对应完整归档为 `results/_archive/final_experiment_snapshot_20260602_3759744/`。
+- 报告核心对比：`V3_NoStructural` RDR `0.237`、FAR `0.762`、pass rate `0.302`；结构化 V3 ecommerce RDR `0.640`、FAR `0.231`、pass rate `0.662`。
+- 关键分析：structural audit 的增益来自两个 runtime-only 信号：F2 pre-execution policy violation（`0.225 -> 0.735`）和 F4 post-execution state-transition anomaly（`0.353 -> 0.827`）。
+- 结论：claim-only final-answer audit 对 runtime failures 覆盖不足；结构化 audit 同时补足 policy precondition 和 state-transition correctness 两类 final-answer 不稳定暴露的信号。
 
 ### 7.5 Domain-level Analysis
 
@@ -359,51 +359,58 @@
 - **Case 3: Reference metadata mismatch**  
   DOI、title、author 或 publication year 与 metadata 不一致，展示 claim-to-evidence trace。
 
-### 7.7 Expected or Observed Findings
+### 7.7 Observed Findings
 
-若实验结果已固定，可写为 observed findings；若仍在整理，应写为 expected findings 或 preliminary findings。
-
-- ecommerce 中 trace/state-augmented auditing 预计会显著提升 detection rate；最终数值以冻结代码后的 Set A 和 RQ3 同批结果为准。
-- reference 中 enforced intervention 可能产生高 false alarm rate，主要原因预计是 claim extraction 产生大量 unverifiable aggregate claims；最终用 evidence-state 表和 TCCR 解释。
+- Set A overall：V3 false acceptance rate `0.389`、risk detection rate `0.466`、false alarm rate `0.214`、pass rate `0.518`。
+- Ecommerce：V3 达到 RDR `0.640`、FAR `0.231`、false alarm `0.250`、pass rate `0.662`；RQ3 中 `V3_NoStructural` 只有 RDR `0.237` 和 FAR `0.762`。
+- Reference：V3 只有 RDR `0.162`，FAR 仍为 `0.666`；evidence-state coverage `0.321`、TCCR `0.188`、avg unverifiable count `2.512`，说明主要限制在 claim grounding 和 verifier coverage。
+- Set B：V3 overall FAR `0.783`、false alarm `0.179`、gate action rate `0.178`、pass rate `0.569`，应作为泛化压力测试的限制性结果报告。
 
 ### 7.8 Runtime and Cost Results
 
 - 报告平均 audit latency、p95 latency 与 token cost。
 - 区分 neural stages 和 symbolic stages 的开销。
 - 使用 `stage_latency_mean_ms`、`stage_latency_p95_ms`、`avg_tokens` 和 `total_tokens_sum` 填表。
-- 记录对应的 timestamped results 目录和 commit hash，避免混用归档旧批次与修复后新批次。
+- 当前 Set A V3 ecommerce total pipeline mean `13605.7 ms`，p95 `37955.9 ms`；`extract_claims` mean `13603.2 ms`，p95 `37953.1 ms`，说明开销几乎完全由 LLM claim extraction 主导。
+- 记录对应的 timestamped results 目录和 commit hash `3759744`，避免混用归档旧批次与修复后新批次。
 - 讨论该开销对 offline benchmark、interactive agent 和 production monitoring 三种使用方式的影响。
 
 ## 8. Discussion
 
 ### 8.1 Why Trace/State-augmented Auditing Matters—and Where It Does Not
 
-ReliableGuard 的受控消融实验（V3 vs V3_NoStructural）用于揭示 trace/state augmentation 的价值边界，而非只是一个总体检测增益数字。最终论证应使用修复后冻结代码重跑的同批 RQ3 数据；`results/_archive/full_experiment_snapshot_20260522.tar.gz` 和更早旧批次只作为设计验证与复现实验参考。这个边界在架构层面有明确的解释。
+ReliableGuard 的受控消融实验（V3 vs V3_NoStructural）用于揭示 trace/state augmentation 的价值边界，而非只是一个总体检测增益数字。当前 post-fix RQ3 数据显示，claim-only V3 在 ecommerce 上只有 RDR `0.237`，而结构化 V3 达到 RDR `0.640`。
 
-**Claim pipeline 在没有 trace/state 的情况下能覆盖的：**
+**Claim pipeline 可以覆盖的：**
 
-- **F3（虚构数据）**：agent 声称一个 DB 里不存在的实体 → claim pipeline 查询 DB → not_found → BLOCK。不需要任何 trace。
-- **F4（false-success）**：agent 说"order confirmed"，但工具实际上没有改变 DB 状态。Claim pipeline 提取声明"order status is confirmed"，查询 DB → status = pending → contradicted → BLOCK。Claim pipeline 本质上是一个 post-hoc 事实一致性检查器——它把最终回答里的声明拿去和当前 domain state 对比。工具调用是否"成功报告了"并不重要，重要的是最终状态。
+- **F3（虚构数据）**：agent 声称一个 DB 里不存在的实体，claim pipeline 查询 DB 后得到 not_found 或 contradicted。这类失败通常不需要工具执行前的 policy signal。
+- **部分 F4（false-success）**：如果最终回答明确声明订单已创建、确认或退款，而 DB 状态没有对应变化，claim pipeline 有机会通过 contradicted evidence 检出。
+
+**Claim pipeline 不稳定覆盖的：**
+
+- **F4 的全部 false-success 变体**：claim pipeline 依赖 final answer 是否包含可抽取、可验证的状态声明。如果 agent 用模糊语言回答，或 extractor 没有抽取到关键 claim，即使 DB 未变化，也可能漏检。最新 RQ3 中 F4 在 `V3_NoStructural` 下 detection 只有 `0.353`，结构化 V3 提升到 `0.827`，说明 post-execution state-transition check 比 final-answer-only audit 更稳定。
 
 **Structural audit 独立负责的：**
 
-- **F2（策略违规）**：agent 创建了 amount = 8000 的订单。Claim pipeline 提取声明"order amount is 8000"，查询 DB → amount = 8000 ✓ → supported → PASS。DB 状态是正确的，事实全部对应。问题在于：这个操作在执行前违反了 amount > 5000 需要审批的业务策略。策略违规发生在状态变化之前，而不是状态之中。任何事后验证都无法发现它，因为执行结果里没有任何"错误"可供核实。只有 pre-execution check 在工具调用前检查 `amount=8000 > 5000` 才能拦截。
+- **F2（策略违规）**：agent 创建 amount = 8000 的订单时，DB 记录本身可能是事实正确的；问题是该操作违反 amount > 5000 需要审批的业务策略。claim pipeline 验证最终状态可能全部 supported，因此需要 pre-execution check 在工具调用前检查 `amount=8000 > 5000`。最新 RQ3 中 F2 detection 从 `0.225` 提升到 `0.735`。
+- **F4（状态转移异常）**：工具报告 success 但 DB before/after snapshot 没有对应变化时，post-execution check 可以直接 BLOCK，不依赖最终回答措辞。
 
 **原则性的边界描述：**
 
-这不是"trace/state 提供了更多信息"那么简单。边界在于：**失败是否在 post-execution domain state 里留下可观测的矛盾**。
+trace/state augmentation 的价值在于它提供 final-answer-only audit 不稳定或不可见的 runtime evidence：
 
-- 如果是（F3、F4）：claim pipeline 覆盖，structural audit 不带来额外增益。
-- 如果不是（F2）：domain state 在执行后是正确的，claim pipeline 天然盲区，只有 pre-execution structural audit 能检测。
+- policy preconditions：操作是否应被允许执行。
+- state transitions：成功工具调用是否实际改变了环境状态。
+- final-answer claims：agent 是否在自然语言中暴露了足够可验证的事实。
 
 **架构意义：**
 
-这解释了为什么 ReliableGuard 的双层设计是必要的，而不只是"ecommerce 比 reference 多了一个组件"：
+ReliableGuard 的双层设计不是简单叠加组件，而是覆盖不同证据来源：
 
-- Neural claim pipeline：language understanding + post-hoc factual consistency checking
-- Symbolic structural audit：business rule encoding + pre-execution enforcement
+- Neural claim pipeline：language understanding + post-hoc factual consistency checking。
+- Symbolic structural audit：business rule encoding + pre-execution policy checking + post-execution state-transition validation。
 
-两层的覆盖域不重叠，任何一层都不能替代另一层。这一设计原则对新领域的扩展同样成立：如果新领域存在"操作结果正确但操作决策不合规"的失败场景（医疗审批、财务合规、权限控制），structural audit 是必须的；如果失败都表现为最终状态的事实不一致，claim pipeline 就已足够。
+两层互补，而不是互相替代。对新领域而言，如果风险存在于 tool arguments、权限、审批、事务状态变化或环境副作用中，就需要 structural audit；如果风险只表现为最终回答与可查询证据之间的事实不一致，claim-level audit 可能足够。
 
 ### 8.2 Domain-dependent Reliability
 

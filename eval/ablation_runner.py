@@ -31,10 +31,13 @@ LLM_INFRASTRUCTURE_ERRORS = {
     "AuthenticationError",
     "BadRequestError",
     "InternalServerError",
-    "LLMResponseTruncatedError",
     "PermissionDeniedError",
     "RateLimitError",
 }
+
+# Truncation is task-level (answer too long for this specific input), not an
+# infrastructure failure. Log and skip; do not count toward consecutive abort threshold.
+TRUNCATION_ERRORS = {"LLMResponseTruncatedError"}
 
 
 class ExperimentAbort(RuntimeError):
@@ -144,7 +147,8 @@ def run_version(
             except Exception as e:
                 error_label = type(e).__name__
                 print(f"[ERROR] seed={seed} {task['id']} | {error_label}: {e}")
-                consecutive_errors += 1
+                if error_label not in TRUNCATION_ERRORS:
+                    consecutive_errors += 1
 
                 row = build_result_row(
                     task=task,
