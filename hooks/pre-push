@@ -1,41 +1,54 @@
 #!/bin/bash
-# pre-push hook: documentation discipline gate.
-#   (1) HARD : reject the push if CHANGELOG.md is not updated in the commits being pushed.
-#   (2) WARN : if tracked code changed but README.md did not (judgement call, non-blocking).
-#   (3) CHECK: print the documentation checklist and, when run interactively, require an
-#              explicit confirmation. Items 3-4 of the checklist live in gitignored
-#              CLAUDE.md / memory and cannot be machine-verified from git.
+# pre-push hook: documentation discipline gate. See docs/push_checklist.md.
+#   (1) HARD : reject if CHANGELOG.md is not updated in the commits being pushed.
+#   (2) WARN : tracked code changed but README.md did not (judgement call, non-blocking).
+#   (3) HARD : a push is a project "node". On a new node (HEAD differs from the last push),
+#       the local record files must have been updated since the last push:
+#         - CLAUDE.md (Code Task Checklist / Status / decisions), and
+#         - the memory/ roadmap, if its directory is locatable.
+#       These are gitignored, so they cannot be checked from git history; the hook compares
+#       their content hash against a local baseline in .git/doc_push_state. Re-pushing the
+#       same HEAD (e.g. after a network failure) is skipped, and the very first run only
+#       records the baseline.
 # Install: bash scripts/install-hooks.sh
 # Emergency bypass (avoid): git push --no-verify
+# Env overrides: RG_MEMORY_DIR (memory location), RG_DOC_STATE (baseline file).
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 CODE_REGEX='^(src/|eval/|scripts/|tasks/|ReliableGuard\.py)'
+STATE_FILE="${RG_DOC_STATE:-$REPO_ROOT/.git/doc_push_state}"
+MEMORY_DIR="${RG_MEMORY_DIR:-$HOME/.claude/projects/$(printf '%s' "$REPO_ROOT" | tr '/_' '--')/memory}"
 
+_sha() {
+    if command -v sha256sum >/dev/null 2>&1; then sha256sum | awk '{print $1}';
+    else shasum -a 256 | awk '{print $1}'; fi
+}
+hash_file() { [ -f "$1" ] && _sha < "$1" || echo "absent"; }
+hash_memory() {
+    [ -d "$MEMORY_DIR" ] || { echo "absent"; return; }
+    local files; files=$(find "$MEMORY_DIR" -type f -name '*.md' | sort)
+    [ -n "$files" ] && printf '%s\n' "$files" | xargs cat | _sha || echo "empty"
+}
+
+# (1) + (2): per-range CHANGELOG gate, plus code/README change flags.
 code_changed=0
 readme_changed=0
-
 while read -r local_ref local_sha remote_ref remote_sha; do
-    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
-        continue  # branch deletion — skip
-    fi
+    [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue  # deletion
     if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-        range="$local_sha"            # new branch — all reachable commits
+        range="$local_sha"
     else
         range="$remote_sha..$local_sha"
     fi
-
     files=$(git log --name-only --pretty=format: "$range" 2>/dev/null | sort -u)
-
     if ! printf '%s\n' "$files" | grep -q '^CHANGELOG.md$'; then
         echo ""
         echo "Push rejected: CHANGELOG.md was not updated in the commits being pushed ($range)."
-        echo "  1. Add an entry under [Unreleased] in CHANGELOG.md"
-        echo "  2. Include CHANGELOG.md in the same commit, then push again"
+        echo "  Add an entry under [Unreleased] and include CHANGELOG.md in the same commit."
         echo "  Emergency bypass: git push --no-verify"
         echo ""
         exit 1
     fi
-
     printf '%s\n' "$files" | grep -Eq "$CODE_REGEX" && code_changed=1
     printf '%s\n' "$files" | grep -q '^README.md$' && readme_changed=1
 done
@@ -43,34 +56,53 @@ done
 if [ "$code_changed" = "1" ] && [ "$readme_changed" = "0" ]; then
     echo ""
     echo "WARNING: tracked code changed but README.md was not updated."
-    echo "  If this change adds/moves/removes a file, directory, command, or workflow,"
-    echo "  update the README.md structure/usage sections (non-blocking)."
+    echo "  If a file, directory, command, or workflow changed, update README.md (non-blocking)."
 fi
+
+# (3): local-record gate (CLAUDE.md + memory) keyed by node = current HEAD.
+cur_head="$(git rev-parse HEAD 2>/dev/null)"
+claude_now="$(hash_file "$REPO_ROOT/CLAUDE.md")"
+memory_now="$(hash_memory)"
+
+prev_head=""; prev_claude=""; prev_memory=""
+if [ -f "$STATE_FILE" ]; then
+    prev_head=$(grep '^head=' "$STATE_FILE" | cut -d= -f2-)
+    prev_claude=$(grep '^claude=' "$STATE_FILE" | cut -d= -f2-)
+    prev_memory=$(grep '^memory=' "$STATE_FILE" | cut -d= -f2-)
+fi
+
+if [ -z "$prev_head" ]; then
+    echo ""
+    echo "Records gate: first run — recording baseline, not enforced this time."
+elif [ "$prev_head" = "$cur_head" ]; then
+    echo ""
+    echo "Records gate: same HEAD as last push (re-push) — skipped."
+else
+    problems=""
+    if [ "$claude_now" = "absent" ]; then
+        echo "Records gate: CLAUDE.md not found at repo root — its check is skipped."
+    elif [ "$claude_now" = "$prev_claude" ]; then
+        problems="$problems\n  - CLAUDE.md unchanged since last push — update the Code Task Checklist / Status / decisions."
+    fi
+    if [ "$memory_now" = "absent" ]; then
+        echo "Records gate: memory dir not found ($MEMORY_DIR) — set RG_MEMORY_DIR to enforce; reminder only."
+    elif [ "$memory_now" = "$prev_memory" ]; then
+        problems="$problems\n  - no memory/*.md changed since last push — mirror this node's progress/decisions into memory."
+    fi
+    if [ -n "$problems" ]; then
+        echo ""
+        echo "Push rejected: local record files were not updated for this node:"
+        printf "%b\n" "$problems"
+        echo "  (gitignored files — checked by content hash, not git history.)"
+        echo "  Emergency bypass: git push --no-verify"
+        echo ""
+        exit 1
+    fi
+fi
+
+# Passed: advance the baseline to this node.
+{ echo "head=$cur_head"; echo "claude=$claude_now"; echo "memory=$memory_now"; } > "$STATE_FILE"
 
 echo ""
-echo "================ Pre-push documentation checklist ================"
-echo "  1. CHANGELOG.md  - entry under [Unreleased]            (HARD-gated above)"
-echo "  2. README.md     - updated if a file/dir/command/workflow changed"
-echo "  3. CLAUDE.md + memory/ - framework decisions recorded  (local-only)"
-echo "  4. CLAUDE.md 'Code Task Checklist' - done/pending updated (local-only)"
-echo "  details: docs/push_checklist.md"
-echo "=================================================================="
-
-# Only enforce the confirmation when /dev/tty is genuinely usable. Probing it by an
-# actual write+read (errors suppressed) is more reliable than `[ -r /dev/tty ]`, which is
-# true even when the device node exists but has no controlling terminal (IDE/CI pushes).
-if printf "Confirm the documentation checklist is satisfied? [y/N] " 2>/dev/null >/dev/tty \
-   && IFS= read -r reply 2>/dev/null </dev/tty; then
-    case "$reply" in
-        y|Y|yes|YES) echo "Checklist confirmed. Proceeding with push." ;;
-        *)
-            echo "Push aborted: documentation checklist not confirmed."
-            echo "  (re-run after updating docs, or 'git push --no-verify' to bypass)"
-            exit 1
-            ;;
-    esac
-else
-    echo "(non-interactive shell - checklist shown as a reminder, not enforced.)"
-fi
-
+echo "Pre-push checks passed (CHANGELOG + local records). See docs/push_checklist.md."
 exit 0

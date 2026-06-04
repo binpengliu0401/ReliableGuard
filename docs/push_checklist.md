@@ -1,24 +1,40 @@
 # Pre-Push Documentation Checklist
 
-Enforced by `hooks/pre-push` (install once after cloning: `bash scripts/install-hooks.sh`).
+A push is treated as a project **node**: reaching it means every record file — both the
+GitHub-tracked ones and the gitignored local ones — must be current. This is enforced by
+`hooks/pre-push` (install once after cloning: `bash scripts/install-hooks.sh`).
 Emergency bypass (avoid): `git push --no-verify`.
 
-Before every push, confirm:
+Before every push, the hook checks:
 
-1. **CHANGELOG.md** — an entry was added under `[Unreleased]` describing this change.
-   *Hard-gated: the push is rejected if `CHANGELOG.md` is not among the commits being pushed.*
+1. **CHANGELOG.md** — an entry was added under `[Unreleased]`.
+   *Hard gate: the push is rejected if `CHANGELOG.md` is not among the commits being pushed.*
 2. **README.md** — updated if the change adds, moves, or removes a tracked file, directory,
    command, or workflow that the project-structure / usage sections describe.
    *Soft warning: the hook warns if tracked code changed but `README.md` did not.*
-3. **Framework decisions** — any design or scope decision agreed this session is recorded in
-   `CLAUDE.md` (Status / roadmap) and in the `memory/` roadmap.
-   *Reminder only: these are gitignored, local-only files and cannot be verified from git.*
-4. **Task status** — the `CLAUDE.md` "Code Task Checklist" reflects what is done / pending for
-   this change (check off completed tasks, note resolved decisions).
-   *Reminder only: gitignored, local-only.*
+3. **CLAUDE.md** — the "Code Task Checklist" / Status / decisions reflect this node.
+   *Hard gate (see below).*
+4. **memory/** — the roadmap memory mirrors this node's progress and decisions.
+   *Hard gate when the memory directory is locatable; reminder otherwise.*
 
-Items 3–4 live in gitignored local files, so they cannot be machine-verified from git history.
-When the hook runs interactively (a terminal `git push`), it prints this list and requires an
-explicit `y` confirmation. Non-interactive pushes (e.g. the IDE push button, CI) still get the
-hard CHANGELOG gate and the README warning, but the items 3–4 confirmation is shown as a
-reminder only.
+## How the local-record gate works (items 3–4)
+
+`CLAUDE.md` and `memory/` are gitignored, so they never appear in git history and cannot be
+checked from the pushed commits. Instead the hook keeps a content-hash baseline in
+`.git/doc_push_state` (local, untracked) recording, at each successful push, the pushed `HEAD`
+and the hashes of `CLAUDE.md` and the memory `*.md` files.
+
+On the next push the hook compares:
+
+- **Same `HEAD` as last push** (e.g. retry after a network failure): the gate is skipped.
+- **New `HEAD` (a new node)**: if `CLAUDE.md` is byte-for-byte unchanged since the last push,
+  or no `memory/*.md` changed, the push is **rejected** — update the records first.
+- **First run** (no baseline yet): the baseline is recorded and the gate is not enforced.
+
+The memory directory defaults to the Claude memory path derived from the repo location and can
+be overridden with `RG_MEMORY_DIR`. If it cannot be found, item 4 degrades to a printed
+reminder (it is not silently dropped). On a fresh clone / CI where the local files are absent,
+the relevant checks are skipped so legitimate pushes are not blocked.
+
+To relax memory enforcement to a warning, point `RG_MEMORY_DIR` elsewhere or use
+`git push --no-verify` for that push.
