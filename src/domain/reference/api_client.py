@@ -65,6 +65,14 @@ def _load_real() -> dict[str, Any]:
     return _real_cache
 
 
+# Reference-fixture provenance convention. Each PDF entry and each of its reference
+# records in mock_data.json carries a `provenance` field ("real_paper" / "synthetic";
+# paper_f4 is synthetic, the rest are transcribed from real papers). Scenario-injected
+# fabricated DOIs (e.g. 10.99999/fake.*) are identified at the dataset level, not stored
+# in the fixture. The verifier never reads `provenance`, so it is black-box-safe and
+# changes no evidence_state; it is consumed only by offline failure-attribution analysis.
+
+
 # parse_pdf
 def get_references_from_pdf(pdf_path: str) -> list[dict]:
     if _MODE == "mock":

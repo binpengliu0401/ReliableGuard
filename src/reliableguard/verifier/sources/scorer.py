@@ -18,11 +18,14 @@ def verification_from_evidence(
     material = [item for item in evidence if item.found]
     if not material:
         if evidence:
+            # Configured sources were consulted (online) and positively reported no
+            # matching evidence.
             return VerificationResult(
                 claim_id=claim.claim_id,
                 evidence_state="not_found",
                 evidence_value=[item.to_dict() for item in evidence],
                 source=default_source,
+                source_mode="not_found",
                 confidence=0.0,
                 reason="Configured verifier sources returned no matching evidence.",
             )
@@ -47,6 +50,7 @@ def verification_from_evidence(
         evidence_state=evidence_state,
         evidence_value=evidence_value,
         source=best.source,
+        source_mode="fixture",
         confidence=round(float(score["overall"]), 3),
         reason=(
             f"Configured source diagnostic={diagnostic}; "

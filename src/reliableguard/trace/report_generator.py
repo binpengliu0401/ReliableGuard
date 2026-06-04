@@ -18,6 +18,13 @@ def generate_report(
     for trace in traces:
         counts[trace.verification.evidence_state] += 1
 
+    # source_mode is orthogonal to evidence_state: it records whether the verifier had
+    # an evidence source to consult at runtime. `unavailable` flags claims that could
+    # not be checked because no source was reachable (offline / source disabled).
+    unavailable_count = sum(
+        1 for trace in traces if trace.verification.source_mode == "unavailable"
+    )
+
     findings = [
         trace
         for trace in traces
@@ -51,5 +58,6 @@ def generate_report(
         unsupported_count=counts["unsupported"],
         unverifiable_count=counts["unverifiable"],
         not_found_count=counts["not_found"],
+        unavailable_count=unavailable_count,
     )
 

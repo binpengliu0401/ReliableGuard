@@ -11,9 +11,20 @@ from src.domain.reference.api_client import (
 )
 from src.domain.reference.matcher import author_overlap, title_similarity
 from src.domain.reference.tools import init_reference_db
-from src.reliableguard.schema import Claim, VerificationResult, Verifiability
+from src.reliableguard.schema import Claim, SourceMode, VerificationResult, Verifiability
+from src.reliableguard.verifier.sources.loader import load_sources
 from src.reliableguard.verifier.sources.router import query_configured_sources
 from src.reliableguard.verifier.sources.scorer import verification_from_evidence
+
+
+def _external_sources_enabled() -> bool:
+    """Whether any external reference source is configured and enabled.
+
+    Offline (the default benchmark mode) all sources are disabled, so a claim the
+    fixture cannot confirm maps to `unavailable` ("no source to consult") rather than
+    `not_found` ("an available authoritative source positively reported absence").
+    """
+    return len(load_sources("reference")) > 0
 
 
 def verify_reference_claim(claim: Claim, verifiability: Verifiability) -> VerificationResult:
@@ -49,6 +60,7 @@ def verify_reference_claim(claim: Claim, verifiability: Verifiability) -> Verifi
         claim_id=claim.claim_id,
         evidence_state="unsupported" if verifiability == "partially_verifiable" else "unverifiable",
         source="reference_metadata",
+        source_mode="unavailable",
         confidence=0.0,
         reason="No reference verifier rule matched this claim.",
     )
@@ -69,6 +81,7 @@ def _verify_doi_claim(claim: Claim, doi: str) -> VerificationResult:
                 evidence_state="not_found",
                 evidence_value=result,
                 source="crossref",
+                source_mode="not_found" if _external_sources_enabled() else "unavailable",
                 confidence=1.0,
                 reason=f"DOI {doi} was not found in the configured reference source.",
             )
@@ -84,6 +97,7 @@ def _verify_doi_claim(claim: Claim, doi: str) -> VerificationResult:
             claim,
             f"DOI {doi} exists but no fixture metadata is available for field verification.",
             result,
+            source_mode="fixture",
         )
     metadata = dict(metadata)
     metadata.setdefault("doi", doi)
@@ -110,6 +124,7 @@ def _verify_reference_db_claim(claim: Claim, ref_id: int) -> VerificationResult:
             claim_id=claim.claim_id,
             evidence_state="not_found",
             source="references_db",
+            source_mode="not_found",
             confidence=1.0,
             reason=f"Reference {ref_id} was not found in references_db.",
         )
@@ -139,6 +154,7 @@ def _verify_reference_db_claim(claim: Claim, ref_id: int) -> VerificationResult:
         evidence_state="supported",
         evidence_value=evidence,
         source="references_db",
+        source_mode="fixture",
         confidence=1.0,
         reason="Reference entity exists in references_db.",
     )
@@ -169,6 +185,7 @@ def _verify_authors_claim(claim: Claim, title: str) -> VerificationResult:
             evidence_state="unsupported",
             evidence_value=result,
             source="semantic_scholar",
+            source_mode="not_found" if _external_sources_enabled() else "unavailable",
             confidence=0.0,
             reason="No canonical authors were found for the claimed title.",
         )
@@ -180,6 +197,7 @@ def _verify_authors_claim(claim: Claim, title: str) -> VerificationResult:
         evidence_state="supported" if overlap >= 0.8 else "contradicted",
         evidence_value={"expected_authors": expected, "claimed_authors": claimed},
         source="semantic_scholar",
+        source_mode="fixture",
         confidence=overlap,
         reason=f"Author overlap={overlap:.3f}.",
     )
@@ -253,16 +271,20 @@ def _verify_record_fields(
             evidence_state="contradicted",
             evidence_value=record,
             source=source,
+            source_mode="fixture",
             confidence=min(score for _, _, score, _ in material_checks),
             reason="; ".join(reason for _, supported, _, reason in material_checks if supported is False),
         )
 
     if missing_checks:
+        # A record was found; only the specific field is absent, so this is still
+        # fixture-sourced evidence (not "source offline").
         return _unverifiable_metadata_result(
             claim,
             "; ".join(reason for _, _, _, reason in missing_checks),
             record,
             source,
+            source_mode="fixture",
         )
 
     if material_checks:
@@ -271,6 +293,7 @@ def _verify_record_fields(
             evidence_state="supported",
             evidence_value=record,
             source=source,
+            source_mode="fixture",
             confidence=min(score for _, _, score, _ in material_checks),
             reason="; ".join(reason for _, _, _, reason in material_checks),
         )
@@ -280,6 +303,7 @@ def _verify_record_fields(
         evidence_state="supported",
         evidence_value=record,
         source=source,
+        source_mode="fixture",
         confidence=1.0,
         reason=default_reason or "Reference metadata record exists in the configured source.",
     )
@@ -366,12 +390,15 @@ def _unverifiable_metadata_result(
     reason: str,
     evidence_value: Any | None = None,
     source: str = "reference_metadata",
+    *,
+    source_mode: SourceMode = "unavailable",
 ) -> VerificationResult:
     return VerificationResult(
         claim_id=claim.claim_id,
         evidence_state="unverifiable",
         evidence_value=evidence_value,
         source=source,
+        source_mode=source_mode,
         confidence=0.0,
         reason=reason,
     )
@@ -409,6 +436,7 @@ def _compare_numeric(
             evidence_state="unsupported",
             evidence_value=evidence_value if evidence_value is not None else actual,
             source=source,
+            source_mode="fixture",
             confidence=0.5,
             reason="Numeric claim could not be parsed into a comparable value.",
         )
@@ -418,6 +446,7 @@ def _compare_numeric(
         evidence_state="supported" if supported else "contradicted",
         evidence_value=evidence_value if evidence_value is not None else actual,
         source=source,
+        source_mode="fixture",
         confidence=1.0,
         reason=f"Claimed value={claimed}; database value={actual_number}.",
     )

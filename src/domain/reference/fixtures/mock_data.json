@@ -2,6 +2,7 @@
   "pdfs": {
     "react.pdf": {
       "paper_id": "react",
+      "provenance": "real_paper",
       "source": "ReAct- Synergizing Reasoning and Acting in Language Models",
       "references": [
         {
@@ -16,7 +17,8 @@
           "doi": "10.18653/v1/N18-1074",
           "journal": "North American Chapter of the Association for Computational Linguistics",
           "year": 2018,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 2,
@@ -33,7 +35,8 @@
           "doi": "10.18653/v1/D18-1259",
           "journal": "Conference on Empirical Methods in Natural Language Processing",
           "year": 2018,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 3,
@@ -49,7 +52,8 @@
           "doi": "",
           "journal": "International Conference on Learning Representations",
           "year": 2020,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 4,
@@ -83,7 +87,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2020,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 5,
@@ -95,7 +100,8 @@
           "doi": "10.18653/v1/2021.emnlp-main.734",
           "journal": "Conference on Empirical Methods in Natural Language Processing",
           "year": 2021,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 6,
@@ -110,7 +116,8 @@
           "doi": "10.18653/v1/2021.emnlp-main.293",
           "journal": "Conference on Empirical Methods in Natural Language Processing",
           "year": 2021,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 7,
@@ -132,7 +139,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 8,
@@ -146,7 +154,8 @@
           "doi": "",
           "journal": "International Conference on Machine Learning",
           "year": 2022,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 9,
@@ -164,7 +173,8 @@
           "doi": "10.52202/068431-1800",
           "journal": "Neural Information Processing Systems",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 10,
@@ -182,12 +192,14 @@
           "doi": "10.52202/068431-2262",
           "journal": "Neural Information Processing Systems",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         }
       ]
     },
     "critic.pdf": {
       "paper_id": "critic",
+      "provenance": "real_paper",
       "source": "CRITIC- Large Language Models Can Self-Correct with Tool-Interactive Critiquing",
       "references": [
         {
@@ -206,7 +218,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2019,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 2,
@@ -224,7 +237,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 3,
@@ -256,7 +270,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 4,
@@ -284,7 +299,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 5,
@@ -300,7 +316,8 @@
           "doi": "",
           "journal": "International Conference on Learning Representations",
           "year": 2022,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 6,
@@ -341,7 +358,8 @@
           "doi": "10.48550/arXiv.2204.05862",
           "journal": "arXiv.org",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 7,
@@ -357,7 +375,8 @@
           "doi": "",
           "journal": "",
           "year": 2022,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 8,
@@ -370,7 +389,8 @@
           "doi": "10.48550/arXiv.2205.12255",
           "journal": "arXiv.org",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 9,
@@ -387,7 +407,8 @@
           "doi": "10.18653/v1/2023.acl-long.291",
           "journal": "Annual Meeting of the Association for Computational Linguistics",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 10,
@@ -433,12 +454,14 @@
           "doi": "10.48550/arXiv.2207.05221",
           "journal": "arXiv.org",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         }
       ]
     },
     "gorilla.pdf": {
       "paper_id": "gorilla",
+      "provenance": "real_paper",
       "source": "Gorilla- Large Language Model Connected with Massive APIs",
       "references": [
         {
@@ -453,7 +476,8 @@
           "doi": "10.18653/v1/D19-1609",
           "journal": "Conference on Empirical Methods in Natural Language Processing",
           "year": 2019,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 2,
@@ -465,7 +489,8 @@
           "doi": "10.18653/v1/2021.eacl-main.20",
           "journal": "Conference of the European Chapter of the Association for Computational Linguistics",
           "year": 2020,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 3,
@@ -479,7 +504,8 @@
           "doi": "10.70675/416f6582z4576z444eza710z5e930d59bf97",
           "journal": "Neural Information Processing Systems",
           "year": 2020,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 4,
@@ -542,7 +568,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 5,
@@ -555,7 +582,8 @@
           "doi": "10.18653/v1/2022.acl-long.579",
           "journal": "Annual Meeting of the Association for Computational Linguistics",
           "year": 2021,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 6,
@@ -606,7 +634,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 7,
@@ -628,7 +657,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 8,
@@ -656,7 +686,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 9,
@@ -723,7 +754,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2022,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 10,
@@ -741,12 +773,14 @@
           "doi": "10.52202/068431-1800",
           "journal": "Neural Information Processing Systems",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         }
       ]
     },
     "reflexion.pdf": {
       "paper_id": "reflexion",
+      "provenance": "real_paper",
       "source": "Reflexion- Language Agents with Verbal Reinforcement Learning",
       "references": [
         {
@@ -810,7 +844,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 2,
@@ -831,7 +866,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 3,
@@ -859,7 +895,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2021,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 4,
@@ -877,7 +914,8 @@
           "doi": "10.52202/068431-1800",
           "journal": "Neural Information Processing Systems",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 5,
@@ -930,7 +968,8 @@
           "doi": "",
           "journal": "Conference on Robot Learning",
           "year": 2022,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 6,
@@ -944,7 +983,8 @@
           "doi": "10.52202/075280-1321",
           "journal": "Neural Information Processing Systems",
           "year": 2022,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 7,
@@ -962,7 +1002,8 @@
           "doi": "10.48550/arXiv.2302.04761",
           "journal": "Neural Information Processing Systems",
           "year": 2023,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 8,
@@ -976,7 +1017,8 @@
           "doi": "10.48550/arXiv.2303.17071",
           "journal": "Clinical Natural Language Processing Workshop",
           "year": 2023,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 9,
@@ -992,7 +1034,8 @@
           "doi": "10.48550/arXiv.2303.17580",
           "journal": "Neural Information Processing Systems",
           "year": 2023,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 10,
@@ -1017,12 +1060,14 @@
           "doi": "10.48550/arXiv.2303.17651",
           "journal": "Neural Information Processing Systems",
           "year": 2023,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         }
       ]
     },
     "cognitive_arch.pdf": {
       "paper_id": "cognitive_arch",
+      "provenance": "real_paper",
       "source": "Cognitive Architectures for Language Agents",
       "references": [
         {
@@ -1036,7 +1081,8 @@
           "doi": "",
           "journal": "International Conference on Learning Representations",
           "year": 2014,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 2,
@@ -1055,7 +1101,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2016,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 3,
@@ -1069,7 +1116,8 @@
           "doi": "10.18653/v1/P17-1171",
           "journal": "Annual Meeting of the Association for Computational Linguistics",
           "year": 2017,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 4,
@@ -1082,7 +1130,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2018,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 5,
@@ -1097,7 +1146,8 @@
           "doi": "",
           "journal": "arXiv.org",
           "year": 2019,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 6,
@@ -1109,7 +1159,8 @@
           "doi": "10.18653/v1/D19-1063",
           "journal": "Conference on Empirical Methods in Natural Language Processing",
           "year": 2019,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 7,
@@ -1124,7 +1175,8 @@
           "doi": "10.5282/UBM/EPUB.72201",
           "journal": "arXiv.org",
           "year": 2019,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 8,
@@ -1138,7 +1190,8 @@
           "doi": "10.18653/v1/2020.emnlp-main.704",
           "journal": "Conference on Empirical Methods in Natural Language Processing",
           "year": 2020,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 9,
@@ -1154,7 +1207,8 @@
           "doi": "",
           "journal": "International Conference on Learning Representations",
           "year": 2020,
-          "doi_status": "no_doi"
+          "doi_status": "no_doi",
+          "provenance": "real_paper"
         },
         {
           "ref_id": 10,
@@ -1167,12 +1221,14 @@
           "doi": "10.18653/v1/2021.acl-long.295",
           "journal": "Annual Meeting of the Association for Computational Linguistics",
           "year": 2021,
-          "doi_status": "verified"
+          "doi_status": "verified",
+          "provenance": "real_paper"
         }
       ]
     },
     "paper_f4.pdf": {
       "paper_id": "paper_f4",
+      "provenance": "synthetic",
       "source": "synthetic",
       "references": []
     }

@@ -25,6 +25,13 @@ EvidenceState = Literal[
     "unverifiable",
     "not_found",
 ]
+# Provenance of the evidence the verifier actually had at runtime. Orthogonal to
+# `evidence_state` (the verification outcome): a `not_found` outcome can be produced
+# either by an available authoritative source ("not_found" mode) or by a missing
+# source offline ("unavailable" mode). `None` means no source was consulted (e.g. the
+# claim was classified unverifiable by type). This is a black-box, runtime-only signal;
+# it never reads dataset ground-truth labels.
+SourceMode = Literal["fixture", "unavailable", "not_found"]
 RiskLevel = Literal["low", "medium", "high"]
 InterventionAction = Literal["PASS", "WARN", "BLOCK"]
 Certainty = Literal["certain", "uncertain", "abstained"]
@@ -48,6 +55,7 @@ class VerificationResult(BaseModel):
     evidence_state: EvidenceState
     evidence_value: Any | None = None
     source: str | None = None
+    source_mode: SourceMode | None = None
     confidence: float = 1.0
     reason: str = ""
 
@@ -83,5 +91,6 @@ class ReliabilityReport(BaseModel):
     unsupported_count: int = 0
     unverifiable_count: int = 0
     not_found_count: int = 0
+    unavailable_count: int = 0
     stage_latencies: dict[str, float] = Field(default_factory=dict)
     token_usage: dict[str, int] = Field(default_factory=dict)

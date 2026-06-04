@@ -61,16 +61,20 @@ def _build_trace_summary(traces: list[ClaimTrace]) -> dict:
         "unverifiable": 0,
         "not_found": 0,
     }
+    source_modes = {"fixture": 0, "unavailable": 0, "not_found": 0, "unspecified": 0}
     items = []
     for trace in traces:
         state = trace.verification.evidence_state
         counts[state] += 1
+        source_mode = trace.verification.source_mode
+        source_modes[source_mode or "unspecified"] += 1
         items.append(
             {
                 "claim_id": trace.claim.claim_id,
                 "claim": trace.claim.text,
                 "evidence_state": state,
                 "source": trace.verification.source,
+                "source_mode": source_mode,
                 "risk_level": trace.risk.risk_level,
                 "intervention": trace.intervention.action,
                 "reason": trace.verification.reason,
@@ -79,5 +83,6 @@ def _build_trace_summary(traces: list[ClaimTrace]) -> dict:
     return {
         "total_claims": len(traces),
         "counts": counts,
+        "source_modes": source_modes,
         "items": items,
     }

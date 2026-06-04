@@ -15,6 +15,7 @@ def verify_ecommerce_claim(claim: Claim, verifiability: Verifiability) -> Verifi
                 claim_id=claim.claim_id,
                 evidence_state="not_found",
                 source="orders_db",
+                source_mode="not_found",
                 confidence=1.0,
                 reason=f"Order {order_id} was not found in orders_db.",
             )
@@ -39,6 +40,7 @@ def verify_ecommerce_claim(claim: Claim, verifiability: Verifiability) -> Verifi
         claim_id=claim.claim_id,
         evidence_state="unverifiable" if verifiability == "unverifiable" else "unsupported",
         source="orders_db",
+        source_mode="unavailable",
         confidence=0.0,
         reason="No ecommerce verifier rule matched this claim.",
     )
@@ -54,6 +56,7 @@ def _compare_order_claim(claim: Claim, evidence: dict[str, Any]) -> Verification
             evidence_state="supported" if expected == actual else "contradicted",
             evidence_value=evidence,
             source="orders_db",
+            source_mode="fixture",
             confidence=1.0,
             reason=f"Claimed {attribute}={expected}; database {attribute}={actual}.",
         )
@@ -66,6 +69,7 @@ def _compare_order_claim(claim: Claim, evidence: dict[str, Any]) -> Verification
         evidence_state="supported",
         evidence_value=evidence,
         source="orders_db",
+        source_mode="fixture",
         confidence=1.0,
         reason="Order entity exists in orders_db.",
     )
@@ -85,6 +89,7 @@ def _compare_numeric(
             evidence_state="unsupported",
             evidence_value=evidence_value if evidence_value is not None else actual,
             source=source,
+            source_mode="fixture",
             confidence=0.5,
             reason="Numeric claim could not be parsed into a comparable value.",
         )
@@ -94,6 +99,7 @@ def _compare_numeric(
         evidence_state="supported" if supported else "contradicted",
         evidence_value=evidence_value if evidence_value is not None else actual,
         source=source,
+        source_mode="fixture",
         confidence=1.0,
         reason=f"Claimed value={claimed}; database value={actual_number}.",
     )
@@ -162,6 +168,7 @@ def _unsupported_filter_result(claim: Claim, unsupported: list[str]) -> Verifica
         claim_id=claim.claim_id,
         evidence_state="unverifiable",
         source="orders_db",
+        source_mode="unavailable",
         confidence=1.0,
         reason=(
             "The claim requires filter(s) not present in the current orders schema: "

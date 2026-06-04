@@ -153,6 +153,11 @@ def compute_metrics(results: list[dict]) -> dict:
     pass_with_claim = 0
     pass_without_claim = 0
     evidence_state_totals = dict.fromkeys(EVIDENCE_STATE_COUNT_FIELDS, 0)
+    # source_mode == "unavailable" aggregate. Tracked separately from evidence states
+    # so it does not pollute evidence_state_coverage (a claim can be unavailable while
+    # carrying no positive evidence state).
+    unavailable_total = 0
+    unavailable_task_count = 0
     stage_latency_lists: dict[str, list[float]] = {
         stage: [] for stage in STAGE_LATENCY_KEYS
     }
@@ -234,6 +239,11 @@ def compute_metrics(results: list[dict]) -> dict:
                 evidence_state_task_count += 1
                 for key, value in evidence_counts.items():
                     evidence_state_totals[key] += value
+
+            unavailable_count = int(report.get("unavailable_count") or 0)
+            if unavailable_count > 0:
+                unavailable_total += unavailable_count
+                unavailable_task_count += 1
 
             grounded_count = sum(
                 int(report.get(key) or 0)
@@ -350,6 +360,12 @@ def compute_metrics(results: list[dict]) -> dict:
         )
         if evidence_state_task_count
         else None,
+        "avg_unavailable_count": round(
+            unavailable_total / evidence_state_task_count, 3
+        )
+        if evidence_state_task_count
+        else None,
+        "unavailable_task_rate": round(unavailable_task_count / total, 3) if total else None,
         "evidence_state_coverage": round(evidence_state_task_count / total, 3),
         "false_alarm_rate": round(false_alarm / false_alarm_denominator, 3)
         if false_alarm_denominator
