@@ -14,8 +14,9 @@ Before every push, the hook checks:
    *Soft warning: the hook warns if tracked code changed but `README.md` did not.*
 3. **CLAUDE.md** — the "Code Task Checklist" / Status / decisions reflect this node.
    *Hard gate (see below).*
-4. **memory/** — the roadmap memory mirrors this node's progress and decisions.
-   *Hard gate when the memory directory is locatable; reminder otherwise.*
+4. **memory/** — the roadmap memory mirrors this node's durable decisions/facts.
+   *Soft warning: the hook warns if no `memory/*.md` changed since the last push, but does not
+   block (memory hygiene — not every node produces a fact worth recording).*
 
 ## How the local-record gate works (items 3–4)
 
@@ -31,10 +32,10 @@ On the next push the hook compares:
   or no `memory/*.md` changed, the push is **rejected** — update the records first.
 - **First run** (no baseline yet): the baseline is recorded and the gate is not enforced.
 
-The memory directory defaults to the Claude memory path derived from the repo location and can
-be overridden with `RG_MEMORY_DIR`. If it cannot be found, item 4 degrades to a printed
-reminder (it is not silently dropped). On a fresh clone / CI where the local files are absent,
-the relevant checks are skipped so legitimate pushes are not blocked.
+Only `CLAUDE.md` is a hard gate. The `memory/` check is a non-blocking warning: if no
+`memory/*.md` changed since the last push the hook prints a reminder but still allows the push.
 
-To relax memory enforcement to a warning, point `RG_MEMORY_DIR` elsewhere or use
-`git push --no-verify` for that push.
+The memory directory defaults to the Claude memory path derived from the repo location and can
+be overridden with `RG_MEMORY_DIR`. On a fresh clone / CI where the local files are absent, the
+relevant checks are skipped so legitimate pushes are not blocked. `git push --no-verify` bypasses
+all checks for one push.

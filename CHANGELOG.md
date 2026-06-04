@@ -10,6 +10,7 @@ and include CHANGELOG.md in the same commit as the code changes.
 ## [Unreleased]
 
 ### Changed
+- **Pre-push memory check downgraded to a warning**: `hooks/pre-push` now hard-gates only `CLAUDE.md` for the local-records node check; an unchanged `memory/` prints a non-blocking warning instead of rejecting the push (memory hygiene — not every node produces a durable fact worth recording).
 - **README structure**: list `eval/annotation/` and `scripts/build_extractor_annotation.py` in the project-structure map
 - **Renumber paper RQs** (confirmed 2026-06-04, by logical dependence):
   - RQ1 = Claim-level audit accuracy + coverage ceiling (ecommerce, success case)

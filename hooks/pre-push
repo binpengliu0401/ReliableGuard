@@ -3,13 +3,14 @@
 #   (1) HARD : reject if CHANGELOG.md is not updated in the commits being pushed.
 #   (2) WARN : tracked code changed but README.md did not (judgement call, non-blocking).
 #   (3) HARD : a push is a project "node". On a new node (HEAD differs from the last push),
-#       the local record files must have been updated since the last push:
-#         - CLAUDE.md (Code Task Checklist / Status / decisions), and
-#         - the memory/ roadmap, if its directory is locatable.
-#       These are gitignored, so they cannot be checked from git history; the hook compares
-#       their content hash against a local baseline in .git/doc_push_state. Re-pushing the
-#       same HEAD (e.g. after a network failure) is skipped, and the very first run only
-#       records the baseline.
+#       CLAUDE.md (Code Task Checklist / Status / decisions) must have changed since the last
+#       push, else the push is rejected.
+#   (4) WARN : the memory/ roadmap is checked the same way but only warns when unchanged
+#       (memory hygiene: not every node produces a durable fact worth recording).
+#       CLAUDE.md and memory/ are gitignored, so they cannot be checked from git history; the
+#       hook compares their content hash against a local baseline in .git/doc_push_state.
+#       Re-pushing the same HEAD (e.g. after a network failure) is skipped, and the very first
+#       run only records the baseline.
 # Install: bash scripts/install-hooks.sh
 # Emergency bypass (avoid): git push --no-verify
 # Env overrides: RG_MEMORY_DIR (memory location), RG_DOC_STATE (baseline file).
@@ -85,9 +86,10 @@ else
         problems="$problems\n  - CLAUDE.md unchanged since last push — update the Code Task Checklist / Status / decisions."
     fi
     if [ "$memory_now" = "absent" ]; then
-        echo "Records gate: memory dir not found ($MEMORY_DIR) — set RG_MEMORY_DIR to enforce; reminder only."
+        echo "Records gate: memory dir not found ($MEMORY_DIR) — memory reminder skipped."
     elif [ "$memory_now" = "$prev_memory" ]; then
-        problems="$problems\n  - no memory/*.md changed since last push — mirror this node's progress/decisions into memory."
+        echo "WARNING: no memory/*.md changed since last push — update the roadmap memory if"
+        echo "  this node produced a durable decision/fact (non-blocking, memory hygiene)."
     fi
     if [ -n "$problems" ]; then
         echo ""
