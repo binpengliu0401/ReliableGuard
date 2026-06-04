@@ -21,7 +21,7 @@ The current consolidated experiment batch was run on git commit `3759744`.
 | --- | --- |
 | Set A full ablation | `results/set_a_full/20260526/173346/` |
 | Set B full ablation | `results/set_b_full/20260531/045635/` |
-| RQ3 structural ablation | `results/rq3_ablation/20260531/073500/` |
+| Structural ablation (paper RQ2) | `results/rq3_ablation/20260531/073500/` |
 | Final figures and LaTeX tables | `figures/` |
 | Protected archive copy | `results/_archive/final_experiment_snapshot_20260602_3759744/` |
 | Compressed archive | `results/_archive/final_experiment_snapshot_20260602_3759744.tar.gz` |
@@ -32,7 +32,7 @@ Key Set A results:
 - Ecommerce V3 risk detection rate: `0.640`; false acceptance rate: `0.231`.
 - Reference V3 risk detection rate: `0.162`; false acceptance rate: `0.666`.
 
-RQ3 ecommerce structural ablation:
+Structural ablation (ecommerce, paper RQ2 — directory historically named `rq3_ablation`):
 
 - `V3_NoStructural`: risk detection `0.237`, false acceptance `0.762`.
 - `V3_Intervention`: risk detection `0.640`, false acceptance `0.231`.
@@ -55,7 +55,7 @@ Run the full ablation:
 ./scripts/run_full_experiment_sequence.sh
 ```
 
-This runs Set A, Set B, the RQ3 structural ablation, and figure generation in sequence. Output is written to `results/` and `figures/`. Use `scripts/run_ablation.py --timestamped-output` for targeted runs; pass `--overwrite` only for scratch diagnostics.
+This runs Set A, Set B, the structural ablation, and figure generation in sequence. Output is written to `results/` and `figures/`. Use `scripts/run_ablation.py --timestamped-output` for targeted runs; pass `--overwrite` only for scratch diagnostics.
 
 ## Ablation Versions
 
@@ -64,7 +64,7 @@ This runs Set A, Set B, the RQ3 structural ablation, and figure generation in se
 | `V1_Baseline` | False | False | Agent-only baseline |
 | `V2_AuditOnly` | True | False | Audit without enforcement |
 | `V3_Intervention` | True | True | Audit with PASS/WARN/BLOCK gate |
-| `V3_NoStructural` | True | True | V3 without structural audit (RQ3 ablation) |
+| `V3_NoStructural` | True | True | V3 without structural audit (structural ablation, paper RQ2) |
 
 ## Running Evaluations
 
@@ -75,7 +75,7 @@ python3 scripts/run_ablation.py --set A --versions V1 V2 V3 --seeds 42 123 7 --t
 # Set B — generalization stress test
 python3 scripts/run_ablation.py --set B --versions V1 V2 V3 --seeds 42 123 7 --timestamped-output
 
-# RQ3 — structural audit ablation (ecommerce only)
+# Structural audit ablation (ecommerce only, paper RQ2)
 python3 scripts/run_ablation.py --set A --versions V3_NoStructural --seeds 42 123 7 --domain ecommerce --timestamped-output
 ```
 
@@ -84,7 +84,7 @@ Convenience shell scripts:
 ```bash
 ./scripts/run_set_a_full.sh
 ./scripts/run_set_b_full.sh
-./scripts/run_rq3_ablation.sh
+./scripts/run_structural_ablation.sh
 ```
 
 Each run writes `summary.txt`, `*_metrics.json`, and `*_rows.csv` to the output directory.
@@ -101,7 +101,7 @@ Current generated artifacts:
 
 - `figures/fig1_set_a_main.pdf`
 - `figures/fig2_set_a_failure_modes.pdf`
-- `figures/fig3_rq3_structural.pdf`
+- `figures/fig3_structural.pdf`
 - `figures/fig4_set_b_generalization.pdf`
 - `figures/table_main_ablation.tex`
 - `figures/table_evidence_state.tex`
@@ -121,11 +121,13 @@ eval/
   benchmark.py       # Lower-level entry point (use scripts/run_ablation.py for thesis runs)
 scripts/
   run_ablation.py              # Primary benchmark entry point (Set A / Set B)
-  run_full_experiment_sequence.sh  # Runs Set A → Set B → RQ3 → figures in sequence
-  run_set_a_full.sh / run_set_b_full.sh / run_rq3_ablation.sh
+  run_full_experiment_sequence.sh  # Runs Set A → Set B → structural ablation → figures
+  run_set_a_full.sh / run_set_b_full.sh / run_structural_ablation.sh
   generate_figures.py          # Produces thesis figures and LaTeX tables
 tasks/             # Scenario files (ecommerce and reference)
+docs/              # Thesis documents (thesis_scope, formal_definitions, related_work)
 tests/             # Pytest unit tests
 ReliableGuard.py   # Single-run CLI entry point
 requirements.txt   # Python dependencies
+CHANGELOG.md       # Feature and change history (updated before every push)
 ```

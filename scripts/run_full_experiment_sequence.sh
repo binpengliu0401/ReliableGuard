@@ -55,7 +55,7 @@ echo "[GIT] $(git rev-parse --short HEAD 2>/dev/null || echo unknown)" | tee -a 
 
 run_step "Set A full ablation" ./scripts/run_set_a_full.sh
 run_step "Set B full ablation" ./scripts/run_set_b_full.sh
-run_step "RQ3 structural ablation" ./scripts/run_rq3_ablation.sh
+run_step "Structural ablation (paper RQ2)" ./scripts/run_structural_ablation.sh
 run_step "Generate figures" python3 scripts/generate_figures.py
 
 echo "[ALL DONE] $(date)" | tee -a "${LOG_FILE}"

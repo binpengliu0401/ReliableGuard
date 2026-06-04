@@ -147,6 +147,11 @@ def compute_metrics(results: list[dict]) -> dict:
     warned = 0
     tccr_count = 0
     evidence_state_task_count = 0
+    verifier_ran_count = 0
+    zero_claim_count = 0
+    zero_claim_pass = 0
+    pass_with_claim = 0
+    pass_without_claim = 0
     evidence_state_totals = dict.fromkeys(EVIDENCE_STATE_COUNT_FIELDS, 0)
     stage_latency_lists: dict[str, list[float]] = {
         stage: [] for stage in STAGE_LATENCY_KEYS
@@ -209,6 +214,18 @@ def compute_metrics(results: list[dict]) -> dict:
             reliability_scores.append(float(state["reliability_score"]))
         report = state.get("reliability_report") if state is not None else None
         if isinstance(report, dict):
+            verifier_ran_count += 1
+            claim_count = len(report.get("traces", []))
+            if claim_count == 0:
+                zero_claim_count += 1
+                if actual == "PASS":
+                    zero_claim_pass += 1
+            if actual == "PASS":
+                if claim_count == 0:
+                    pass_without_claim += 1
+                else:
+                    pass_with_claim += 1
+
             evidence_counts = {
                 key: int(report.get(key) or 0)
                 for key in EVIDENCE_STATE_COUNT_FIELDS
@@ -366,6 +383,22 @@ def compute_metrics(results: list[dict]) -> dict:
         "avg_outcome_score": round(sum(outcome_scores) / total, 3),
         "detection_rate_by_type": detection_rates,
         "outcome_scores": outcome_scores,
+        "zero_claim_rate": round(zero_claim_count / verifier_ran_count, 3)
+        if verifier_ran_count
+        else None,
+        "zero_claim_pass_rate": round(zero_claim_pass / zero_claim_count, 3)
+        if zero_claim_count
+        else None,
+        "pass_with_claim_rate": round(
+            pass_with_claim / (pass_with_claim + pass_without_claim), 3
+        )
+        if (pass_with_claim + pass_without_claim)
+        else None,
+        "pass_without_claim_rate": round(
+            pass_without_claim / (pass_with_claim + pass_without_claim), 3
+        )
+        if (pass_with_claim + pass_without_claim)
+        else None,
     }
 
 
@@ -400,6 +433,7 @@ def build_result_row(
     total_tokens = 0
     reliability_score = None
     reliability_summary = None
+    claim_count = None
     if state is not None:
         executed_tools = state.get("executed_tools", []) or []
         total_tokens = state.get("total_tokens", 0) or 0
@@ -407,6 +441,7 @@ def build_result_row(
         report = state.get("reliability_report") or {}
         if isinstance(report, dict):
             reliability_summary = report.get("summary")
+            claim_count = len(report.get("traces", []))
 
     return {
         "scenario_id": task.get("id"),
@@ -425,6 +460,7 @@ def build_result_row(
         "tool_calls": len(executed_tools),
         "tokens": total_tokens,
         "reliability_score": reliability_score,
+        "claim_count": claim_count,
         "reliability_summary": reliability_summary,
         "fact_accuracy": fact_accuracy,
         "fact_snapshot": fact_snapshot or {},

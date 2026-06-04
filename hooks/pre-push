@@ -1,0 +1,35 @@
+#!/bin/bash
+# pre-push hook: reject push if CHANGELOG.md was not updated in the commits being pushed.
+# Install: bash scripts/install-hooks.sh
+# Bypass (emergency only): git push --no-verify
+
+while read local_ref local_sha remote_ref remote_sha; do
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+        # Branch deletion — skip check
+        continue
+    fi
+
+    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+        # New branch — check all commits reachable from local_sha
+        range="$local_sha"
+        changed=$(git log --name-only --pretty=format: "$range" 2>/dev/null | grep "^CHANGELOG.md$")
+    else
+        range="$remote_sha..$local_sha"
+        changed=$(git log --name-only --pretty=format: "$range" 2>/dev/null | grep "^CHANGELOG.md$")
+    fi
+
+    if [ -z "$changed" ]; then
+        echo ""
+        echo "Push rejected: CHANGELOG.md was not updated in the commits being pushed."
+        echo ""
+        echo "  1. Add an entry under [Unreleased] in CHANGELOG.md"
+        echo "  2. Include CHANGELOG.md in the same commit"
+        echo "  3. Then push again"
+        echo ""
+        echo "Emergency bypass: git push --no-verify"
+        echo ""
+        exit 1
+    fi
+done
+
+exit 0

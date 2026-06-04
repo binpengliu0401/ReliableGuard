@@ -246,6 +246,52 @@ def test_compute_metrics_includes_set_a_detection_rates():
     assert metrics["safe_pass_rate"] == 0.5
 
 
+def test_compute_metrics_reports_zero_claim_rates():
+    metrics = run_ablation.compute_metrics(
+        [
+            {
+                "task": {"expected_outcome": "PASS"},
+                "state": {
+                    "reliability_verdict": "PASS",
+                    "reliability_report": {"traces": []},
+                },
+            },
+            {
+                "task": {"expected_outcome": "PASS"},
+                "state": {
+                    "reliability_verdict": "PASS",
+                    "reliability_report": {"traces": [{"claim": {"claim_id": "c1"}}]},
+                },
+            },
+            {
+                "task": {"expected_outcome": "BLOCK"},
+                "state": {
+                    "reliability_verdict": "WARN",
+                    "reliability_report": {"traces": []},
+                },
+            },
+        ]
+    )
+
+    assert metrics["zero_claim_rate"] == 0.667
+    assert metrics["zero_claim_pass_rate"] == 0.5
+    assert metrics["pass_with_claim_rate"] == 0.5
+    assert metrics["pass_without_claim_rate"] == 0.5
+
+
+def test_build_result_row_includes_claim_count():
+    row = run_ablation.build_result_row(
+        task={"id": "T1", "expected_outcome": "PASS"},
+        state={
+            "reliability_verdict": "PASS",
+            "reliability_report": {"traces": [{"claim": {}}, {"claim": {}}]},
+        },
+        version="V3_Intervention",
+    )
+
+    assert row["claim_count"] == 2
+
+
 def test_missing_openrouter_api_key_exits_with_error(tmp_path, monkeypatch, capsys):
     ecommerce, reference, tier_b = _write_scenarios(tmp_path)
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)

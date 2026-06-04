@@ -26,6 +26,10 @@ def test_score_facts_numeric_fallback_matches_int_and_float_strings():
     assert score_facts({"amount": "50"}, {"amount": 50.0}) == 1.0
 
 
+def test_score_facts_bool_string_matches_sqlite_integer():
+    assert score_facts({"doi_exists": "false"}, {"doi_exists": 0}) == 1.0
+
+
 def test_mismatch_summary_reports_expected_and_actual_values():
     assert (
         mismatch_summary(

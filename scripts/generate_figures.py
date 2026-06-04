@@ -61,11 +61,11 @@ def main() -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     set_a_dir = _latest_set_a_dir()
     set_b_dir = _latest_set_b_dir()
-    rq3_dir = _latest_rq3_dir()
+    structural_ablation_dir = _latest_structural_ablation_dir()
 
     generate_fig1_set_a_main(set_a_dir)
     generate_fig2_set_a_failure_modes(set_a_dir)
-    generate_fig3_rq3_structural(set_a_dir, rq3_dir)
+    generate_fig3_structural(set_a_dir, structural_ablation_dir)
     generate_fig4_set_b_generalization(set_b_dir)
     generate_table_main_ablation(set_a_dir)
     if set_a_dir is None:
@@ -206,11 +206,11 @@ def generate_fig2_set_a_failure_modes(base_dir: Path | None) -> None:
     print(f"WROTE {output}")
 
 
-def generate_fig3_rq3_structural(
+def generate_fig3_structural(
     set_a_dir: Path | None,
-    rq3_dir: Path | None,
+    structural_ablation_dir: Path | None,
 ) -> None:
-    output = FIGURES_DIR / "fig3_rq3_structural.pdf"
+    output = FIGURES_DIR / "fig3_structural.pdf"
     if set_a_dir is None:
         print(f"SKIP {output.name}: result directory not found")
         return
@@ -222,14 +222,14 @@ def generate_fig3_rq3_structural(
     if not _path_exists(structural_rows_path, output.name):
         return
 
-    if rq3_dir is None:
-        print("SKIP fig3_rq3_structural.pdf: RQ3 ablation not yet run (C2 pending)")
+    if structural_ablation_dir is None:
+        print(f"SKIP {output.name}: structural ablation not yet run")
         return
-    rq3_metrics_path = rq3_dir / "set_a_metrics.json"
-    rq3_rows_path = rq3_dir / "set_a_rows.csv"
-    if not _path_exists(rq3_metrics_path, output.name):
+    ablation_metrics_path = structural_ablation_dir / "set_a_metrics.json"
+    ablation_rows_path = structural_ablation_dir / "set_a_rows.csv"
+    if not _path_exists(ablation_metrics_path, output.name):
         return
-    if not _path_exists(rq3_rows_path, output.name):
+    if not _path_exists(ablation_rows_path, output.name):
         return
 
     failure_modes = ["F2", "F4"]
@@ -240,7 +240,7 @@ def generate_fig3_rq3_structural(
         failure_modes=failure_modes,
     )
     claim_only_rates = _failure_mode_detection_rates(
-        rows_path=rq3_rows_path,
+        rows_path=ablation_rows_path,
         versions=["V3_NoStructural"],
         domain="ecommerce",
         failure_modes=failure_modes,
@@ -272,7 +272,7 @@ def generate_fig3_rq3_structural(
     ax.set_xticklabels(failure_modes)
     ax.set_ylim(0.0, 1.0)
     ax.set_ylabel("Detection Rate")
-    ax.set_title("RQ3: Structural Audit vs. Claim-Only (Ecommerce F2 & F4)", pad=16)
+    ax.set_title("Structural Audit vs. Claim-Only (Ecommerce F2 & F4)", pad=16)
     ax.legend(frameon=False, ncols=2, loc="upper center", bbox_to_anchor=(0.5, -0.14))
     _despine(ax)
     fig.subplots_adjust(bottom=0.24, top=0.86)
@@ -521,7 +521,8 @@ def _latest_set_b_dir() -> Path | None:
     return max(candidates, key=lambda path: (path.stat().st_mtime, str(path))).parent
 
 
-def _latest_rq3_dir() -> Path | None:
+def _latest_structural_ablation_dir() -> Path | None:
+    # Authoritative directory name kept as results/rq3_ablation (historical, archived).
     base = Path("results/rq3_ablation")
     candidates = list(base.rglob("set_a_metrics.json"))
     if not candidates:

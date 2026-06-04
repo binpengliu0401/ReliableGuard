@@ -46,16 +46,8 @@ def score_facts(expected: dict[str, str], snapshot: dict[str, FactValue]) -> flo
         if key not in snapshot:
             continue
         compared += 1
-        actual_str = str(snapshot[key]).strip().lower()
-        expected_str = str(expected_value).strip().lower()
-        if actual_str == expected_str:
+        if _values_match(snapshot[key], expected_value):
             matched += 1
-            continue
-        try:
-            if float(actual_str) == float(expected_str):
-                matched += 1
-        except (TypeError, ValueError):
-            pass
 
     if compared == 0:
         return None
@@ -67,15 +59,7 @@ def mismatch_summary(expected: dict[str, str], snapshot: dict[str, FactValue]) -
     for key, exp_val in expected.items():
         if key not in snapshot:
             continue
-        actual_str = str(snapshot[key]).strip().lower()
-        exp_str = str(exp_val).strip().lower()
-        match = actual_str == exp_str
-        if not match:
-            try:
-                match = float(actual_str) == float(exp_str)
-            except (ValueError, TypeError):
-                pass
-        if not match:
+        if not _values_match(snapshot[key], exp_val):
             parts.append(f"{key}: expected={exp_val}, actual={snapshot[key]}")
     return "; ".join(parts)
 
@@ -185,7 +169,10 @@ def _snapshot_reference(expected_keys: set[str]) -> dict[str, FactValue]:
         "doi_status": 'SELECT doi_status FROM "references" ORDER BY ref_id DESC LIMIT 1',
         "ref_count": 'SELECT COUNT(*) FROM "references"',
         "ref_year": 'SELECT year FROM "references" ORDER BY ref_id DESC LIMIT 1',
-        "doi_exists": 'SELECT COUNT(*) > 0 FROM "references" WHERE doi_status != \'not_found\'',
+        "doi_exists": (
+            'SELECT COUNT(*) > 0 FROM "references" '
+            "WHERE doi_verdict_code IN ('verified', 'mismatch', 'uncertain')"
+        ),
         "total_refs": 'SELECT COUNT(*) FROM "references"',
         "ref_title": 'SELECT title FROM "references" ORDER BY ref_id DESC LIMIT 1',
         "ref_doi": 'SELECT doi FROM "references" ORDER BY ref_id DESC LIMIT 1',
@@ -249,17 +236,24 @@ def _snapshot_trace_reference_value(key: str) -> FactValue:
     db = init_reference_db()
     try:
         if key == "parse_status":
-            count = _fetch_one_value(
-                db.execute('SELECT COUNT(*) FROM "references" WHERE doi_status=\'valid\'')
-            )
-            return "ok" if int(count or 0) > 0 else "error"
-        if key in {"verified_doi_count", "verified_count", "successful_parses"}:
             return _fetch_one_value(
-                db.execute('SELECT COUNT(*) FROM "references" WHERE doi_status=\'valid\'')
+                db.execute("SELECT status FROM papers ORDER BY rowid DESC LIMIT 1")
+            )
+        if key in {"verified_doi_count", "verified_count", "successful_parses"}:
+            if key == "successful_parses":
+                return _fetch_one_value(
+                    db.execute("SELECT COUNT(*) FROM papers WHERE status='parsed'")
+                )
+            return _fetch_one_value(
+                db.execute('SELECT COUNT(*) FROM "references" WHERE doi_status=\'verified\'')
             )
         if key in {"failed_count", "failed_parses"}:
+            if key == "failed_parses":
+                return _fetch_one_value(
+                    db.execute("SELECT COUNT(*) FROM papers WHERE status='failed'")
+                )
             return _fetch_one_value(
-                db.execute('SELECT COUNT(*) FROM "references" WHERE doi_status=\'not_found\'')
+                db.execute('SELECT COUNT(*) FROM "references" WHERE doi_status=\'failed\'')
             )
         if key == "doi_verdict_code":
             return _fetch_one_value(
@@ -269,9 +263,14 @@ def _snapshot_trace_reference_value(key: str) -> FactValue:
             )
         if key == "matches":
             row = db.execute(
-                'SELECT doi_status FROM "references" ORDER BY ref_id DESC LIMIT 1'
+                """
+                SELECT COALESCE(doi_verdict_code, doi_status)
+                FROM "references"
+                ORDER BY ref_id DESC
+                LIMIT 1
+                """
             ).fetchone()
-            return 1 if row and row[0] == "valid" else 0
+            return bool(row and row[0] == "verified")
     except Exception:
         return None
     finally:
@@ -298,13 +297,32 @@ def _fetch_one_value(cursor_result: Any) -> FactValue:
 
 
 def _matches_expected_bool(actual: bool, expected: str) -> bool:
-    expected_normalized = str(expected).strip().lower()
-    if expected_normalized in {"true", "1", "yes", "called"}:
-        return actual is True
-    if expected_normalized in {"false", "0", "no", "not_called"}:
-        return actual is False
-    return str(actual).strip().lower() == expected_normalized
+    expected_bool = _as_boolish(expected)
+    if expected_bool is not None:
+        return actual is expected_bool
+    return str(actual).strip().lower() == str(expected).strip().lower()
 
 
 def _values_match(actual: FactValue, expected: str) -> bool:
-    return str(actual).strip().lower() == str(expected).strip().lower()
+    actual_bool = _as_boolish(actual)
+    expected_bool = _as_boolish(expected)
+    if actual_bool is not None and expected_bool is not None:
+        return actual_bool is expected_bool
+
+    actual_str = str(actual).strip().lower()
+    expected_str = str(expected).strip().lower()
+    if actual_str == expected_str:
+        return True
+    try:
+        return float(actual_str) == float(expected_str)
+    except (TypeError, ValueError):
+        return False
+
+
+def _as_boolish(value: Any) -> bool | None:
+    normalized = str(value).strip().lower()
+    if normalized in {"true", "1", "yes", "called"}:
+        return True
+    if normalized in {"false", "0", "no", "not_called"}:
+        return False
+    return None
