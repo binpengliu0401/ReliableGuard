@@ -144,7 +144,7 @@ def _extract_with_heuristics(domain: str, agent_answer: str) -> list[Claim]:
                 value=status.lower(),
             )
         for order_id, amount in re.findall(
-            r"order[_\s-]?(\d+).*?(?:amount|金额).*?(\d+(?:\.\d+)?)",
+            r"order[_\s-]?(\d+).*?amount.*?(\d+(?:\.\d+)?)",
             text,
             re.I,
         ):
