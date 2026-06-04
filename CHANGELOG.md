@@ -10,6 +10,7 @@ and include CHANGELOG.md in the same commit as the code changes.
 ## [Unreleased]
 
 ### Changed
+- **README structure**: list `eval/annotation/` and `scripts/build_extractor_annotation.py` in the project-structure map
 - **Renumber paper RQs** (confirmed 2026-06-04, by logical dependence):
   - RQ1 = Claim-level audit accuracy + coverage ceiling (ecommerce, success case)
   - RQ2 = Final-answer-only vs. trace/state-augmented auditing (ecommerce, formerly RQ3's structural content)

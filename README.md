@@ -119,10 +119,12 @@ eval/
   ablation_runner.py # Per-version scenario runner; ExperimentAbort on infra errors
   metrics.py         # Aggregate metrics and summary statistics
   benchmark.py       # Lower-level entry point (use scripts/run_ablation.py for thesis runs)
+  annotation/        # Extractor-annotation workbook (claim P/R/F1 + coverage study)
 scripts/
   run_ablation.py              # Primary benchmark entry point (Set A / Set B)
   run_full_experiment_sequence.sh  # Runs Set A → Set B → structural ablation → figures
   run_set_a_full.sh / run_set_b_full.sh / run_structural_ablation.sh
+  build_extractor_annotation.py    # Builds the extractor-annotation workbook from run traces
   generate_figures.py          # Produces thesis figures and LaTeX tables
 tasks/             # Scenario files (ecommerce and reference)
 docs/              # Thesis documents (thesis_scope, formal_definitions, related_work)
