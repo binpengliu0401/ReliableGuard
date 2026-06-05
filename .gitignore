@@ -48,3 +48,6 @@ src/domain/reference/fixtures/real_data.json
 tasks/papers/
 tasks/reference_fixture_raw.csv
 tasks/paper_name_mapping.json
+
+# eval/annotation — track the canonical CSVs; the .xlsx is a human-fill convenience (binary, non-diffable)
+eval/annotation/*.xlsx

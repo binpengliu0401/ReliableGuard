@@ -125,6 +125,7 @@ scripts/
   run_full_experiment_sequence.sh  # Runs Set A → Set B → structural ablation → figures
   run_set_a_full.sh / run_set_b_full.sh / run_structural_ablation.sh
   build_extractor_annotation.py    # Builds the extractor-annotation workbook from run traces
+  prescreen_extractor_annotation.py # Rule-based pre-screen of the precision sheet (flags NEEDS_REVIEW)
   generate_figures.py          # Produces thesis figures and LaTeX tables
 tasks/             # Scenario files (ecommerce and reference)
 docs/              # Thesis documents (thesis_scope, formal_definitions, related_work)
