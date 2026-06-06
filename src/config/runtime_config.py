@@ -15,9 +15,24 @@ class RuntimeConfig:
     llm_base_url: str = OPENROUTER_BASE_URL
     llm_temperature: float = 0.0
     llm_seed: int | None = None
-    llm_max_tokens: int = 2048
-    claim_extraction_max_tokens: int = 2048
+    # max_tokens is a ceiling, not a target: raising it only prevents truncation
+    # (LLMResponseTruncatedError -> task skip) and does not increase cost, which is
+    # billed per token actually generated. The previous 2048 truncated long
+    # reference answers / multi-claim extraction JSON, causing up to ~36% skipped
+    # reference tasks in V2. Ceilings raised generously to drive truncation to ~0.
+    llm_max_tokens: int = 4096
+    claim_extraction_max_tokens: int = 8192
     claim_extraction_temperature: float = 0.0
+    # Record mode for the frozen-corpus methodology. When True, execute_node runs in
+    # observe-only structural mode: it snapshots ecommerce state before/after every tool
+    # call and computes structural issues as data, but never blocks execution. This yields
+    # a config-independent behaviour trace that replay can audit under any monitor setting.
+    capture_trace: bool = False
+    # T8 policy-aware experiment: when True, the ecommerce agent system prompt is
+    # given the >5000 approval policy. Used to test whether telling the agent the
+    # policy is sufficient (it is not, especially adversarially), motivating the
+    # deterministic structural check as a necessary backstop (RQ2 F2 hardening).
+    policy_aware: bool = False
 
 
 DEFAULT_RUNTIME_CONFIG = RuntimeConfig()

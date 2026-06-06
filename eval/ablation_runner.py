@@ -64,7 +64,12 @@ def run_version(
     print(f"{'#'*60}")
 
     for seed in selected_seeds:
-        config = replace(base_config, llm_temperature=0.7, llm_seed=seed)
+        # Inherit the configured agent temperature (default 0.0) instead of
+        # hardcoding 0.7: the benchmark must be reproducible, and a stochastic
+        # agent answer was the dominant cause of run-to-run swings in
+        # wording-dependent claim detection (e.g. F4). Override via RuntimeConfig
+        # if a stochastic-agent study is wanted.
+        config = replace(base_config, llm_seed=seed)
         if verbose:
             print(f"\n[SEED] {seed}")
 
@@ -380,6 +385,248 @@ def _seed_database(domain: str, seed: dict) -> None:
         return
 
     raise ValueError(f"Unsupported domain: {domain}")
+
+
+# ---------------------------------------------------------------------------
+# Frozen-corpus record / replay (reproducible monitor evaluation).
+#
+# The agent (and the claim extractor) are non-deterministic hosted LLMs, so a
+# fair comparison between monitor configurations must hold the agent behaviour
+# fixed. `record_corpus` runs each scenario once in observe-only capture mode and
+# freezes (answer, extracted claims, tool trace, structural issues, post-state).
+# `replay_corpus` then audits that frozen behaviour under any version with zero
+# LLM calls, so version differences (e.g. V3 vs V3_NoStructural) are paired and
+# fully reproducible. Ecommerce structural is faithful; reference replay re-seeds
+# the scenario db_seed and relies on the static evidence fixture.
+# ---------------------------------------------------------------------------
+
+CORPUS_RECORD_VERSION = 1
+
+
+def _reset_domain(domain: str) -> None:
+    if domain == "ecommerce":
+        reset_env()
+    else:
+        from src.db.reset_reference_env import reset_reference_env
+
+        reset_reference_env()
+
+
+def _state_to_record(task: dict, state: dict, seed: int, domain: str) -> dict:
+    report = state.get("reliability_report") or {}
+    claims = [
+        trace["claim"]
+        for trace in (report.get("traces") or [])
+        if isinstance(trace, dict) and trace.get("claim")
+    ]
+    db_state_after = (
+        _snapshot_ecommerce_db_state() if domain == "ecommerce" else None
+    )
+    return {
+        "record_version": CORPUS_RECORD_VERSION,
+        "scenario_id": task.get("id"),
+        "domain": domain,
+        "seed": seed,
+        "input": task.get("input", ""),
+        # The full scenario, so replay scores pass_fail/expected exactly as e2e
+        # (normalize_expected reads expected_outcome / failure_mode / verifiable_facts).
+        "task": task,
+        "final_answer": state.get("final_answer") or "",
+        "claims": claims,
+        "tool_trace": state.get("tool_trace", []) or [],
+        "structural_issues": state.get("structural_audit", []) or [],
+        "executed_tools": state.get("executed_tools", []) or [],
+        "db_state_after": db_state_after,
+        "db_seed": task.get("db_seed", {}),
+        "error": None,
+    }
+
+
+def record_corpus(
+    scenarios: list[dict],
+    seeds: list[int] | None = None,
+    enable_fault_injection: bool = True,
+    verbose: bool = True,
+    skip_keys: set | None = None,
+    on_record=None,
+    policy_aware: bool = False,
+) -> list[dict]:
+    """Run each (scenario, seed) once in observe-only capture mode; return corpus records.
+
+    `skip_keys` is a set of (scenario_id, seed) already recorded (for --resume); those
+    are skipped. `on_record(record)` is called immediately after each record is built,
+    enabling incremental checkpointing so a crash never loses completed work.
+    `policy_aware` (T8) exposes the >5000 approval policy to the ecommerce agent prompt.
+    """
+    selected_seeds = seeds or [42]
+    skip_keys = skip_keys or set()
+    base = replace(VERSIONS["V2_AuditOnly"], capture_trace=True, policy_aware=policy_aware)
+    corpus: list[dict] = []
+    for seed in selected_seeds:
+        config = replace(base, llm_seed=seed)
+        for task in scenarios:
+            if (task.get("id"), seed) in skip_keys:
+                continue
+            domain = task.get("domain", "ecommerce")
+            _reset_domain(domain)
+            try:
+                if task.get("mode", "e2e") == "verifier_only":
+                    # Already a frozen unit: pass the injected answer/claims through.
+                    record = {
+                        "record_version": CORPUS_RECORD_VERSION,
+                        "scenario_id": task.get("id"),
+                        "domain": domain,
+                        "seed": seed,
+                        "input": task.get("input", ""),
+                        "task": task,
+                        "final_answer": task.get("injected_final_answer", ""),
+                        "claims": task.get("injected_claims", []),
+                        "tool_trace": [],
+                        "structural_issues": [],
+                        "executed_tools": [],
+                        "db_state_after": None,
+                        "db_seed": task.get("db_seed", {}),
+                        "error": None,
+                    }
+                else:
+                    with _maybe_inject_ecommerce_f4_false_success(
+                        task, domain, enabled=enable_fault_injection
+                    ):
+                        state = run_agent(
+                            task["input"], domain=domain, config=config
+                        )
+                    record = _state_to_record(task, state, seed, domain)
+            except Exception as e:  # noqa: BLE001 - record the failure, keep going
+                record = {
+                    "record_version": CORPUS_RECORD_VERSION,
+                    "scenario_id": task.get("id"),
+                    "domain": domain,
+                    "seed": seed,
+                    "input": task.get("input", ""),
+                    "task": task,
+                    "final_answer": "",
+                    "claims": [],
+                    "tool_trace": [],
+                    "structural_issues": [],
+                    "executed_tools": [],
+                    "db_state_after": None,
+                    "db_seed": task.get("db_seed", {}),
+                    "error": type(e).__name__,
+                }
+                if verbose:
+                    print(f"[RECORD-ERROR] seed={seed} {task.get('id')} | {record['error']}: {e}")
+            if on_record is not None:
+                on_record(record)
+            corpus.append(record)
+            if verbose and not record["error"]:
+                print(
+                    f"[RECORD] seed={seed} {task.get('id')} | "
+                    f"claims={len(record['claims'])} "
+                    f"structural={len(record['structural_issues'])}"
+                )
+    return corpus
+
+
+def _record_to_task(record: dict) -> dict:
+    """The frozen scenario, so build_result_row scores expected/pass_fail as in e2e."""
+    task = record.get("task")
+    if isinstance(task, dict) and task:
+        return task
+    return {
+        "id": record.get("scenario_id"),
+        "domain": record.get("domain", "ecommerce"),
+        "input": record.get("input", ""),
+    }
+
+
+def replay_corpus(
+    corpus: list[dict],
+    version_key: str,
+    config_override: RuntimeConfig | None = None,
+    verbose: bool = True,
+) -> list[dict]:
+    """Audit a frozen corpus under one version with no LLM calls. Fully deterministic."""
+    config = config_override or VERSIONS[version_key]
+    results: list[dict] = []
+    for record in corpus:
+        task = _record_to_task(record)
+        seed = record.get("seed")
+        if record.get("error"):
+            row = build_result_row(
+                task=task, state=None, version=version_key,
+                error=record["error"], seed=seed,
+            )
+            results.append({
+                "task": task, "state": None, "version": version_key,
+                "seed": seed, "error": record["error"], "scored_row": row,
+            })
+            continue
+
+        domain = record.get("domain", "ecommerce")
+        # Reconstruct the evidence the verifier checks against.
+        _reset_domain(domain)
+        if domain == "ecommerce":
+            _seed_database("ecommerce", {"orders": record.get("db_state_after") or []})
+        else:
+            _seed_database("reference", record.get("db_seed", {}))
+
+        state = _replay_state(record, config, domain, seed)
+        row = build_result_row(task=task, state=state, version=version_key, seed=seed)
+        results.append({
+            "task": task, "state": state, "version": version_key,
+            "seed": seed, "error": None, "scored_row": row,
+        })
+        if verbose:
+            print(
+                f"[REPLAY:{version_key}] seed={seed} {record.get('scenario_id')} | "
+                f"audit={state.get('reliability_verdict_audit')}"
+            )
+    return results
+
+
+def _replay_state(record: dict, config: RuntimeConfig, domain: str, seed: int | None) -> dict:
+    answer = record.get("final_answer", "")
+    executed_tools = record.get("executed_tools", []) or []
+    structural_issues = record.get("structural_issues", []) or []
+
+    state: dict = {
+        "messages": [{"role": "user", "content": record.get("input", "")}],
+        "tool_call": None, "trace": [], "final_answer": answer,
+        "reliability_report": None, "reliability_verdict": None,
+        "reliability_verdict_audit": None, "reliability_score": None,
+        "structural_audit": structural_issues, "tool_trace": record.get("tool_trace", []) or [],
+        "executed_tools": executed_tools, "config": config, "domain": domain,
+        "verifier_context": None, "prompt_tokens": 0, "completion_tokens": 0,
+        "total_tokens": 0, "run_id": record.get("scenario_id"), "run_stamp": None,
+        "run_started_at": None, "seed": seed,
+    }
+
+    if not config.use_verifier:
+        # Baseline: no monitor runs. Enforcement off -> PASS, matching the e2e baseline.
+        return state
+
+    # Inject the frozen claims (never re-extract: pass the list even when empty so
+    # the pipeline does not fall back to an LLM extraction call).
+    claims = [Claim(**c) for c in record.get("claims", []) if isinstance(c, dict)]
+    report = run_reliability_pipeline(
+        domain=domain, query=record.get("input", ""), agent_answer=answer,
+        model=config.llm_model, base_url=config.llm_base_url, write_logs=False,
+        claims=claims, temperature=config.claim_extraction_temperature,
+        seed=config.llm_seed, max_tokens=config.claim_extraction_max_tokens,
+    )
+    state["reliability_report"] = report.model_dump()
+    state["reliability_score"] = report.reliability_score
+
+    # Apply the frozen structural issues only when this version enables structural audit.
+    apply_structural = config.enforce_intervention and config.use_structural_audit
+    structural_blocks = [
+        item for item in structural_issues
+        if apply_structural and item.get("action") == "BLOCK"
+    ]
+    audit_verdict = "BLOCK" if structural_blocks else report.verdict
+    state["reliability_verdict_audit"] = audit_verdict
+    state["reliability_verdict"] = audit_verdict if config.enforce_intervention else "PASS"
+    return state
 
 
 if __name__ == "__main__":

@@ -420,7 +420,7 @@ $$
 
 ### 4.2 Detection Scope Boundary: Type I versus Type II Failures
 
-The claim-level pipeline operates on the agent answer \(A\) and the domain state \(D_{\text{after}}\) at audit time. This defines a fundamental boundary in what post-hoc claim verification can and cannot detect.
+This boundary is an **observability** statement. The final answer \(A\) is a partial, self-reported observation of the true execution trajectory; the claim-level pipeline can only audit what is recoverable from \(A\) together with the domain state \(D_{\text{after}}\) at audit time. A failure class is *unobservable* through this channel exactly when there exists a correct execution that is indistinguishable from the failing one under the observable artifacts. The Type I / Type II split below partitions failures by the **locus of their ground truth** relative to that observation, and thereby determines observability: Type I ground truth is recoverable from \((A, D_{\text{after}})\); Type II ground truth resides in the pre-execution policy predicate or the pre/post state transition, neither of which is exposed by \(A\) or by \(D_{\text{after}}\) alone. This is the formal basis for the claim, established empirically in RQ1, that the final-answer blind spot is a property of the observation channel rather than of extraction quality.
 
 **Type I: Factual inconsistency failures.**
 

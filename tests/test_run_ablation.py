@@ -24,12 +24,19 @@ def test_versions_dict_has_expected_entries():
         "V2_AuditOnly",
         "V3_Intervention",
         "V3_NoStructural",
+        "V3_PolicyAware",
     }
     assert VERSIONS["V3_Intervention"].enforce_intervention is True
     assert VERSIONS["V3_Intervention"].use_structural_audit is True
     assert VERSIONS["V3_NoStructural"].enforce_intervention is True
     assert VERSIONS["V3_NoStructural"].use_structural_audit is False
     assert VERSIONS["V3_NoStructural"].version_name == "V3_NoStructural"
+    # T8: policy-aware variant exposes the approval policy to the agent prompt;
+    # otherwise it is V3_Intervention (structural + enforcement on).
+    assert VERSIONS["V3_PolicyAware"].policy_aware is True
+    assert VERSIONS["V3_PolicyAware"].enforce_intervention is True
+    assert VERSIONS["V3_PolicyAware"].use_structural_audit is True
+    assert VERSIONS["V3_PolicyAware"].version_name == "V3_PolicyAware"
 
 
 def test_v3_no_structural_is_supported_as_explicit_version():

@@ -6,6 +6,8 @@ A LangGraph-based runtime verification harness for tool-using LLM agents. It aud
 
 ReliableGuard runs tool-using LLM agents and audits their outputs through a 6-stage reliability pipeline: claim extraction → verifiability classification → domain verification → risk scoring → intervention decision → report generation.
 
+Conceptually, the project studies black-box agent auditing as an **observability problem**: an agent's final answer is only a partial, self-reported observation of its execution, so failures are classified by the *locus of their ground truth* — answer-local (checkable from the answer), trace/state-local (only visible in the execution, e.g. policy compliance and state-effect realization), and evidence-local (in an external source). The framework characterizes which failures the answer channel can observe and which require additional trace/state observation. See [docs/thesis_scope.md](docs/thesis_scope.md) for the full framing.
+
 Two domains are supported:
 
 - **Ecommerce**: SQLite-backed order state with tool trace and policy checks.
@@ -15,7 +17,9 @@ Ablation versions compare baseline execution, audit-only detection, and enforced
 
 ## Latest Experiment Snapshot
 
-The current consolidated experiment batch was run on git commit `3759744`.
+> **Provisional / non-reproducible.** The numbers below are from an earlier batch (agent at temperature 0.7) that is now known to be non-reproducible: two identical runs disagree on ~1/3 of per-task outcomes because of provider-level LLM non-determinism (the seed is sent but ignored). They are kept as directional evidence only and are scheduled for regeneration under a frozen-corpus, paired-replay methodology (see [docs/thesis_scope.md](docs/thesis_scope.md) → Evaluation Methodology). The qualitative conclusions that rest on deterministic structural checks and architectural arguments are expected to survive; the exact rates are not yet final.
+
+The provisional consolidated experiment batch was run on git commit `3759744`.
 
 | Output | Directory |
 | --- | --- |

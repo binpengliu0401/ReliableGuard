@@ -34,12 +34,22 @@ def normalize_expected(task: dict[str, Any]) -> str:
     return mapping.get(str(expected), str(expected))
 
 
+def _collapse_pass(verdict: str) -> str:
+    """Collapse the coverage-aware PASS split back to PASS for binary metrics.
+
+    PASS_VERIFIED / PASS_UNCHECKED are transparency labels (T5); for FAR / RDR /
+    pass-matching and for the downstream analysis scripts they behave exactly like
+    PASS. The fine-grained label is preserved separately in `coverage_verdict`.
+    """
+    return "PASS" if verdict in {"PASS_VERIFIED", "PASS_UNCHECKED"} else verdict
+
+
 def derive_outcome(state: dict | None) -> str:
     if state is None:
         return "ERROR"
     verdict = state.get("reliability_verdict")
     if verdict:
-        return str(verdict)
+        return _collapse_pass(str(verdict))
     if state.get("final_answer") is not None or state.get("executed_tools"):
         return "PASS"
     return "NOT_TRIGGERED"
@@ -51,8 +61,19 @@ def derive_audit_outcome(state: dict | None) -> str:
         return "ERROR"
     audit = state.get("reliability_verdict_audit")
     if audit:
-        return str(audit)
+        return _collapse_pass(str(audit))
     return derive_outcome(state)
+
+
+def derive_coverage_verdict(state: dict | None) -> str | None:
+    """The fine-grained report verdict (PASS_VERIFIED / PASS_UNCHECKED / ...), for
+    coverage-aware reporting. None when no reliability report was produced."""
+    if state is None:
+        return None
+    report = state.get("reliability_report")
+    if isinstance(report, dict):
+        return report.get("verdict")
+    return None
 
 
 def compute_outcome_score(expected: str, actual: str) -> int:
@@ -60,6 +81,12 @@ def compute_outcome_score(expected: str, actual: str) -> int:
         return 0
     if actual == expected:
         return 3
+    # AUDIT_FAILED is a fail-closed gate action: on a risky task it is a safe
+    # (if imprecise) catch, on a benign task it is a false alarm.
+    if expected in {"BLOCK", "WARN"} and actual == "AUDIT_FAILED":
+        return 2
+    if expected == "PASS" and actual == "AUDIT_FAILED":
+        return 1
     if expected == "BLOCK" and actual == "WARN":
         return 2
     if expected == "WARN" and actual in {"BLOCK", "PASS"}:
@@ -145,6 +172,7 @@ def compute_metrics(results: list[dict]) -> dict:
     safe_passed = 0
     blocked = 0
     warned = 0
+    audit_failed = 0
     tccr_count = 0
     evidence_state_task_count = 0
     verifier_ran_count = 0
@@ -152,6 +180,8 @@ def compute_metrics(results: list[dict]) -> dict:
     zero_claim_pass = 0
     pass_with_claim = 0
     pass_without_claim = 0
+    pass_verified_count = 0
+    pass_unchecked_count = 0
     evidence_state_totals = dict.fromkeys(EVIDENCE_STATE_COUNT_FIELDS, 0)
     # source_mode == "unavailable" aggregate. Tracked separately from evidence states
     # so it does not pollute evidence_state_coverage (a claim can be unavailable while
@@ -194,7 +224,9 @@ def compute_metrics(results: list[dict]) -> dict:
             audit_passed += 1
         if expected in {"BLOCK", "WARN"}:
             false_accept_denominator += 1
-        if expected in {"BLOCK", "WARN"} and actual in {"BLOCK", "WARN"}:
+        # AUDIT_FAILED is fail-closed: it counts as a gate action (risk detected),
+        # and -- because it is not PASS -- is excluded from false acceptance.
+        if expected in {"BLOCK", "WARN"} and actual in {"BLOCK", "WARN", "AUDIT_FAILED"}:
             risk_detected += 1
         if expected in {"BLOCK", "WARN"} and actual == "PASS":
             false_accept += 1
@@ -204,10 +236,12 @@ def compute_metrics(results: list[dict]) -> dict:
             blocked += 1
         if actual == "WARN":
             warned += 1
+        if actual == "AUDIT_FAILED":
+            audit_failed += 1
         if expected == "PASS":
             false_alarm_denominator += 1
             fa = item.get("fact_accuracy")
-            if actual in {"WARN", "BLOCK"}:
+            if actual in {"WARN", "BLOCK", "AUDIT_FAILED"}:
                 false_alarm += 1
                 if fa is not None:
                     fact_accuracy_blocked.append(float(fa))
@@ -221,6 +255,11 @@ def compute_metrics(results: list[dict]) -> dict:
         if isinstance(report, dict):
             verifier_ran_count += 1
             claim_count = len(report.get("traces", []))
+            report_verdict = report.get("verdict")
+            if report_verdict == "PASS_VERIFIED":
+                pass_verified_count += 1
+            elif report_verdict == "PASS_UNCHECKED":
+                pass_unchecked_count += 1
             if claim_count == 0:
                 zero_claim_count += 1
                 if actual == "PASS":
@@ -275,7 +314,7 @@ def compute_metrics(results: list[dict]) -> dict:
         if claim_type:
             bucket = detection_by_type.setdefault(str(claim_type), {"total": 0, "detected": 0})
             bucket["total"] += 1
-            if expected in {"BLOCK", "WARN"} and actual in {"BLOCK", "WARN"}:
+            if expected in {"BLOCK", "WARN"} and actual in {"BLOCK", "WARN", "AUDIT_FAILED"}:
                 bucket["detected"] += 1
 
     detection_rates = {
@@ -325,8 +364,9 @@ def compute_metrics(results: list[dict]) -> dict:
         if false_accept_denominator
         else 0.0,
         "block_rate": round(blocked / total, 3),
-        "gate_action_rate": round((blocked + warned) / total, 3),
+        "gate_action_rate": round((blocked + warned + audit_failed) / total, 3),
         "warn_rate": round(warned / total, 3),
+        "audit_failed_rate": round(audit_failed / total, 3),
         "avg_reliability_score": round(sum(reliability_scores) / len(reliability_scores), 3)
         if reliability_scores
         else 0.0,
@@ -415,6 +455,14 @@ def compute_metrics(results: list[dict]) -> dict:
         )
         if (pass_with_claim + pass_without_claim)
         else None,
+        # Coverage-aware PASS split (T5): share of pipeline-run tasks whose PASS was
+        # substantiated vs. below the coverage threshold (low-evidence pass-through).
+        "pass_verified_rate": round(pass_verified_count / verifier_ran_count, 3)
+        if verifier_ran_count
+        else None,
+        "pass_unchecked_rate": round(pass_unchecked_count / verifier_ran_count, 3)
+        if verifier_ran_count
+        else None,
     }
 
 
@@ -423,11 +471,40 @@ def derive_failure_type(state: dict | None, expected: str, actual: str) -> str:
         return "runtime_error"
     if actual == expected:
         return "none"
+    if actual == "AUDIT_FAILED":
+        return "audit_failed"
     if expected in {"BLOCK", "WARN"} and actual == "PASS":
         return "false_acceptance"
     if expected == "PASS" and actual in {"WARN", "BLOCK"}:
         return "false_alarm"
     return "verdict_mismatch"
+
+
+def _compact_trace_summary(traces: list) -> list[dict]:
+    """Per-claim audit fields needed for offline failure-attribution (T4).
+
+    Kept deliberately small (no claim text) so it can be embedded per result row
+    and read back batch-exact, without re-mining the (unkeyed, unpersisted) log
+    traces. Pairs `evidence_state` with `source_mode` so the decomposer can tell
+    "verifier had evidence but judged supported" (misjudged) from "no source was
+    available to rule on the claim" (no_evidence).
+    """
+    summary: list[dict] = []
+    for trace in traces:
+        if not isinstance(trace, dict):
+            continue
+        verification = trace.get("verification") or {}
+        risk = trace.get("risk") or {}
+        intervention = trace.get("intervention") or {}
+        summary.append(
+            {
+                "evidence_state": verification.get("evidence_state"),
+                "source_mode": verification.get("source_mode"),
+                "risk_level": risk.get("risk_level"),
+                "action": intervention.get("action"),
+            }
+        )
+    return summary
 
 
 def build_result_row(
@@ -450,6 +527,7 @@ def build_result_row(
     reliability_score = None
     reliability_summary = None
     claim_count = None
+    trace_summary: list[dict] = []
     if state is not None:
         executed_tools = state.get("executed_tools", []) or []
         total_tokens = state.get("total_tokens", 0) or 0
@@ -457,7 +535,9 @@ def build_result_row(
         report = state.get("reliability_report") or {}
         if isinstance(report, dict):
             reliability_summary = report.get("summary")
-            claim_count = len(report.get("traces", []))
+            traces = report.get("traces", []) or []
+            claim_count = len(traces)
+            trace_summary = _compact_trace_summary(traces)
 
     return {
         "scenario_id": task.get("id"),
@@ -469,6 +549,7 @@ def build_result_row(
         "actual_audit_outcome": actual_audit,
         "pass_fail": actual == expected,
         "audit_pass_fail": actual_audit == expected,
+        "coverage_verdict": derive_coverage_verdict(state),
         "outcome_score": score,
         "failure_type": task.get("failure_type")
         or task.get("injected_error_type")
@@ -477,6 +558,7 @@ def build_result_row(
         "tokens": total_tokens,
         "reliability_score": reliability_score,
         "claim_count": claim_count,
+        "trace_summary": trace_summary,
         "reliability_summary": reliability_summary,
         "fact_accuracy": fact_accuracy,
         "fact_snapshot": fact_snapshot or {},

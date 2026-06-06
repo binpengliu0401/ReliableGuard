@@ -1,0 +1,100 @@
+[
+  {
+    "id": "REF-F0-G-001",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from react.pdf",
+    "input": "Please parse 'react.pdf' with paper_id 'react', then list references and verify DOI and authors for the first reference.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F0-G-002",
+    "domain": "reference",
+    "failure_mode": "F0",
+    "description": "Happy path: parse and verify references from critic.pdf",
+    "input": "I need you to parse 'critic.pdf' as paper 'critic', list all references, and verify the DOI and authors for the first one.",
+    "expected_outcome": "SUCCESS"
+  },
+  {
+    "id": "REF-F1-G-001",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Call verify_doi with ref_id=0 and doi='10.18653/v1/N18-1074'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F1-G-002",
+    "domain": "reference",
+    "failure_mode": "F1",
+    "description": "Schema violation: ref_id=0 below minimum 1",
+    "input": "Execute verify_doi now with ref_id=0 and doi='10.18653/v1/N18-1074'.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-001",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Parse 'critic.pdf' as 'paper_nondoi'. Call list_references to get the reference list and use the actual ref_id. Call verify_doi for that reference using doi '10.99999/fake.0000'. Then verify the journal for that reference using the same doi.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F2-G-002",
+    "domain": "reference",
+    "failure_mode": "F2",
+    "description": "Policy violation: verify_journal called when doi_status=failed",
+    "input": "Load 'critic.pdf' as 'paper_nondoi'. List references. Verify DOI for the first reference with doi '10.99999/fake.0001'. Then verify the journal.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-001",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Verify the DOI for reference 1 using doi '10.18653/v1/D19-1609'. Do not parse any paper first.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F3-G-002",
+    "domain": "reference",
+    "failure_mode": "F3",
+    "description": "Dependency violation: verify called without prior parse_pdf",
+    "input": "Check the DOI '10.18653/v1/D19-1609' for reference 1 without parsing a paper.",
+    "expected_outcome": "GATE_BLOCKED"
+  },
+  {
+    "id": "REF-F4-G-001",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Parse the paper at path 'paper_f4.pdf' with paper_id 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F4-G-002",
+    "domain": "reference",
+    "failure_mode": "F4",
+    "description": "Verifier detection: parse_pdf returns empty references, assertion fails",
+    "input": "Load 'paper_f4.pdf' as 'paper_f4'.",
+    "expected_outcome": "VERIFY_FAILED"
+  },
+  {
+    "id": "REF-F5-G-001",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for cognitive_arch.pdf",
+    "input": "Parse 'cognitive_arch.pdf' as 'cognitive_arch'. List references. Verify the DOI for the first reference. Then verify the authors.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  },
+  {
+    "id": "REF-F5-G-002",
+    "domain": "reference",
+    "failure_mode": "F5",
+    "description": "Multi-step: parse and verify pipeline for cognitive_arch.pdf",
+    "input": "Load 'cognitive_arch.pdf' as 'cognitive_arch'. Retrieve references. Run DOI verification then author verification for the first reference.",
+    "expected_outcome": "SUCCESS",
+    "note": "multi_step"
+  }
+]

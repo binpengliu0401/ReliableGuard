@@ -220,6 +220,14 @@ def execute_node(state: AgentState) -> AgentState:
         and config.enforce_intervention
         and config.use_structural_audit
     )
+    # Observe-only capture for the frozen-corpus methodology: snapshot and compute
+    # structural issues as data, but never block, so the recorded behaviour is
+    # config-independent. Mutually exclusive with the enforcing guard above.
+    capture_trace = (
+        domain == "ecommerce"
+        and getattr(config, "capture_trace", False)
+        and not structural_guard_enabled
+    )
 
     if "_argument_parse_error" in func_args:
         result = {
@@ -266,6 +274,22 @@ def execute_node(state: AgentState) -> AgentState:
 
             before_snapshot = snapshot_ecommerce_state()
 
+        if capture_trace:
+            # Observe-only: record pre-execution issues as data and snapshot before,
+            # but do not block. Execution proceeds as in the no-structural setting.
+            from src.domain.ecommerce.structural_audit import (
+                check_pre_execution,
+                issue_to_dict,
+                snapshot_ecommerce_state,
+            )
+
+            pre_issues = check_pre_execution(func_name, func_args)
+            if pre_issues:
+                state["structural_audit"] = state.get("structural_audit", []) + [
+                    issue_to_dict(issue) for issue in pre_issues
+                ]
+            before_snapshot = snapshot_ecommerce_state()
+
         result = tool_registry.get(
             func_name,
             lambda **kw: {"error": f"unknown tool: {func_name}"},
@@ -297,6 +321,30 @@ def execute_node(state: AgentState) -> AgentState:
                     "STATE_BLOCK",
                     f"{func_name} - {post_issues[0].reason}",
                 )
+        elif capture_trace and before_snapshot is not None:
+            from src.domain.ecommerce.structural_audit import (
+                check_post_execution,
+                issue_to_dict,
+                snapshot_ecommerce_state,
+            )
+
+            after_snapshot = snapshot_ecommerce_state()
+            post_issues = check_post_execution(
+                func_name, func_args, result, before_snapshot, after_snapshot
+            )
+            if post_issues:
+                state["structural_audit"] = state.get("structural_audit", []) + [
+                    issue_to_dict(issue) for issue in post_issues
+                ]
+            state["tool_trace"] = state.get("tool_trace", []) + [
+                {
+                    "func_name": func_name,
+                    "func_args": func_args,
+                    "result": result,
+                    "before": before_snapshot,
+                    "after": after_snapshot,
+                }
+            ]
 
     _trace(state, "execute_node", "EXECUTED", f"{func_name} - {result}")
 

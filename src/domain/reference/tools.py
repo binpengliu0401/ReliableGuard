@@ -3,7 +3,9 @@ import os
 import sqlite3
 from typing import Any
 
-REFERENCE_DB_PATH = "references.db"
+# Optionally per-process isolated via RG_DB_SUFFIX (sharded/parallel record runs).
+_DB_SUFFIX = os.environ.get("RG_DB_SUFFIX", "")
+REFERENCE_DB_PATH = f"references.{_DB_SUFFIX}.db" if _DB_SUFFIX else "references.db"
 
 
 def _get_conn() -> sqlite3.Connection:

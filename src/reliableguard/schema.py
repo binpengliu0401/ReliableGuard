@@ -34,6 +34,22 @@ EvidenceState = Literal[
 SourceMode = Literal["fixture", "unavailable", "not_found"]
 RiskLevel = Literal["low", "medium", "high"]
 InterventionAction = Literal["PASS", "WARN", "BLOCK"]
+# Overall reliability verdict. Extends the per-claim actions with:
+#   - AUDIT_FAILED: the extractor produced zero claims, so the pipeline had nothing
+#     to audit (fail-closed, NOT a PASS; a gate action when enforced).
+#   - PASS_VERIFIED / PASS_UNCHECKED: a coverage-aware split of PASS. PASS_UNCHECKED
+#     means the answer passed but evidence coverage was below threshold, i.e. the
+#     monitor could not actually check most claims -- a transparency signal, still
+#     PASS-like for enforcement. Metrics collapse both back to "PASS" for FAR/RDR.
+# A per-claim `InterventionResult` never takes any of these extended values.
+OverallVerdict = Literal[
+    "PASS",
+    "PASS_VERIFIED",
+    "PASS_UNCHECKED",
+    "WARN",
+    "BLOCK",
+    "AUDIT_FAILED",
+]
 Certainty = Literal["certain", "uncertain", "abstained"]
 
 
@@ -82,7 +98,7 @@ class ClaimTrace(BaseModel):
 
 
 class ReliabilityReport(BaseModel):
-    verdict: InterventionAction
+    verdict: OverallVerdict
     reliability_score: float
     summary: str
     traces: list[ClaimTrace]

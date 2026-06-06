@@ -27,6 +27,14 @@ V3_NO_STRUCTURAL = replace(
     use_structural_audit=False,
     version_name="V3_NoStructural",
 )
+# T8: same monitor as V3_Intervention, but the agent prompt is given the >5000
+# approval policy. Used to test whether prompting the policy suffices (it does not,
+# adversarially), motivating the deterministic structural check (RQ2 F2 hardening).
+V3_POLICY_AWARE = replace(
+    V3_INTERVENTION,
+    policy_aware=True,
+    version_name="V3_PolicyAware",
+)
 
 
 VERSIONS = {
@@ -34,6 +42,7 @@ VERSIONS = {
     "V2_AuditOnly": V2_AUDIT_ONLY,
     "V3_Intervention": V3_INTERVENTION,
     "V3_NoStructural": V3_NO_STRUCTURAL,
+    "V3_PolicyAware": V3_POLICY_AWARE,
 }
 
 

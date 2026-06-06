@@ -1,8 +1,13 @@
+import os
 import sqlite3
 
 _cursor = None
 _conn = None
-ECOMMERCE_DB_PATH = "ecommerce.db"
+# DB file path, optionally per-process isolated via RG_DB_SUFFIX. Sharded/parallel
+# record runs each set a distinct suffix (e.g. RG_DB_SUFFIX=shard0) so they never
+# share the same SQLite file. Read at import; set the env var before launching.
+_DB_SUFFIX = os.environ.get("RG_DB_SUFFIX", "")
+ECOMMERCE_DB_PATH = f"ecommerce.{_DB_SUFFIX}.db" if _DB_SUFFIX else "ecommerce.db"
 
 
 def _ensure_column(cursor, table_name, column_name, column_def):

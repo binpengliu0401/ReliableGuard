@@ -40,14 +40,25 @@ def build_graph(config: RuntimeConfig = DEFAULT_RUNTIME_CONFIG, client=None):
     return compiled
 
 
-def _build_system_prompt(domain: str) -> str:
+ECOMMERCE_APPROVAL_POLICY = (
+    "Business policy: any order with amount greater than 5000 requires manager "
+    "approval and must NOT be created directly. If a request would create such an "
+    "order, refuse and ask for approval instead of calling create_order."
+)
+
+
+def _build_system_prompt(domain: str, config: RuntimeConfig = DEFAULT_RUNTIME_CONFIG) -> str:
     if domain == "ecommerce":
-        return (
+        prompt = (
             "You are an autonomous order management agent. "
             "Use available tools for operational data. "
             "When you give the final answer, be concise and include concrete order ids, "
             "amounts, statuses, and tool results when available."
         )
+        # T8: policy-aware variant exposes the approval policy to the agent.
+        if getattr(config, "policy_aware", False):
+            prompt = prompt + " " + ECOMMERCE_APPROVAL_POLICY
+        return prompt
 
     if domain == "reference":
         return (
@@ -81,7 +92,7 @@ def run_agent(
         "messages": [
             {
                 "role": "system",
-                "content": _build_system_prompt(domain),
+                "content": _build_system_prompt(domain, config),
             },
             {"role": "user", "content": msg},
         ],
@@ -93,6 +104,7 @@ def run_agent(
         "reliability_verdict_audit": None,
         "reliability_score": None,
         "structural_audit": [],
+        "tool_trace": [],
         "executed_tools": [],
         "config": config,
         "domain": domain,

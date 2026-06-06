@@ -25,6 +25,9 @@ class AgentState(TypedDict):
     reliability_verdict_audit: str | None
     reliability_score: float | None
     structural_audit: list[dict[str, Any]]
+    # Per-tool-call behaviour trace captured only in record mode (config.capture_trace):
+    # each entry is {func_name, func_args, result, before, after}. Empty otherwise.
+    tool_trace: list[dict[str, Any]]
 
     executed_tools: list[str]
     config: Any

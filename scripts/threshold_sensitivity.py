@@ -34,7 +34,7 @@ CURRENT_THRESHOLD = 0.6
 
 
 def _adjusted_outcome(actual: str, score_str: str, threshold: float) -> str:
-    if actual == "BLOCK" or not score_str:
+    if actual in {"BLOCK", "AUDIT_FAILED"} or not score_str:
         return actual
     try:
         score = float(score_str)
@@ -58,7 +58,7 @@ def _compute(rows: list[dict], threshold: float) -> dict:
             risky_total += 1
             if actual == "PASS":
                 false_accept += 1
-            elif actual in {"BLOCK", "WARN"}:
+            elif actual in {"BLOCK", "WARN", "AUDIT_FAILED"}:
                 risk_detected += 1
     far = round(false_accept / risky_total, 3) if risky_total else None
     rdr = round(risk_detected / risky_total, 3) if risky_total else None
