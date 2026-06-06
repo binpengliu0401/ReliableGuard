@@ -20,7 +20,10 @@ class RuntimeConfig:
     # billed per token actually generated. The previous 2048 truncated long
     # reference answers / multi-claim extraction JSON, causing up to ~36% skipped
     # reference tasks in V2. Ceilings raised generously to drive truncation to ~0.
-    llm_max_tokens: int = 4096
+    # The full-scale Set A record (1550) still hit 21 agent-side truncations on the
+    # longest reference verification answers at 4096, so the agent ceiling was raised
+    # to 8192 (matches the extractor); cost-free, answer-length only.
+    llm_max_tokens: int = 8192
     claim_extraction_max_tokens: int = 8192
     claim_extraction_temperature: float = 0.0
     # Record mode for the frozen-corpus methodology. When True, execute_node runs in

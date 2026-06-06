@@ -163,6 +163,30 @@ def lookup_by_metadata(title: str, authors: list, year: int | None = None) -> di
     return None
 
 
+def lookup_by_title_only(title: str, threshold: float = 0.85) -> dict | None:
+    """Return the best-matching fixture record by title similarity (no author required).
+
+    Used by the citation-level sufficiency check in the reference verifier when a
+    per-field route fails but citation context (title) is available in the claim.
+    Returns the highest-scoring record above `threshold`, or None.
+    """
+    title_key = _normalize_title(title)
+    if not title_key:
+        return None
+    data = _load_real() if _MODE == "real" else _load_mock()
+    best: dict | None = None
+    best_score = threshold
+    for record in _iter_fixture_records(data):
+        record_title = _normalize_title(str(record.get("title") or ""))
+        if not record_title:
+            continue
+        score = _title_similarity(title_key, record_title)
+        if score > best_score:
+            best_score = score
+            best = dict(record)
+    return best
+
+
 # verify_authors
 def query_authors(title: str) -> dict[str, Any]:
     if _MODE == "mock":

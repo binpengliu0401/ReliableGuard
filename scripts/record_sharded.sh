@@ -34,8 +34,9 @@ for i in $(seq 0 $((N - 1))); do
     --shard "$i" --num-shards "$N" --resume \
     --out "$OUT_DIR/shard$i.jsonl" \
     > "$OUT_DIR/shard$i.log" 2>&1 &
-  pids+=("$!")
-  echo "[SHARDED] shard $i -> pid ${pids[-1]} (log: $OUT_DIR/shard$i.log)"
+  pid=$!
+  pids+=("$pid")
+  echo "[SHARDED] shard $i -> pid $pid (log: $OUT_DIR/shard$i.log)"
 done
 
 # Wait for all shards; fail if any shard process exits non-zero.

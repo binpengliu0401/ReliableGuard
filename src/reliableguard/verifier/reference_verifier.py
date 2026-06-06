@@ -5,6 +5,7 @@ from typing import Any
 
 from src.domain.reference.api_client import (
     lookup_by_metadata,
+    lookup_by_title_only,
     normalize_doi,
     query_authors,
     query_doi,
@@ -34,6 +35,15 @@ def verify_reference_claim(claim: Claim, verifiability: Verifiability) -> Verifi
 
     ref_id = _as_int(claim.entities.get("ref_id"))
     if ref_id is not None:
+        # For ref_id-tagged claims: first try per-attribute fixture verification
+        # (title / DOI can be looked up directly in the fixture). All other
+        # attribute types fall through to _verify_reference_db_claim, which
+        # returns `unverifiable` when the ref_id is absent from the DB (the DB
+        # only holds F4 fault-injected records; its absence is NOT authoritative
+        # evidence that the reference does not exist).
+        fixture_result = _verify_ref_id_claim_via_fixture(claim)
+        if fixture_result is not None:
+            return fixture_result
         return _verify_reference_db_claim(claim, ref_id)
 
     if claim.attribute in {"reference_count", "ref_count"} and claim.entities.get("paper_id"):
@@ -120,13 +130,16 @@ def _verify_reference_db_claim(claim: Claim, ref_id: int) -> VerificationResult:
         conn.close()
 
     if row is None:
+        # The references_db only contains F4 fault-injected records (high ref_ids).
+        # Absence here does NOT mean the reference does not exist — the DB is not
+        # an authoritative source for normal fixture ref_ids (1–N per paper).
         return VerificationResult(
             claim_id=claim.claim_id,
-            evidence_state="not_found",
+            evidence_state="unverifiable",
             source="references_db",
-            source_mode="not_found",
-            confidence=1.0,
-            reason=f"Reference {ref_id} was not found in references_db.",
+            source_mode="unavailable",
+            confidence=0.0,
+            reason=f"Reference {ref_id} was not found in references_db (not authoritative for this ref_id).",
         )
 
     evidence = {
@@ -171,6 +184,18 @@ def _verify_reference_count_claim(claim: Claim, paper_id: str) -> VerificationRe
         conn.close()
 
     actual = row["count"] if row is not None else 0
+    if actual == 0:
+        # Paper has no references in the DB (only F4 records are stored there).
+        # A zero count here means the DB is not authoritative for this paper's refs,
+        # not that the paper actually has zero references.
+        return VerificationResult(
+            claim_id=claim.claim_id,
+            evidence_state="unverifiable",
+            source="references_db",
+            source_mode="unavailable",
+            confidence=0.0,
+            reason=f"Paper '{paper_id}' has no references in references_db (not authoritative).",
+        )
     return _compare_numeric(claim, actual, "references_db", {"paper_id": paper_id, "count": actual})
 
 
@@ -450,3 +475,83 @@ def _compare_numeric(
         confidence=1.0,
         reason=f"Claimed value={claimed}; database value={actual_number}.",
     )
+
+
+def _verify_ref_id_claim_via_fixture(claim: Claim) -> VerificationResult | None:
+    """Fixture-based verification for claims that carry a ref_id entity.
+
+    For title and DOI attributes, the claim value provides a direct fixture lookup
+    path — find the paper by title or DOI and verify the attribute.  A real title
+    returns `supported`; a fabricated title returns `not_found` (preserving F1/F3
+    detection).  For all other attribute types (authors, ref_id existence, meta-
+    claims such as verification_status), there is no unambiguous fixture path (ref_ids
+    are per-paper and not globally unique), so None is returned to fall through to
+    _verify_reference_db_claim, which now returns `unverifiable` for absent ref_ids.
+    """
+    attr = (claim.attribute or "").lower()
+
+    # Title claims: look up the title value in the fixture.
+    # Correct title → supported; hallucinated/wrong title → not_found (detection preserved).
+    if attr in {"title", "paper_title"} and claim.value:
+        record = lookup_by_title_only(str(claim.value))
+        if record is not None:
+            sim = title_similarity(str(claim.value), str(record.get("title", "")))
+            state = "supported" if sim >= 0.8 else "contradicted"
+            return VerificationResult(
+                claim_id=claim.claim_id,
+                evidence_state=state,
+                evidence_value=record,
+                source="reference_fixture",
+                source_mode="fixture",
+                confidence=sim,
+                reason=(
+                    f"Title {'matches' if state == 'supported' else 'contradicts'}"
+                    f" fixture record (similarity={sim:.3f})."
+                ),
+            )
+        return VerificationResult(
+            claim_id=claim.claim_id,
+            evidence_state="not_found",
+            source="reference_fixture",
+            source_mode="not_found",
+            confidence=1.0,
+            reason="Title not found in reference fixture.",
+        )
+
+    # DOI claims: look up the DOI value in the fixture.
+    # Correct DOI → supported; fabricated DOI → not_found (detection preserved).
+    # Null-like values ("none", empty) mean "this reference has no DOI" —
+    # that is unverifiable without paper context, not a fixture miss.
+    if attr == "doi" and claim.value:
+        doi_str = str(claim.value).strip()
+        if not doi_str or doi_str.lower() in {"none", "n/a", "null", "na", "-"}:
+            return VerificationResult(
+                claim_id=claim.claim_id,
+                evidence_state="unverifiable",
+                source="reference_fixture",
+                source_mode="unavailable",
+                confidence=0.0,
+                reason="DOI claim has a null/absent value; cannot verify without paper context.",
+            )
+        doi_result = query_doi(normalize_doi(doi_str))
+        if doi_result.get("exists", False):
+            return VerificationResult(
+                claim_id=claim.claim_id,
+                evidence_state="supported",
+                evidence_value=doi_result.get("metadata"),
+                source="crossref",
+                source_mode="fixture",
+                confidence=1.0,
+                reason="DOI found in reference fixture.",
+            )
+        return VerificationResult(
+            claim_id=claim.claim_id,
+            evidence_state="not_found",
+            source="crossref",
+            source_mode="not_found" if _external_sources_enabled() else "unavailable",
+            confidence=1.0,
+            reason="DOI not found in reference fixture.",
+        )
+
+    # All other attribute types: no unambiguous fixture path — fall through.
+    return None
