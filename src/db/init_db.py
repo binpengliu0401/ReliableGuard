@@ -42,6 +42,25 @@ def init_db():
 
     _ensure_column(_cursor, "orders", "refund_reason", "TEXT DEFAULT NULL")
 
+    # Inventory table for the clean state-local F4 supplementary experiment. A quantity
+    # field whose post-value is plausible on its own, so a false-success no-op is only
+    # detectable by the pre/post state-transition check (not by an answer-local claim).
+    _cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS inventory (
+            product_id INTEGER PRIMARY KEY,
+            name TEXT,
+            stock INTEGER
+        )
+        """
+    )
+    if _cursor.execute("SELECT COUNT(*) FROM inventory").fetchone()[0] == 0:
+        _cursor.executemany(
+            "INSERT INTO inventory(product_id, name, stock) VALUES(?, ?, ?)",
+            [(1, "Widget", 10), (2, "Gadget", 25), (3, "Gizmo", 7),
+             (4, "Sprocket", 100), (5, "Cog", 50)],
+        )
+
     _conn.commit()
     print(f"Ecommerce database initialized successfully: {ECOMMERCE_DB_PATH}")
 

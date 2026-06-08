@@ -74,3 +74,20 @@ tools:
         failure: "Order status did not transition to refunded in DB"
       - name: refund_reason_written
         failure: "refund_reason not written to DB"
+
+  update_stock:
+    required:
+      - product_id
+      - delta
+    rules:
+      product_id:
+        type: int
+        min: 1
+      delta:
+        type: int
+    policies: []
+    dependencies: []
+    assertions:
+      - name: tool_success_requires_state_change
+        action: BLOCK
+        failure: "update_stock reported success but inventory state unchanged"

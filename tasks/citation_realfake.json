@@ -1,0 +1,2041 @@
+[
+  {
+    "ref_id": "RP-000",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Breaking Feedback Loops in Recommender Systems with Causal Inference",
+    "authors": [
+      "K. Krauth",
+      "Yixin Wang",
+      "Michael I. Jordan"
+    ],
+    "doi": "10.1145/3728372",
+    "year": 2022,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-001",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "A Survey of Machine Unlearning",
+    "authors": [
+      "T. Nguyen",
+      "T. Huynh",
+      "Phi-Le Nguyen",
+      "Alan Wee-Chung Liew",
+      "Hongzhi Yin",
+      "Q. Nguyen"
+    ],
+    "doi": "10.1145/3749987",
+    "year": 2022,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RP-002",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Using the Output Embedding to Improve Language Models",
+    "authors": [
+      "Ofir Press",
+      "Lior Wolf"
+    ],
+    "doi": "10.18653/V1/E17-2025",
+    "year": 2016,
+    "source_paper": "all_atention_you_need.pdf"
+  },
+  {
+    "ref_id": "RP-003",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Gorilla: Large Language Model Connected with Massive APIs",
+    "authors": [
+      "Shishir G. Patil",
+      "Tianjun Zhang",
+      "Xin Wang",
+      "Joseph E. Gonzalez"
+    ],
+    "doi": "10.52202/079017-4020",
+    "year": 2023,
+    "source_paper": "toolllm_facilitating_large_language_mode.pdf"
+  },
+  {
+    "ref_id": "RP-004",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Neural Machine Translation of Rare Words with Subword Units",
+    "authors": [
+      "Rico Sennrich",
+      "B. Haddow",
+      "Alexandra Birch"
+    ],
+    "doi": "10.18653/v1/P16-1162",
+    "year": 2015,
+    "source_paper": "all_atention_you_need.pdf"
+  },
+  {
+    "ref_id": "RP-005",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Pretrained Transformers Improve Out-of-Distribution Robustness",
+    "authors": [
+      "Dan Hendrycks",
+      "Xiaoyuan Liu",
+      "Eric Wallace",
+      "Adam Dziedzic",
+      "R. Krishnan",
+      "D. Song"
+    ],
+    "doi": "10.18653/v1/2020.acl-main.244",
+    "year": 2020,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-006",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "MultiWOZ - A Large-Scale Multi-Domain Wizard-of-Oz Dataset for Task-Oriented Dialogue Modelling",
+    "authors": [
+      "Paweł Budzianowski",
+      "Tsung-Hsien Wen",
+      "Bo-Hsiang Tseng",
+      "I. Casanueva",
+      "Stefan Ultes",
+      "Osman Ramadan",
+      "Milica Gasic"
+    ],
+    "doi": "10.18653/v1/D18-1547",
+    "year": 2018,
+    "source_paper": "bench_a_benchmark_for_tool_agent_user_in.pdf"
+  },
+  {
+    "ref_id": "RP-007",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "A Survey of the State of Explainable AI for Natural Language Processing",
+    "authors": [
+      "Marina Danilevsky",
+      "Kun Qian",
+      "R. Aharonov",
+      "Yannis Katsis",
+      "B. Kawas",
+      "Prithviraj Sen"
+    ],
+    "doi": "10.18653/v1/2020.aacl-main.46",
+    "year": 2020,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-008",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "ChainedFilter: Combining Membership Filters by Chain Rule",
+    "authors": [
+      "Li Haoyu",
+      "Wang Liuhui",
+      "Chen Qizhi",
+      "Ji Jianan",
+      "Wu Yuhan",
+      "Zhao Yikai",
+      "Yang Tong",
+      "Akella Aditya"
+    ],
+    "doi": "10.1145/3626721",
+    "year": 2023,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-009",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Large Language Models are Better Reasoners with Self-Verification",
+    "authors": [
+      "Yixuan Weng",
+      "Minjun Zhu",
+      "Fei Xia",
+      "Bin Li",
+      "Shizhu He",
+      "Kang Liu",
+      "Jun Zhao"
+    ],
+    "doi": "10.18653/v1/2023.findings-emnlp.167",
+    "year": 2022,
+    "source_paper": "critic.pdf"
+  },
+  {
+    "ref_id": "RP-010",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Keep CALM and Explore: Language Models for Action Generation in Text-based Games",
+    "authors": [
+      "Shunyu Yao",
+      "Rohan Rao",
+      "Matthew J. Hausknecht",
+      "Karthik Narasimhan"
+    ],
+    "doi": "10.18653/v1/2020.emnlp-main.704",
+    "year": 2020,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RP-011",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Long Short-Term Memory-Networks for Machine Reading",
+    "authors": [
+      "Jianpeng Cheng",
+      "Li Dong",
+      "Mirella Lapata"
+    ],
+    "doi": "10.18653/v1/D16-1053",
+    "year": 2016,
+    "source_paper": "all_atention_you_need.pdf"
+  },
+  {
+    "ref_id": "RP-012",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "End-to-End Bias Mitigation by Modelling Biases in Corpora",
+    "authors": [
+      "Rabeeh Karimi Mahabadi",
+      "Yonatan Belinkov",
+      "James Henderson"
+    ],
+    "doi": "10.18653/v1/2020.acl-main.769",
+    "year": 2019,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-013",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Incorporating External Knowledge into Machine Reading for Generative Question Answering",
+    "authors": [
+      "Bin Bi",
+      "Chen Wu",
+      "Ming Yan",
+      "Wei Wang",
+      "Jiangnan Xia",
+      "Chenliang Li"
+    ],
+    "doi": "10.18653/v1/D19-1255",
+    "year": 2019,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-014",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Knowledge Graph-Augmented Abstractive Summarization with Semantic-Driven Cloze Reward",
+    "authors": [
+      "Luyang huang",
+      "Lingfei Wu",
+      "Lu Wang"
+    ],
+    "doi": "10.18653/v1/2020.acl-main.457",
+    "year": 2020,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-015",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Recent Advances in Adversarial Training for Adversarial Robustness",
+    "authors": [
+      "Tao Bai",
+      "Jinqi Luo",
+      "Jun Zhao",
+      "B. Wen",
+      "Qian Wang"
+    ],
+    "doi": "10.24963/ijcai.2021/591",
+    "year": 2021,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-016",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Should ChatGPT be Biased? Challenges and Risks of Bias in Large Language Models",
+    "authors": [
+      "Emilio Ferrara"
+    ],
+    "doi": "10.5210/fm.v28i11.13346",
+    "year": 2023,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-017",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "SQuAD: 100,000+ Questions for Machine Comprehension of Text",
+    "authors": [
+      "Rajpurkar Pranav",
+      "Zhang Jian",
+      "Lopyrev Konstantin",
+      "Liang Percy"
+    ],
+    "doi": "10.18653/v1/D16-1264",
+    "year": 2016,
+    "source_paper": "we_bar_e_n_a_a_realistic_web_environment.pdf"
+  },
+  {
+    "ref_id": "RP-018",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Decoupling Strategy and Generation in Negotiation Dialogues",
+    "authors": [
+      "He He",
+      "Derek Chen",
+      "Anusha Balakrishnan",
+      "Percy Liang"
+    ],
+    "doi": "10.18653/v1/D18-1256",
+    "year": 2018,
+    "source_paper": "bench_a_benchmark_for_tool_agent_user_in.pdf"
+  },
+  {
+    "ref_id": "RP-019",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Increasing Faithfulness in Knowledge-Grounded Dialogue with Controllable Features",
+    "authors": [
+      "Hannah Rashkin",
+      "D. Reitter",
+      "Gaurav Singh Tomar",
+      "Dipanjan Das"
+    ],
+    "doi": "10.18653/v1/2021.acl-long.58",
+    "year": 2021,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-020",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Documenting Large Webtext Corpora: A Case Study on the Colossal Clean Crawled Corpus",
+    "authors": [
+      "Dodge Jesse",
+      "Sap Maarten",
+      "Marasović Ana",
+      "Agnew William",
+      "Ilharco Gabriel",
+      "Groeneveld Dirk",
+      "Mitchell Margaret",
+      "Gardner Matt"
+    ],
+    "doi": "10.18653/v1/2021.emnlp-main.98",
+    "year": 2021,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-021",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Uncertainty-Aware Machine Translation Evaluation",
+    "authors": [
+      "Glushkova Taisiya",
+      "Zerva Chrysoula",
+      "Rei Ricardo",
+      "Martins André F. T."
+    ],
+    "doi": "10.18653/v1/2021.findings-emnlp.330",
+    "year": 2021,
+    "source_paper": "critic.pdf"
+  },
+  {
+    "ref_id": "RP-022",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Bloom Filters: One Size Fits All?",
+    "authors": [
+      "Hurley Paul",
+      "Waldvogel Marcel"
+    ],
+    "doi": "10.1109/LCN.2007.17",
+    "year": 2007,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-023",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Calibrated Language Models Must Hallucinate",
+    "authors": [
+      "Kalai Adam Tauman",
+      "Vempala Santosh S."
+    ],
+    "doi": "10.1145/3618260.3649777",
+    "year": 2024,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-024",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "ChatDev: Communicative Agents for Software Development",
+    "authors": [
+      "Cheng Qian",
+      "Wei Liu",
+      "Hongzhang Liu",
+      "Nuo Chen",
+      "Yufan Dang",
+      "Jiahao Li",
+      "Cheng Yang",
+      "Weize Chen",
+      "Yusheng Su",
+      "X. Cong",
+      "Juyuan Xu",
+      "Dahai Li",
+      "Zhiyuan Liu",
+      "Maosong Sun"
+    ],
+    "doi": "10.18653/v1/2024.acl-long.810",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RP-025",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Chain of Thought Prompting Elicits Reasoning in Large Language Models",
+    "authors": [
+      "Jason Wei",
+      "Xuezhi Wang",
+      "Dale Schuurmans",
+      "Maarten Bosma",
+      "Ed H. Chi",
+      "F. Xia",
+      "Quoc Le",
+      "Denny Zhou"
+    ],
+    "doi": "10.52202/068431-1800",
+    "year": 2022,
+    "source_paper": "react.pdf"
+  },
+  {
+    "ref_id": "RP-026",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "When is memorization of irrelevant training data necessary for high-accuracy learning?",
+    "authors": [
+      "Brown Gavin",
+      "Bun Mark",
+      "Feldman Vitaly",
+      "Smith Adam",
+      "Talwar Kunal"
+    ],
+    "doi": "10.1145/3406325.3451131",
+    "year": 2021,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-027",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Space Lower Bounds for Dynamic Filters and Value-Dynamic Retrieval",
+    "authors": [
+      "Kuszmaul William",
+      "Walzer Stefan"
+    ],
+    "doi": "10.1145/3618260.3649649",
+    "year": 2024,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-028",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Eight Things to Know about Large Language Models",
+    "authors": [
+      "Sam Bowman"
+    ],
+    "doi": "10.1215/2834703x-11556011",
+    "year": 2023,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-029",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Contrastive Out-of-Distribution Detection for Pretrained Transformers",
+    "authors": [
+      "Wenxuan Zhou",
+      "Fangyu Liu",
+      "Muhao Chen"
+    ],
+    "doi": "10.18653/v1/2021.emnlp-main.84",
+    "year": 2021,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-030",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "CogAgent: A Visual Language Model for GUI Agents",
+    "authors": [
+      "Wenyi Hong",
+      "Weihan Wang",
+      "Qingsong Lv",
+      "Jiazheng Xu",
+      "Wenmeng Yu",
+      "Junhui Ji",
+      "Yan Wang",
+      "Zihan Wang",
+      "Yuxiao Dong",
+      "Ming Ding",
+      "Jie Tang"
+    ],
+    "doi": "10.1109/CVPR52733.2024.01354",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RP-031",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "User-friendly introduction to PAC-Bayes bounds",
+    "authors": [
+      "Pierre Alquier"
+    ],
+    "doi": "10.1561/2200000100",
+    "year": 2021,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-032",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "PAC-BAYESIAN SUPERVISED CLASSIFICATION: The Thermodynamics of Statistical Learning",
+    "authors": [
+      "O. Catoni"
+    ],
+    "doi": "10.1214/074921707000000391",
+    "year": 2007,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-033",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "GRAIT: Gradient-Driven Refusal-Aware Instruction Tuning for Effective Hallucination Mitigation",
+    "authors": [
+      "Zhu Runchuan",
+      "Jiang Xinke",
+      "Wu Jiang",
+      "Ma Zhipeng",
+      "Song Jiahe",
+      "Bai Fengshuo",
+      "Lin Dahua",
+      "Wu Lijun",
+      "He Conghui"
+    ],
+    "doi": "10.18653/V1/2025.FINDINGS-NAACL.223",
+    "year": 2025,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RP-034",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Conformal prediction for text infilling and part-of-speech prediction",
+    "authors": [
+      "N. Dey",
+      "Jing Ding",
+      "Jack G. Ferrell",
+      "Carolina Kapper",
+      "Maxwell Lovig",
+      "Emiliano Planchon",
+      "Jonathan P. Williams"
+    ],
+    "doi": "10.51387/22-nejsds8",
+    "year": 2021,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-035",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Defcon Capture the Flag: defending vulnerable code from intense attack",
+    "authors": [
+      "Cowan C.",
+      "Arnold S.",
+      "Beattie S.",
+      "Wright C.",
+      "Viega J."
+    ],
+    "doi": "10.1109/DISCEX.2003.1194878",
+    "year": null,
+    "source_paper": "intercode_standardizing_and_benchmarking.pdf"
+  },
+  {
+    "ref_id": "RP-036",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Generative Agents: Interactive Simulacra of Human Behavior",
+    "authors": [
+      "J. Park",
+      "Joseph O'Brien",
+      "Carrie J. Cai",
+      "M. Morris",
+      "Percy Liang",
+      "Michael S. Bernstein"
+    ],
+    "doi": "10.1145/3586183.3606763",
+    "year": 2023,
+    "source_paper": "reflexion.pdf"
+  },
+  {
+    "ref_id": "RP-037",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "A Multitask, Multilingual, Multimodal Evaluation of ChatGPT on Reasoning, Hallucination, and Interactivity",
+    "authors": [
+      "Yejin Bang",
+      "Samuel Cahyawijaya",
+      "Nayeon Lee",
+      "Wenliang Dai",
+      "Dan Su",
+      "Bryan Wilie",
+      "Holy Lovenia",
+      "Ziwei Ji",
+      "Tiezheng Yu",
+      "Willy Chung",
+      "Quyet V. Do",
+      "Yan Xu",
+      "Pascale Fung"
+    ],
+    "doi": "10.18653/v1/2023.ijcnlp-main.45",
+    "year": 2023,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RP-038",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Tool Learning with Foundation Models",
+    "authors": [
+      "Yujia Qin",
+      "Shengding Hu",
+      "Yankai Lin",
+      "Weize Chen",
+      "Ning Ding",
+      "Ganqu Cui",
+      "Zheni Zeng",
+      "Yufei Huang",
+      "Chaojun Xiao",
+      "Chi Han",
+      "Y. Fung",
+      "Yusheng Su",
+      "Huadong Wang",
+      "Cheng Qian",
+      "Runchu Tian",
+      "Kunlun Zhu",
+      "Shi Liang",
+      "Xingyu Shen",
+      "Bokai Xu",
+      "Zhen Zhang",
+      "Yining Ye",
+      "Bowen Li",
+      "Ziwei Tang",
+      "Jing Yi",
+      "Yuzhang Zhu",
+      "Zhenning Dai",
+      "Lan Yan",
+      "X. Cong",
+      "Ya-Ting Lu",
+      "Weilin Zhao",
+      "Yuxiang Huang",
+      "Junxi Yan",
+      "Xu Han",
+      "Xian Sun",
+      "Dahai Li",
+      "Jason Phang",
+      "Cheng Yang",
+      "Tongshuang Wu",
+      "Heng Ji",
+      "Zhiyuan Liu",
+      "Maosong Sun"
+    ],
+    "doi": "10.1145/3704435",
+    "year": 2023,
+    "source_paper": "api_bank_a_comprehensive_benchmark_for_t.pdf"
+  },
+  {
+    "ref_id": "RP-039",
+    "arm": "real_published",
+    "ground_truth": "real",
+    "title": "Frameworks and Results in Distributionally Robust Optimization",
+    "authors": [
+      "Hamed Rahimian",
+      "Sanjay Mehrotra"
+    ],
+    "doi": "10.5802/ojmo.15",
+    "year": 2019,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RA-000",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "ToolQA: A Dataset for LLM Question Answering with External Tools",
+    "authors": [
+      "Yuchen Zhuang",
+      "Yue Yu",
+      "Kuan Wang",
+      "Haotian Sun",
+      "Chao Zhang"
+    ],
+    "doi": "10.48550/arXiv.2306.13304",
+    "year": 2023,
+    "source_paper": "toolllm_facilitating_large_language_mode.pdf"
+  },
+  {
+    "ref_id": "RA-001",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "A Generalist Agent",
+    "authors": [
+      "S. Reed",
+      "Konrad Zolna",
+      "Emilio Parisotto",
+      "Sergio Gomez Colmenarejo",
+      "Alexander Novikov",
+      "Gabriel Barth-Maron",
+      "Mai Giménez",
+      "Yury Sulsky",
+      "Jackie Kay",
+      "Jost Tobias Springenberg",
+      "Tom Eccles",
+      "Jake Bruce",
+      "Ali Razavi",
+      "Ashley D. Edwards",
+      "N. Heess",
+      "Yutian Chen",
+      "R. Hadsell",
+      "O. Vinyals",
+      "Mahyar Bordbar",
+      "Nando de Freitas"
+    ],
+    "doi": "10.48550/arXiv.2205.06175",
+    "year": 2022,
+    "source_paper": "react.pdf"
+  },
+  {
+    "ref_id": "RA-002",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Mind2Web: Towards a Generalist Agent for the Web",
+    "authors": [
+      "Xiang Deng",
+      "Yu Gu",
+      "Boyuan Zheng",
+      "Shijie Chen",
+      "Samuel Stevens",
+      "Boshi Wang",
+      "Huan Sun",
+      "Yu Su"
+    ],
+    "doi": "10.48550/arXiv.2306.06070",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-003",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Can Large Language Models Really Improve by Self-critiquing Their Own Plans?",
+    "authors": [
+      "Karthik Valmeekam",
+      "Matthew Marquez",
+      "Subbarao Kambhampati"
+    ],
+    "doi": "10.48550/arXiv.2310.08118",
+    "year": 2023,
+    "source_paper": "critic.pdf"
+  },
+  {
+    "ref_id": "RA-004",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "WebArena: A Realistic Web Environment for Building Autonomous Agents",
+    "authors": [
+      "Shuyan Zhou",
+      "Frank F. Xu",
+      "Hao Zhu",
+      "Xuhui Zhou",
+      "Robert Lo",
+      "Abishek Sridhar",
+      "Xianyi Cheng",
+      "Yonatan Bisk",
+      "Daniel Fried",
+      "Uri Alon",
+      "Graham Neubig"
+    ],
+    "doi": "10.48550/arXiv.2307.13854",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-005",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Improving Factuality and Reasoning in Language Models through Multiagent Debate",
+    "authors": [
+      "Yilun Du",
+      "Shuang Li",
+      "A. Torralba",
+      "J. Tenenbaum",
+      "Igor Mordatch"
+    ],
+    "doi": "10.48550/arXiv.2305.14325",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-006",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Voyager: An Open-Ended Embodied Agent with Large Language Models",
+    "authors": [
+      "Guanzhi Wang",
+      "Yuqi Xie",
+      "Yunfan Jiang",
+      "A. Mandlekar",
+      "Chaowei Xiao",
+      "Yuke Zhu",
+      "Linxi (Jim) Fan",
+      "Anima Anandkumar"
+    ],
+    "doi": "10.48550/arXiv.2305.16291",
+    "year": 2023,
+    "source_paper": "we_bar_e_n_a_a_realistic_web_environment.pdf"
+  },
+  {
+    "ref_id": "RA-007",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "ToolAlpaca: Generalized Tool Learning for Language Models with 3000 Simulated Cases",
+    "authors": [
+      "Qiaoyu Tang",
+      "Ziliang Deng",
+      "Hongyu Lin",
+      "Xianpei Han",
+      "Qiao Liang",
+      "Boxi Cao",
+      "Le Sun"
+    ],
+    "doi": "10.48550/arXiv.2306.05301",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-008",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "On Robustness of Prompt-based Semantic Parsing with Large Pre-trained Language Model: An Empirical Study on Codex",
+    "authors": [
+      "Terry Yue Zhuo",
+      "Zhuang Li",
+      "Yujin Huang",
+      "Yuan-Fang Li",
+      "Weiqing Wang",
+      "Gholamreza Haffari",
+      "Fatemeh Shiri"
+    ],
+    "doi": "10.48550/arXiv.2301.12868",
+    "year": 2023,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RA-009",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Multimodal Foundation Models: From Specialists to General-Purpose Assistants",
+    "authors": [
+      "Chunyuan Li",
+      "Zhe Gan",
+      "Zhengyuan Yang",
+      "Jianwei Yang",
+      "Linjie Li",
+      "Lijuan Wang",
+      "Jianfeng Gao"
+    ],
+    "doi": "10.48550/arXiv.2309.10020",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-010",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "ART: Automatic multi-step reasoning and tool-use for large language models",
+    "authors": [
+      "Bhargavi Paranjape",
+      "Scott M. Lundberg",
+      "Sameer Singh",
+      "Hannaneh Hajishirzi",
+      "Luke Zettlemoyer",
+      "Marco Tulio Ribeiro"
+    ],
+    "doi": "10.48550/arXiv.2303.09014",
+    "year": 2023,
+    "source_paper": "api_bank_a_comprehensive_benchmark_for_t.pdf"
+  },
+  {
+    "ref_id": "RA-011",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Tree of Thoughts: Deliberate Problem Solving with Large Language Models",
+    "authors": [
+      "Shunyu Yao",
+      "Dian Yu",
+      "Jeffrey Zhao",
+      "Izhak Shafran",
+      "T. Griffiths",
+      "Yuan Cao",
+      "Karthik Narasimhan"
+    ],
+    "doi": "10.48550/arXiv.2305.10601",
+    "year": 2023,
+    "source_paper": "we_bar_e_n_a_a_realistic_web_environment.pdf"
+  },
+  {
+    "ref_id": "RA-012",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Code Llama: Open Foundation Models for Code",
+    "authors": [
+      "Baptiste Rozière",
+      "Jonas Gehring",
+      "Fabian Gloeckle",
+      "Sten Sootla",
+      "Itai Gat",
+      "Xiaoqing Tan",
+      "Yossi Adi",
+      "Jingyu Liu",
+      "Tal Remez",
+      "J. Rapin",
+      "Artyom Kozhevnikov",
+      "I. Evtimov",
+      "Joanna Bitton",
+      "Manish P Bhatt",
+      "Cristian Canton Ferrer",
+      "Aaron Grattafiori",
+      "Wenhan Xiong",
+      "Alexandre D'efossez",
+      "Jade Copet",
+      "Faisal Azhar",
+      "Hugo Touvron",
+      "Louis Martin",
+      "Nicolas Usunier",
+      "Thomas Scialom",
+      "Gabriel Synnaeve"
+    ],
+    "doi": "10.48550/arXiv.2308.12950",
+    "year": 2023,
+    "source_paper": "mint_evaluating_llms_in_multi_turn_inter.pdf"
+  },
+  {
+    "ref_id": "RA-013",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "CRAFT: Customizing LLMs by Creating and Retrieving from Specialized Toolsets",
+    "authors": [
+      "Lifan Yuan",
+      "Yangyi Chen",
+      "Xingyao Wang",
+      "Y. Fung",
+      "Hao Peng",
+      "Heng Ji"
+    ],
+    "doi": "10.48550/arXiv.2309.17428",
+    "year": 2023,
+    "source_paper": "mint_evaluating_llms_in_multi_turn_inter.pdf"
+  },
+  {
+    "ref_id": "RA-014",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "PAL: Program-aided Language Models",
+    "authors": [
+      "Luyu Gao",
+      "Aman Madaan",
+      "Shuyan Zhou",
+      "Uri Alon",
+      "Pengfei Liu",
+      "Yiming Yang",
+      "Jamie Callan",
+      "Graham Neubig"
+    ],
+    "doi": "10.48550/arXiv.2211.10435",
+    "year": 2022,
+    "source_paper": "gorilla.pdf"
+  },
+  {
+    "ref_id": "RA-015",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Red Teaming Language Models to Reduce Harms: Methods, Scaling Behaviors, and Lessons Learned",
+    "authors": [
+      "Deep Ganguli",
+      "Liane Lovitt",
+      "John Kernion",
+      "Amanda Askell",
+      "Yuntao Bai",
+      "Saurav Kadavath",
+      "Benjamin Mann",
+      "Ethan Perez",
+      "Nicholas Schiefer",
+      "Kamal Ndousse",
+      "Andy Jones",
+      "Sam Bowman",
+      "Anna Chen",
+      "Tom Conerly",
+      "Nova Dassarma",
+      "Dawn Drain",
+      "Nelson Elhage",
+      "S. El-Showk",
+      "Stanislav Fort",
+      "Zachary Dodds",
+      "T. Henighan",
+      "Danny Hernandez",
+      "Tristan Hume",
+      "Josh Jacobson",
+      "Scott Johnston",
+      "Shauna Kravec",
+      "Catherine Olsson",
+      "Sam Ringer",
+      "Eli Tran-Johnson",
+      "Dario Amodei",
+      "Tom B. Brown",
+      "Nicholas Joseph",
+      "Sam McCandlish",
+      "Chris Olah",
+      "Jared Kaplan",
+      "Jack Clark"
+    ],
+    "doi": "10.48550/arXiv.2209.07858",
+    "year": 2022,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RA-016",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "The Self-Perception and Political Biases of ChatGPT",
+    "authors": [
+      "Jérôme Rutinowski",
+      "Sven Franke",
+      "Jan Endendyk",
+      "Ina Dormuth",
+      "Markus Pauly"
+    ],
+    "doi": "10.48550/arXiv.2304.07333",
+    "year": 2023,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RA-017",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "From Pixels to UI Actions: Learning to Follow Instructions via Graphical User Interfaces",
+    "authors": [
+      "Peter Shaw",
+      "Mandar Joshi",
+      "James Cohan",
+      "Jonathan Berant",
+      "Panupong Pasupat",
+      "Hexiang Hu",
+      "Urvashi Khandelwal",
+      "Kenton Lee",
+      "Kristina Toutanova"
+    ],
+    "doi": "10.48550/arXiv.2306.00245",
+    "year": 2023,
+    "source_paper": "we_bar_e_n_a_a_realistic_web_environment.pdf"
+  },
+  {
+    "ref_id": "RA-018",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "TaskMatrix.AI: Completing Tasks by Connecting Foundation Models with Millions of APIs",
+    "authors": [
+      "Yaobo Liang",
+      "Chenfei Wu",
+      "Ting Song",
+      "Wenshan Wu",
+      "Yan Xia",
+      "Yu Liu",
+      "Yangyiwen Ou",
+      "Shuai Lu",
+      "Lei Ji",
+      "Shaoguang Mao",
+      "Yun Wang",
+      "Linjun Shou",
+      "Ming Gong",
+      "Nan Duan"
+    ],
+    "doi": "10.48550/arXiv.2303.16434",
+    "year": 2023,
+    "source_paper": "api_bank_a_comprehensive_benchmark_for_t.pdf"
+  },
+  {
+    "ref_id": "RA-019",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Toolformer: Language Models Can Teach Themselves to Use Tools",
+    "authors": [
+      "Timo Schick",
+      "Jane Dwivedi-Yu",
+      "Roberto Dessì",
+      "R. Raileanu",
+      "M. Lomeli",
+      "Luke Zettlemoyer",
+      "Nicola Cancedda",
+      "Thomas Scialom"
+    ],
+    "doi": "10.48550/arXiv.2302.04761",
+    "year": 2023,
+    "source_paper": "reflexion.pdf"
+  },
+  {
+    "ref_id": "RA-020",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Large Language Models Can Self-Improve",
+    "authors": [
+      "Jiaxin Huang",
+      "S. Gu",
+      "Le Hou",
+      "Yuexin Wu",
+      "Xuezhi Wang",
+      "Hongkun Yu",
+      "Jiawei Han"
+    ],
+    "doi": "10.48550/arXiv.2210.11610",
+    "year": 2022,
+    "source_paper": "critic.pdf"
+  },
+  {
+    "ref_id": "RA-021",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Hallucination is Inevitable for LLMs with the Open World Assumption",
+    "authors": [
+      "Bowen Xu"
+    ],
+    "doi": "10.48550/arXiv.2510.05116",
+    "year": 2025,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "RA-022",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Inner Monologue: Embodied Reasoning through Planning with Language Models",
+    "authors": [
+      "Wenlong Huang",
+      "F. Xia",
+      "Ted Xiao",
+      "Harris Chan",
+      "Jacky Liang",
+      "Peter R. Florence",
+      "Andy Zeng",
+      "Jonathan Tompson",
+      "Igor Mordatch",
+      "Yevgen Chebotar",
+      "P. Sermanet",
+      "Noah Brown",
+      "Tomas Jackson",
+      "Linda Luu",
+      "S. Levine",
+      "Karol Hausman",
+      "Brian Ichter"
+    ],
+    "doi": "10.48550/arXiv.2207.05608",
+    "year": 2022,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-023",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "A Close Look into the Calibration of Pre-trained Language Models",
+    "authors": [
+      "Yangyi Chen",
+      "Lifan Yuan",
+      "Ganqu Cui",
+      "Zhiyuan Liu",
+      "Heng Ji"
+    ],
+    "doi": "10.48550/arXiv.2211.00151",
+    "year": 2022,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-024",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "LeTI: Learning to Generate from Textual Interactions",
+    "authors": [
+      "Xingyao Wang",
+      "Hao Peng",
+      "Reyhaneh Jabbarvand",
+      "Heng Ji"
+    ],
+    "doi": "10.48550/arXiv.2305.10314",
+    "year": 2023,
+    "source_paper": "mint_evaluating_llms_in_multi_turn_inter.pdf"
+  },
+  {
+    "ref_id": "RA-025",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Preference Ranking Optimization for Human Alignment",
+    "authors": [
+      "Feifan Song",
+      "Yu Bowen",
+      "Minghao Li",
+      "Haiyang Yu",
+      "Fei Huang",
+      "Yongbin Li",
+      "Houfeng Wang"
+    ],
+    "doi": "10.48550/arXiv.2306.17492",
+    "year": 2023,
+    "source_paper": "api_bank_a_comprehensive_benchmark_for_t.pdf"
+  },
+  {
+    "ref_id": "RA-026",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "GPT-4 Doesn't Know It's Wrong: An Analysis of Iterative Prompting for Reasoning Problems",
+    "authors": [
+      "Kaya Stechly",
+      "Matthew Marquez",
+      "Subbarao Kambhampati"
+    ],
+    "doi": "10.48550/arXiv.2310.12397",
+    "year": 2023,
+    "source_paper": "critic.pdf"
+  },
+  {
+    "ref_id": "RA-027",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Mitigating Covertly Unsafe Text within Natural Language Systems",
+    "authors": [
+      "Alex Mei",
+      "Anisha Kabir",
+      "Sharon Levy",
+      "Melanie Subbiah",
+      "Emily Allaway",
+      "John Judge",
+      "D. Patton",
+      "Bruce Bimber",
+      "K. McKeown",
+      "William Yang Wang"
+    ],
+    "doi": "10.48550/arXiv.2210.09306",
+    "year": 2022,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RA-028",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Measuring and Narrowing the Compositionality Gap in Language Models",
+    "authors": [
+      "Ofir Press",
+      "Muru Zhang",
+      "Sewon Min",
+      "Ludwig Schmidt",
+      "Noah A. Smith",
+      "M. Lewis"
+    ],
+    "doi": "10.48550/arXiv.2210.03350",
+    "year": 2022,
+    "source_paper": "critic.pdf"
+  },
+  {
+    "ref_id": "RA-029",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Describe, Explain, Plan and Select: Interactive Planning with Large Language Models Enables Open-World Multi-Task Agents",
+    "authors": [
+      "Zihao Wang",
+      "Shaofei Cai",
+      "Anji Liu",
+      "Xiaojian Ma",
+      "Yitao Liang"
+    ],
+    "doi": "10.48550/arXiv.2302.01560",
+    "year": 2023,
+    "source_paper": "agentbench_evaluating_llms_as_agents.pdf"
+  },
+  {
+    "ref_id": "RA-030",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "GLM-130B: An Open Bilingual Pre-trained Model",
+    "authors": [
+      "Aohan Zeng",
+      "Xiao Liu",
+      "Zhengxiao Du",
+      "Zihan Wang",
+      "Hanyu Lai",
+      "Ming Ding",
+      "Zhuoyi Yang",
+      "Yifan Xu",
+      "Wendi Zheng",
+      "Xiao Xia",
+      "W. Tam",
+      "Zixuan Ma",
+      "Yufei Xue",
+      "Jidong Zhai",
+      "Wenguang Chen",
+      "P. Zhang",
+      "Yuxiao Dong",
+      "Jie Tang"
+    ],
+    "doi": "10.48550/arXiv.2210.02414",
+    "year": 2022,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RA-031",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Understanding the Benefits and Challenges of Using Large Language Model-based Conversational Agents for Mental Well-being Support",
+    "authors": [
+      "Zilin Ma",
+      "Yiyang Mei",
+      "Zhaoyuan Su"
+    ],
+    "doi": "10.48550/arXiv.2307.15810",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-032",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Language Models Don't Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting",
+    "authors": [
+      "Miles Turpin",
+      "Julian Michael",
+      "Ethan Perez",
+      "Sam Bowman"
+    ],
+    "doi": "10.48550/arXiv.2305.04388",
+    "year": 2023,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RA-033",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Training a Helpful and Harmless Assistant with Reinforcement Learning from Human Feedback",
+    "authors": [
+      "Yuntao Bai",
+      "Andy Jones",
+      "Kamal Ndousse",
+      "Amanda Askell",
+      "Anna Chen",
+      "Nova Dassarma",
+      "Dawn Drain",
+      "Stanislav Fort",
+      "Deep Ganguli",
+      "T. Henighan",
+      "Nicholas Joseph",
+      "Saurav Kadavath",
+      "John Kernion",
+      "Tom Conerly",
+      "S. El-Showk",
+      "Nelson Elhage",
+      "Zac Hatfield-Dodds",
+      "Danny Hernandez",
+      "Tristan Hume",
+      "Scott Johnston",
+      "Shauna Kravec",
+      "Liane Lovitt",
+      "Neel Nanda",
+      "Catherine Olsson",
+      "Dario Amodei",
+      "Tom B. Brown",
+      "Jack Clark",
+      "Sam McCandlish",
+      "Chris Olah",
+      "Benjamin Mann",
+      "Jared Kaplan"
+    ],
+    "doi": "10.48550/arXiv.2204.05862",
+    "year": 2022,
+    "source_paper": "critic.pdf"
+  },
+  {
+    "ref_id": "RA-034",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Chain of Hindsight Aligns Language Models with Feedback",
+    "authors": [
+      "Hao Liu",
+      "Carmelo Sferrazza",
+      "P. Abbeel"
+    ],
+    "doi": "10.48550/arXiv.2302.02676",
+    "year": 2023,
+    "source_paper": "cognitive_arch.pdf"
+  },
+  {
+    "ref_id": "RA-035",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Sequential Integrated Gradients: a simple but effective method for explaining language models",
+    "authors": [
+      "Joseph Enguehard"
+    ],
+    "doi": "10.48550/arXiv.2305.15853",
+    "year": 2023,
+    "source_paper": "trustworthy_llms_a_survey_and_guideline_.pdf"
+  },
+  {
+    "ref_id": "RA-036",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Take a Break in the Middle: Investigating Subgoals towards Hierarchical Script Generation",
+    "authors": [
+      "Xinze Li",
+      "Yixin Cao",
+      "Muhao Chen",
+      "Aixin Sun"
+    ],
+    "doi": "10.48550/arXiv.2305.10907",
+    "year": 2023,
+    "source_paper": "we_bar_e_n_a_a_realistic_web_environment.pdf"
+  },
+  {
+    "ref_id": "RA-037",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "BlenderBot 3: a deployed conversational agent that continually learns to responsibly engage",
+    "authors": [
+      "Kurt Shuster",
+      "Jing Xu",
+      "M. Komeili",
+      "Da Ju",
+      "Eric Michael Smith",
+      "Stephen Roller",
+      "Megan Ung",
+      "Moya Chen",
+      "Kushal Arora",
+      "Joshua Lane",
+      "Morteza Behrooz",
+      "W.K.F. Ngan",
+      "Spencer Poff",
+      "Naman Goyal",
+      "Arthur Szlam",
+      "Y-Lan Boureau",
+      "M. Kambadur",
+      "J. Weston"
+    ],
+    "doi": "10.48550/arXiv.2208.03188",
+    "year": 2022,
+    "source_paper": "gorilla.pdf"
+  },
+  {
+    "ref_id": "RA-038",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "LEVER: Learning to Verify Language-to-Code Generation with Execution",
+    "authors": [
+      "Ansong Ni",
+      "Srini Iyer",
+      "Dragomir R. Radev",
+      "Ves Stoyanov",
+      "Wen-tau Yih",
+      "Sida I. Wang",
+      "Xi Victoria Lin"
+    ],
+    "doi": "10.48550/arXiv.2302.08468",
+    "year": 2023,
+    "source_paper": "critic.pdf"
+  },
+  {
+    "ref_id": "RA-039",
+    "arm": "real_arxiv",
+    "ground_truth": "real",
+    "title": "Disentangling Feature Structure: A Mathematically Provable Two-Stage Training Dynamics in Transformers",
+    "authors": [
+      "Zixuan Gong",
+      "Jiaye Teng",
+      "Yong Liu"
+    ],
+    "doi": "10.48550/arXiv.2502.20681",
+    "year": 2025,
+    "source_paper": "hallucination_is_a_consequence_of_space_.pdf"
+  },
+  {
+    "ref_id": "FB-000",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Self-Supervised Retrieval-Augmented for Policy Verification",
+    "authors": [
+      "G. Ashby",
+      "A. Halloran",
+      "F. Quill",
+      "L. Ashby"
+    ],
+    "doi": "10.99999/fake.1000",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-001",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Modular Graph-Structured for Reward Disentanglement",
+    "authors": [
+      "A. Vesper",
+      "B. Wexford",
+      "C. Pemberton",
+      "A. Renn"
+    ],
+    "doi": "10.99999/fake.1001",
+    "year": 2023,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-002",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Contrastive Cross-Domain for Reward Disentanglement",
+    "authors": [
+      "A. Ashby",
+      "F. Halloran"
+    ],
+    "doi": "10.99999/fake.1002",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-003",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Compositional Multi-Agent for Policy Verification",
+    "authors": [
+      "N. Pemberton",
+      "P. Calder",
+      "K. Wexford"
+    ],
+    "doi": "10.99999/fake.1003",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-004",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Compositional Cross-Domain for Trace Auditing",
+    "authors": [
+      "A. Quill",
+      "M. Renn",
+      "N. Calder"
+    ],
+    "doi": "10.99999/fake.1004",
+    "year": 2024,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-005",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Compositional Memory-Bounded for Trace Auditing",
+    "authors": [
+      "B. Calder",
+      "P. Halloran",
+      "P. Ostrander",
+      "D. Marlowe"
+    ],
+    "doi": "10.99999/fake.1005",
+    "year": 2022,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-006",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Federated Memory-Bounded for State Reconciliation",
+    "authors": [
+      "A. Tindall",
+      "D. Calder"
+    ],
+    "doi": "10.99999/fake.1006",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-007",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Self-Supervised Curriculum for Citation Grounding",
+    "authors": [
+      "L. Pemberton",
+      "G. Tindall",
+      "P. Pemberton"
+    ],
+    "doi": "10.99999/fake.1007",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-008",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Hierarchical Curriculum for Citation Grounding",
+    "authors": [
+      "K. Ashby",
+      "A. Vesper"
+    ],
+    "doi": "10.99999/fake.1008",
+    "year": 2023,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-009",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Probabilistic Uncertainty-Aware for Agent Alignment",
+    "authors": [
+      "K. Pemberton",
+      "B. Calder",
+      "K. Marlowe"
+    ],
+    "doi": "10.99999/fake.1009",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-010",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Hierarchical Schema-Guided for Tool Synthesis",
+    "authors": [
+      "N. Pemberton",
+      "L. Wexford",
+      "M. Wexford",
+      "L. Marlowe"
+    ],
+    "doi": "10.99999/fake.1010",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-011",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Probabilistic Curriculum for Agent Alignment",
+    "authors": [
+      "F. Tindall",
+      "P. Vesper",
+      "M. Ashby",
+      "J. Ashby"
+    ],
+    "doi": "10.99999/fake.1011",
+    "year": 2024,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-012",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Probabilistic Uncertainty-Aware for Reward Disentanglement",
+    "authors": [
+      "E. Pemberton",
+      "C. Marlowe",
+      "G. Tindall",
+      "G. Tindall"
+    ],
+    "doi": "10.99999/fake.1012",
+    "year": 2024,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-013",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Differentiable Neuro-Symbolic for Constraint Propagation",
+    "authors": [
+      "G. Pemberton",
+      "P. Halloran",
+      "E. Ashby"
+    ],
+    "doi": "10.99999/fake.1013",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-014",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Probabilistic Neuro-Symbolic for Constraint Propagation",
+    "authors": [
+      "F. Ostrander",
+      "H. Ostrander",
+      "L. Marlowe",
+      "J. Ostrander"
+    ],
+    "doi": "10.99999/fake.1014",
+    "year": 2024,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-015",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Differentiable Curriculum for Citation Grounding",
+    "authors": [
+      "L. Tindall",
+      "K. Renn",
+      "B. Marlowe",
+      "L. Ashby"
+    ],
+    "doi": "10.99999/fake.1015",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-016",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Compositional Cross-Domain for Tool Synthesis",
+    "authors": [
+      "D. Ostrander",
+      "K. Vesper"
+    ],
+    "doi": "10.99999/fake.1016",
+    "year": 2022,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-017",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Probabilistic Neuro-Symbolic for State Reconciliation",
+    "authors": [
+      "M. Calder",
+      "H. Calder",
+      "D. Quill",
+      "L. Wexford"
+    ],
+    "doi": "10.99999/fake.1017",
+    "year": 2019,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-018",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Adaptive Schema-Guided for State Reconciliation",
+    "authors": [
+      "N. Wexford",
+      "J. Ostrander"
+    ],
+    "doi": "10.99999/fake.1018",
+    "year": 2019,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-019",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Contrastive Multi-Agent for Policy Verification",
+    "authors": [
+      "C. Ostrander",
+      "L. Pemberton",
+      "J. Sableux"
+    ],
+    "doi": "10.99999/fake.1019",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-020",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Modular Neuro-Symbolic for Evidence Routing",
+    "authors": [
+      "P. Pemberton",
+      "H. Quill",
+      "M. Ostrander"
+    ],
+    "doi": "10.99999/fake.1020",
+    "year": 2022,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-021",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Self-Supervised Multi-Agent for Citation Grounding",
+    "authors": [
+      "H. Tindall",
+      "D. Ashby",
+      "H. Vesper",
+      "M. Ashby"
+    ],
+    "doi": "10.99999/fake.1021",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-022",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Self-Supervised Uncertainty-Aware for Agent Alignment",
+    "authors": [
+      "B. Quill",
+      "C. Marlowe",
+      "G. Wexford",
+      "C. Wexford"
+    ],
+    "doi": "10.99999/fake.1022",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-023",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Adaptive Schema-Guided for Reward Disentanglement",
+    "authors": [
+      "J. Ostrander",
+      "G. Halloran",
+      "D. Calder"
+    ],
+    "doi": "10.99999/fake.1023",
+    "year": 2022,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-024",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Latent Retrieval-Augmented for Constraint Propagation",
+    "authors": [
+      "H. Halloran",
+      "F. Ashby",
+      "N. Calder"
+    ],
+    "doi": "10.99999/fake.1024",
+    "year": 2022,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-025",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Contrastive Graph-Structured for Constraint Propagation",
+    "authors": [
+      "H. Marlowe",
+      "E. Calder"
+    ],
+    "doi": "10.99999/fake.1025",
+    "year": 2022,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-026",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Hierarchical Schema-Guided for Agent Alignment",
+    "authors": [
+      "L. Calder",
+      "M. Quill",
+      "P. Ostrander",
+      "C. Sableux"
+    ],
+    "doi": "10.99999/fake.1026",
+    "year": 2023,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-027",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Hierarchical Schema-Guided for Constraint Propagation",
+    "authors": [
+      "L. Halloran",
+      "B. Tindall",
+      "G. Quill",
+      "P. Ostrander"
+    ],
+    "doi": "10.99999/fake.1027",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-028",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Hierarchical Memory-Bounded for Reward Disentanglement",
+    "authors": [
+      "D. Ostrander",
+      "F. Renn",
+      "N. Calder"
+    ],
+    "doi": "10.99999/fake.1028",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-029",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Probabilistic Memory-Bounded for Policy Verification",
+    "authors": [
+      "A. Wexford",
+      "J. Halloran",
+      "F. Marlowe"
+    ],
+    "doi": "10.99999/fake.1029",
+    "year": 2024,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-030",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Adaptive Retrieval-Augmented for Tool Synthesis",
+    "authors": [
+      "D. Halloran",
+      "K. Quill"
+    ],
+    "doi": "10.99999/fake.1030",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-031",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Differentiable Counterfactual for Policy Verification",
+    "authors": [
+      "D. Ostrander",
+      "M. Ashby",
+      "N. Renn",
+      "C. Sableux"
+    ],
+    "doi": "10.99999/fake.1031",
+    "year": 2023,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-032",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Adaptive Cross-Domain for Citation Grounding",
+    "authors": [
+      "K. Halloran",
+      "E. Sableux"
+    ],
+    "doi": "10.99999/fake.1032",
+    "year": 2024,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-033",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Probabilistic Schema-Guided for State Reconciliation",
+    "authors": [
+      "K. Wexford",
+      "P. Tindall"
+    ],
+    "doi": "10.99999/fake.1033",
+    "year": 2020,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-034",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Adaptive Memory-Bounded for Constraint Propagation",
+    "authors": [
+      "N. Sableux",
+      "N. Halloran"
+    ],
+    "doi": "10.99999/fake.1034",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-035",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Contrastive Schema-Guided for Agent Alignment",
+    "authors": [
+      "J. Tindall",
+      "F. Halloran"
+    ],
+    "doi": "10.99999/fake.1035",
+    "year": 2022,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-036",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Modular Curriculum for Reward Disentanglement",
+    "authors": [
+      "L. Ostrander",
+      "M. Quill",
+      "G. Quill"
+    ],
+    "doi": "10.99999/fake.1036",
+    "year": 2024,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-037",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Contrastive Memory-Bounded for Constraint Propagation",
+    "authors": [
+      "N. Ostrander",
+      "H. Calder",
+      "P. Wexford",
+      "K. Ashby"
+    ],
+    "doi": "10.99999/fake.1037",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-038",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Compositional Curriculum for Citation Grounding",
+    "authors": [
+      "D. Ostrander",
+      "K. Sableux",
+      "L. Calder"
+    ],
+    "doi": "10.99999/fake.1038",
+    "year": 2021,
+    "source_paper": "synthetic"
+  },
+  {
+    "ref_id": "FB-039",
+    "arm": "fabricated",
+    "ground_truth": "fabricated",
+    "title": "Hierarchical Counterfactual for Agent Alignment",
+    "authors": [
+      "H. Marlowe",
+      "F. Ashby"
+    ],
+    "doi": "10.99999/fake.1039",
+    "year": 2021,
+    "source_paper": "synthetic"
+  }
+]

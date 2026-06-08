@@ -43,7 +43,7 @@ def snapshot_ecommerce_state() -> dict[str, Any]:
     rows = cursor.execute(  # type: ignore[union-attr]
         "SELECT id, amount, status, refund_reason FROM orders ORDER BY id"
     ).fetchall()
-    return {
+    state: dict[str, Any] = {
         str(row[0]): {
             "id": row[0],
             "amount": row[1],
@@ -52,6 +52,22 @@ def snapshot_ecommerce_state() -> dict[str, Any]:
         }
         for row in rows
     }
+    # Inventory rows are namespaced ("inv:<product_id>") so they never collide with
+    # order ids. Empty inventory adds nothing, so the authoritative orders-only behaviour
+    # is preserved; it only matters for the clean state-local F4 experiment.
+    try:
+        inv = cursor.execute(  # type: ignore[union-attr]
+            "SELECT product_id, name, stock FROM inventory ORDER BY product_id"
+        ).fetchall()
+        for prod in inv:
+            state[f"inv:{prod[0]}"] = {
+                "product_id": prod[0],
+                "name": prod[1],
+                "stock": prod[2],
+            }
+    except Exception:
+        pass
+    return state
 
 
 def check_post_execution(
@@ -154,6 +170,10 @@ def _state_unchanged_for_successful_tool(
 ) -> bool:
     if before == after:
         return True
+
+    if tool_name == "update_stock":
+        product_id = args.get("product_id")
+        return before.get(f"inv:{product_id}") == after.get(f"inv:{product_id}")
 
     order_id = result.get("order_id") or args.get("order_id")
     if order_id is None:

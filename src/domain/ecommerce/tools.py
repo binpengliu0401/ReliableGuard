@@ -61,6 +61,24 @@ def refund_order(order_id: int, reason: str) -> dict:
         return {"success": False, "error": str(e)}
 
 
+def update_stock(product_id: int, delta: int) -> dict:
+    try:
+        cursor.execute(  # type: ignore
+            "SELECT stock FROM inventory WHERE product_id = ?", (product_id,)
+        )
+        row = cursor.fetchone()  # type: ignore
+        if row is None:
+            return {"success": False, "error": f"Product {product_id} not found."}
+        new_stock = row[0] + delta
+        cursor.execute(  # type: ignore
+            "UPDATE inventory SET stock = ? WHERE product_id = ?", (new_stock, product_id)
+        )
+        conn.commit()
+        return {"success": True, "product_id": product_id, "new_stock": new_stock}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
 tools = [
     {
         "type": "function",
@@ -128,6 +146,24 @@ tools = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "update_stock",
+            "description": "Update the stock level of a product by a delta (negative to decrement).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_id": {"type": "integer", "description": "Product ID"},
+                    "delta": {
+                        "type": "integer",
+                        "description": "Change in stock (negative for a sale, positive for restock)",
+                    },
+                },
+                "required": ["product_id", "delta"],
+            },
+        },
+    },
 ]
 
 TOOL_REGISTRY = {
@@ -135,4 +171,5 @@ TOOL_REGISTRY = {
     "get_order_status": get_order_status,
     "confirm_order": confirm_order,
     "refund_order": refund_order,
+    "update_stock": update_stock,
 }

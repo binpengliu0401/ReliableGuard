@@ -28,6 +28,261 @@ def _external_sources_enabled() -> bool:
     return len(load_sources("reference")) > 0
 
 
+# --- Citation-level sufficiency check ----------------------------------------
+#
+# The per-claim verifier (`verify_reference_claim`) judges each extracted claim in
+# isolation: a DOI route, a title route, an authors route, etc. That isolation is the
+# source of the reference-domain false-BLOCK problem: a single genuine citation is
+# decomposed into several claims, and any one field the fixture cannot confirm on its
+# own (e.g. a real DOI absent from the fixture `dois` map) yields `not_found` -> high
+# risk -> BLOCK, even when the title and authors clearly identify a real paper.
+#
+# `verify_reference_claims` adds a paper-level layer on top of the per-claim baseline.
+# It groups claims that describe the same citation (by ref_id, else title, else DOI),
+# joins the evidence, and applies a sufficiency hierarchy:
+#
+#   strong : a claimed DOI exists in the fixture AND (no competing title, or the
+#            claimed title agrees with the DOI's fixture record >= 0.85)  -> supported
+#   medium : no/failed DOI, but the title matches a fixture record (>= 0.85) AND every
+#            claimed author surname is in that record's author list        -> supported
+#   weak   : exactly one of {title-match, author-match} holds              -> unverifiable
+#   none   : neither holds                                                 -> unchanged
+#
+# The layer only ever *lifts* a baseline result (it never downgrades a claim the
+# per-claim verifier already supported), so it can reduce false BLOCKs without raising
+# new ones. `none` groups keep the per-claim baseline verbatim, preserving F1/F3
+# (fabricated DOI / title) detection.
+
+_CITATION_TITLE_THRESHOLD = 0.95
+
+
+def verify_reference_claims(
+    claims: list[Claim],
+    verifiability: dict[str, Verifiability],
+) -> dict[str, VerificationResult]:
+    """Reference-domain batch verifier with citation-level sufficiency.
+
+    Computes the per-claim baseline first (identical to the legacy path), then merges
+    claims belonging to the same citation and upgrades baselines that the joint
+    evidence renders a false alarm. Returns a result for every claim.
+    """
+    results: dict[str, VerificationResult] = {}
+    for claim in claims:
+        level = verifiability.get(claim.claim_id, "unverifiable")
+        if level == "unverifiable":
+            results[claim.claim_id] = VerificationResult(
+                claim_id=claim.claim_id,
+                evidence_state="unverifiable",
+                confidence=1.0,
+                reason="No verification path is available for this claim.",
+            )
+        else:
+            results[claim.claim_id] = verify_reference_claim(claim, level)
+
+    for group_claims in _group_citation_claims(claims).values():
+        titles, dois, authors = _collect_citation_fields(group_claims)
+        tier, record, source = _judge_citation(titles, dois, authors)
+        if tier == "none":
+            continue
+        for claim in group_claims:
+            results[claim.claim_id] = _apply_citation_tier(
+                claim, results[claim.claim_id], tier, record, source
+            )
+    return results
+
+
+def _group_citation_claims(claims: list[Claim]) -> dict[tuple[str, str], list[Claim]]:
+    """Group claims that describe the same citation.
+
+    Grouping key preference: ref_id (scoped by paper_id when present) > claimed title >
+    claimed DOI. Claims with no citation handle (e.g. a paper-level reference_count)
+    fall into singleton groups and are therefore never cross-contaminated.
+    """
+    groups: dict[tuple[str, str], list[Claim]] = {}
+    for claim in claims:
+        groups.setdefault(_citation_key(claim), []).append(claim)
+    return groups
+
+
+def _citation_key(claim: Claim) -> tuple[str, str]:
+    ref_id = claim.entities.get("ref_id")
+    if ref_id is not None:
+        paper_id = claim.entities.get("paper_id")
+        scope = str(paper_id) if paper_id is not None else ""
+        return ("ref", f"{scope}:{ref_id}")
+
+    title = _claim_title(claim)
+    if title:
+        return ("title", _normalize(title))
+
+    doi = _claim_doi(claim)
+    if doi:
+        return ("doi", normalize_doi(doi))
+
+    return ("solo", claim.claim_id)
+
+
+def _claim_title(claim: Claim) -> str | None:
+    if (claim.attribute or "").lower() in {"title", "paper_title"} and claim.value:
+        return str(claim.value).strip()
+    title = claim.entities.get("paper_title") or claim.entities.get("title")
+    return str(title).strip() if title else None
+
+
+def _claim_doi(claim: Claim) -> str | None:
+    if (claim.attribute or "").lower() == "doi" and claim.value:
+        candidate = str(claim.value).strip()
+        if candidate and candidate.lower() not in {"none", "n/a", "null", "na", "-"}:
+            return candidate
+    raw = claim.entities.get("doi") or claim.entities.get("DOI")
+    if raw:
+        candidate = str(raw).strip()
+        if candidate and candidate.lower() not in {"none", "n/a", "null", "na", "-"}:
+            return candidate
+    return None
+
+
+def _collect_citation_fields(
+    group_claims: list[Claim],
+) -> tuple[list[str], list[str], list[str]]:
+    """Collect the distinct titles, DOIs, and author names asserted across a group."""
+    titles: list[str] = []
+    dois: list[str] = []
+    authors: list[str] = []
+    for claim in group_claims:
+        title = _claim_title(claim)
+        if title and title not in titles:
+            titles.append(title)
+        doi = _claim_doi(claim)
+        if doi and doi not in dois:
+            dois.append(doi)
+        if (claim.attribute or "").lower() == "authors" and claim.value is not None:
+            for author in _as_author_list(claim.value):
+                if author not in authors:
+                    authors.append(author)
+        for author in _as_author_list(claim.entities.get("authors")):
+            if author not in authors:
+                authors.append(author)
+    return titles, dois, authors
+
+
+def _judge_citation(
+    titles: list[str],
+    dois: list[str],
+    authors: list[str],
+) -> tuple[str, dict[str, Any] | None, str]:
+    """Return (tier, fixture_record, source) for one citation group."""
+    doi_record: dict[str, Any] | None = None
+    for doi in dois:
+        result = query_doi(normalize_doi(doi))
+        if result.get("exists", False):
+            metadata = result.get("metadata")
+            doi_record = dict(metadata) if isinstance(metadata, dict) else {}
+            break
+
+    title_record: dict[str, Any] | None = None
+    for title in titles:
+        record = lookup_by_title_only(title, _CITATION_TITLE_THRESHOLD)
+        if record is not None:
+            title_record = record
+            break
+
+    # Strong: a verified DOI, consistent with the claimed title (when one is asserted).
+    if doi_record is not None:
+        if not titles:
+            return "strong", doi_record, "crossref"
+        fixture_title = str(doi_record.get("title") or "")
+        best = max(
+            (title_similarity(title, fixture_title) for title in titles), default=0.0
+        )
+        if best >= _CITATION_TITLE_THRESHOLD:
+            return "strong", doi_record, "crossref"
+        # A valid DOI paired with a disagreeing title is not auto-trusted; fall through.
+
+    title_match = title_record is not None
+    reference_record = doi_record or title_record or {}
+    fixture_authors = reference_record.get("authors") or []
+    author_match = bool(authors) and _author_surnames_subset(authors, fixture_authors)
+
+    # Medium: title matches a fixture record and every claimed author surname is present.
+    if title_match and author_match:
+        return "medium", title_record, "reference_metadata"
+
+    # Weak: a single corroborating signal — enough to suppress a BLOCK, not to support.
+    if title_match or author_match:
+        return "weak", title_record or doi_record, "reference_metadata"
+
+    return "none", None, "reference_metadata"
+
+
+def _author_surnames_subset(claimed: list[str], fixture: list[str]) -> bool:
+    """True when every claimed author surname appears in the fixture author list.
+
+    Order-independent, surname-only (last name). The author lists here are
+    comma/`and`-separated "Given Family" names, so the surname is the trailing token;
+    a "Family, Given" entry is handled by taking the text before the comma.
+    """
+    claimed_surnames = {_surname(name) for name in claimed}
+    fixture_surnames = {_surname(name) for name in fixture}
+    claimed_surnames.discard("")
+    fixture_surnames.discard("")
+    if not claimed_surnames or not fixture_surnames:
+        return False
+    return claimed_surnames <= fixture_surnames
+
+
+def _surname(name: Any) -> str:
+    text = str(name or "").strip()
+    if not text:
+        return ""
+    if "," in text:
+        return text.split(",", 1)[0].strip().lower()
+    tokens = text.split()
+    return tokens[-1].strip().lower() if tokens else ""
+
+
+def _apply_citation_tier(
+    claim: Claim,
+    baseline: VerificationResult,
+    tier: str,
+    record: dict[str, Any] | None,
+    source: str,
+) -> VerificationResult:
+    if tier in {"strong", "medium"}:
+        confidence = 1.0 if tier == "strong" else 0.9
+        return VerificationResult(
+            claim_id=claim.claim_id,
+            evidence_state="supported",
+            evidence_value=record if record else baseline.evidence_value,
+            source=source,
+            source_mode="fixture",
+            confidence=confidence,
+            reason=(
+                f"Citation-level {tier} evidence: the reference is grounded in the "
+                "fixture, so its claims are treated as supported."
+            ),
+        )
+
+    if tier == "weak" and baseline.evidence_state in {"not_found", "contradicted"}:
+        # One signal corroborates the citation but the joint evidence is insufficient
+        # to assert the field. Downgrade the false alarm to unverifiable (low risk,
+        # not BLOCK) rather than letting a single unconfirmed field gate the answer.
+        return VerificationResult(
+            claim_id=claim.claim_id,
+            evidence_state="unverifiable",
+            evidence_value=baseline.evidence_value,
+            source=source,
+            source_mode="unavailable",
+            confidence=0.0,
+            reason=(
+                "Citation-level weak evidence (only one of title/authors matched the "
+                "fixture); insufficient to confirm or to flag this field."
+            ),
+        )
+
+    return baseline
+
+
 def verify_reference_claim(claim: Claim, verifiability: Verifiability) -> VerificationResult:
     doi = claim.entities.get("doi") or (claim.value if claim.attribute == "doi" else None)
     if doi:

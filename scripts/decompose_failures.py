@@ -5,17 +5,30 @@ T4 failure-attribution decomposer (RQ3 core evidence; also feeds RQ1).
 For every risk-bearing task (expected verdict in {BLOCK, WARN}) this classifies
 WHY the claim-level audit did or did not catch the risk, into four buckets:
 
-  - correct        : the audit flagged the risk (audit verdict BLOCK/WARN).
-  - not_extracted  : nothing usable was extracted to audit (claim_count == 0,
-                     i.e. the AUDIT_FAILED / empty-pipeline case) -- a coverage
-                     bottleneck in the extractor.
-  - misjudged      : claims were extracted AND the verifier consulted a source
-                     for at least one of them, but the risk still slipped through
-                     (verifier had evidence and ruled it clean) -- a verifier
-                     bottleneck.
-  - no_evidence    : claims were extracted but no source could be consulted to
-                     rule on them (all claims `source_mode=unavailable` / never
-                     grounded) -- an evidence-availability bottleneck.
+  - correct          : the audit flagged the risk (audit verdict BLOCK/WARN).
+  - not_extracted    : nothing usable was extracted to audit (claim_count == 0,
+                       i.e. the AUDIT_FAILED / empty-pipeline case) -- a coverage
+                       bottleneck in the extractor.
+  - misjudged        : a claim WAS flaggable (some claim is contradicted/not_found)
+                       yet the task still slipped through aggregation -- a genuine
+                       verifier/aggregation bottleneck (fixable).
+  - not_observable   : claims were extracted and grounded against a source, every
+                       claim came back consistent (supported/unverifiable, NO
+                       contradicted/not_found), yet the task carries a risk. The
+                       fault is simply not expressed as a wrong claim -- an
+                       observability bottleneck of the answer channel, NOT a
+                       verifier error. This is the RQ3 boundary signal: it cannot
+                       be closed by a better extractor or verifier, only by adding
+                       a different observation channel (trace/state).
+  - no_evidence      : claims were extracted but no source could be consulted to
+                       rule on them (all claims `source_mode=unavailable` / never
+                       grounded) -- an evidence-availability bottleneck.
+
+The misjudged / not_observable split is what lets T4 distinguish a fixable
+verifier weakness from a fundamental channel blind spot: a missed task where the
+verifier had a contradicted/not_found claim in hand but did not escalate is a real
+bug (misjudged); a missed task where the verifier grounded every claim and found
+them all consistent is the fault living outside the claim channel (not_observable).
 
 Input is one or more `*_rows.csv` produced by `scripts/run_ablation.py`. The
 per-claim signal is read from the row's `trace_summary` column (added so the
@@ -41,7 +54,9 @@ import sys
 from pathlib import Path
 
 RISKY = {"BLOCK", "WARN"}
-CATEGORIES = ["correct", "not_extracted", "misjudged", "no_evidence"]
+# A claim that carries a flaggable signal the aggregator could have acted on.
+_FLAGGABLE_STATES = {"contradicted", "not_found"}
+CATEGORIES = ["correct", "not_extracted", "misjudged", "not_observable", "no_evidence"]
 _STRATUM_RE = re.compile(r"F(\d)")
 
 
@@ -96,7 +111,16 @@ def classify(row: dict) -> str:
 
     if audit == "AUDIT_FAILED" or n_claims == 0:
         return "not_extracted"
-    return "misjudged" if _had_evidence(claims) else "no_evidence"
+
+    # A flaggable claim (contradicted/not_found) was in hand but the task was not
+    # caught -> a genuine aggregation/verifier miss.
+    if any(c.get("evidence_state") in _FLAGGABLE_STATES for c in claims):
+        return "misjudged"
+
+    # No flaggable claim. If the verifier still grounded claims against a source and
+    # found them all consistent, the fault is not expressed as a wrong claim at all
+    # (observability boundary); otherwise nothing could be checked (evidence gap).
+    return "not_observable" if _had_evidence(claims) else "no_evidence"
 
 
 def _blank_counts() -> dict[str, int]:

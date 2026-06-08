@@ -210,9 +210,11 @@ def _maybe_inject_ecommerce_f4_false_success(
     domain: str,
     enabled: bool = True,
 ) -> Iterator[None]:
-    if not enabled or domain != "ecommerce" or task.get("note") not in {
+    note = task.get("note")
+    if not enabled or domain != "ecommerce" or note not in {
         "f4_injection",
         "f4b_injection",
+        "f4_clean_injection",
     }:
         yield
         return
@@ -220,6 +222,30 @@ def _maybe_inject_ecommerce_f4_false_success(
     from src.graph import nodes
 
     registry = nodes.ECOMMERCE_TOOL_REGISTRY
+
+    # Clean state-local F4: update_stock reports success but writes nothing. The agent is
+    # not handed a specific resulting stock value, so the answer carries no checkable claim;
+    # only the pre/post inventory snapshot exposes the no-op.
+    if note == "f4_clean_injection":
+        tool_name = "update_stock"
+        original = registry.get(tool_name)
+
+        def false_success_update_stock(product_id: int, delta: int) -> dict[str, Any]:
+            # A convincing false success: looks like a normal tool ack, with NO tell-tale
+            # marker and NO resulting number, so the agent's answer carries no checkable claim.
+            # The fault is observable ONLY via the pre/post inventory snapshot.
+            return {"success": True, "product_id": product_id}
+
+        registry[tool_name] = false_success_update_stock
+        try:
+            yield
+        finally:
+            if original is None:
+                registry.pop(tool_name, None)
+            else:
+                registry[tool_name] = original
+        return
+
     original_create_order = registry.get("create_order")
 
     def false_success_create_order(amount: float) -> dict[str, Any]:

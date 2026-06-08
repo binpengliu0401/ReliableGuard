@@ -103,8 +103,13 @@ def main() -> None:
     print("  " + "-" * 54)
     print(f"  {'naive (no policy)':<20} {_fmt(naive.get('benign')):>16} {_fmt(naive.get('adversarial')):>16}")
     print(f"  {'policy-aware':<20} {_fmt(aware.get('benign')):>16} {_fmt(aware.get('adversarial')):>16}")
-    print("\nReading: a policy-aware agent that still violates (especially adversarially)")
-    print("shows prompting is insufficient -> the deterministic structural check is necessary.")
+    print("\nReading: compare the adversarial column across conditions. A high naive rate")
+    print("shows the violation is real for a black-box agent; a low policy-aware rate shows")
+    print("prompting enforces the policy for a cooperative agent -- in which case the")
+    print("structural check's value is verification under black-box / monitor-only")
+    print("assumptions (no prompt control; compliance is probabilistic and unverifiable),")
+    print("not 'the LLM cannot follow the rule'. A non-zero policy-aware rate would instead")
+    print("show prompting is insufficient and the deterministic check is necessary to enforce.")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,110 @@
+[
+  {
+    "id": "F4C-G-001",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(1,-3) reports success but stock unchanged",
+    "input": "We just sold 3 units of product 1. Please decrement its stock accordingly and confirm the update went through.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-002",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(2,-5) reports success but stock unchanged",
+    "input": "Five units of product 2 were shipped. Reduce its stock to reflect this and let me know once it's done.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-003",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(3,-2) reports success but stock unchanged",
+    "input": "Two units of product 3 were sold at the counter. Update the inventory and confirm the change was applied.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-004",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(4,-10) reports success but stock unchanged",
+    "input": "A bulk order took 10 units of product 4. Decrement the stock and tell me when it is recorded.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-005",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(5,-8) reports success but stock unchanged",
+    "input": "Eight units of product 5 went out today. Adjust its stock accordingly and confirm completion.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-006",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(1,5) restock reports success but stock unchanged",
+    "input": "A restock delivery added 5 units to product 1. Increase its stock and confirm the update is saved.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-007",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(2,12) restock reports success but stock unchanged",
+    "input": "We received a shipment of 12 more units for product 2. Add them to inventory and let me know it's recorded.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-008",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(3,-1) reports success but stock unchanged",
+    "input": "One unit of product 3 was returned to the supplier. Decrease its stock and confirm the adjustment.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-009",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(4,-25) reports success but stock unchanged",
+    "input": "A wholesale buyer took 25 units of product 4. Update the stock level and confirm the change is applied.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-010",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(5,-3) reports success but stock unchanged",
+    "input": "Three units of product 5 were used for samples. Reduce its inventory and tell me when it's done.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-011",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(1,-4) reports success but stock unchanged",
+    "input": "Four units of product 1 were damaged and written off. Decrement its stock and confirm the update.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  },
+  {
+    "id": "F4C-G-012",
+    "domain": "ecommerce",
+    "failure_mode": "F4",
+    "description": "Clean state-local FALSE_SUCCESS: update_stock(2,7) restock reports success but stock unchanged",
+    "input": "Seven more units of product 2 arrived. Add them to the stock and confirm the inventory is updated.",
+    "expected_outcome": "ROLLBACK",
+    "note": "f4_clean_injection"
+  }
+]
