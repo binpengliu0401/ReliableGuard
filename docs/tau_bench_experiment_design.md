@@ -56,7 +56,11 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 - **trace-local**: an `env.actions` step violates a `wiki.md` rule/precondition.
 - **state-local**: `env.data` after diverges from the claimed effect (e.g. "cancelled" but status≠cancelled).
 - **intent-local**: claim is self-consistent AND state matches the claim, yet reward=0 (valid action,
-  wrong goal) → operational definition: reward=0 AND V_structural finds no inconsistency.
+  wrong goal). **Identify it INDEPENDENTLY** from τ-bench's native fault types (e.g.
+  `used_wrong_tool` / `goal_partially_completed`), NOT merely as "what V_structural missed" — then
+  show the monitor's residual *coincides* with this independently-tagged class. (Defining
+  intent-local as the residual and then concluding the monitor misses intent-local would be
+  circular; the RQ3 boundary claim requires the independent tag.)
 - **evidence-local**: claim unsupported by the KB documents (banking_knowledge).
 
 ---
@@ -65,10 +69,11 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 
 - **Single seed** (42), sent to the API. (Honest caveat: at temp 0 the provider is still
   non-deterministic — the seed barely controls variance; repeats below carry the noise estimate.)
-- **4 base agent models** (the audited models): DeepSeek (baseline) + GLM + MiMo + one open-source
-  mid (e.g. Qwen). **Monitor extractor model fixed** and **user-simulator model fixed** across all
-  runs (two controls, so only the audited agent varies).
-- **K = 5 repeats** per (domain, model) to estimate run-to-run noise.
+- **4 base agent models** (the audited models), locked Phase 0 (2026-06-10) — a 2x2 capability
+  spread across 4 mainland vendors; see the **Locked configuration** section below for exact IDs.
+  **Monitor extractor model fixed** and **user-simulator model fixed** (`minimax/minimax-m3`) across
+  all runs (two controls, so only the audited agent varies).
+- **K = 10 repeats** per (domain, model) to estimate run-to-run noise.
 - Three statistics, each at the right level:
   1. **Significance → per-task paired McNemar test** (V_answer vs V_structural) within each model,
      plus bootstrap CIs over tasks. Hundreds of paired tasks → high power on a single model/seed.
@@ -198,8 +203,51 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
    policy + dependency, which are richer in τ-bench.
 10. **Extractor reuse across configs** is intra-run, not the rejected freeze-as-evidence — noted.
 
-## Open items (settle in Phase 0)
+## Locked configuration (Phase 0, 2026-06-10)
 
-- Exact OpenRouter model IDs (GLM/MiMo/Qwen) and user-sim model.
-- Final domain scope + task counts; K (5 default, adjust by observed noise).
-- banking_knowledge usability for the evidence channel.
+Backend: OpenRouter via LiteLLM (`--model-provider openrouter`; the model ID is the full OpenRouter
+slug). **OpenAI models are NOT reachable on this account** (403 "violation of provider Terms Of
+Service"), so the user-simulator cannot be gpt-4o — it is a mainland model (below).
+
+Audited agent models (4 vendors, 2 flagship + 2 low-end spread), all verified `tools=True`:
+
+| Model ID | Vendor | Tier | $/1M in/out | ctx |
+| --- | --- | --- | --- | --- |
+| `deepseek/deepseek-v4-pro` | DeepSeek (baseline) | flagship | 0.435 / 0.87 | 1M |
+| `xiaomi/mimo-v2.5-pro` | Xiaomi | flagship | 0.435 / 0.87 | 1M |
+| `z-ai/glm-4.7-flash` | Zhipu | low-end | 0.06 / 0.40 | 203K |
+| `qwen/qwen3.6-flash` | Alibaba | low-end | 0.1875 / 1.125 | 1M |
+
+User-simulator (fixed control): `minimax/minimax-m3` (0.30 / 1.20, 1M) — non-audited vendor (no
+cross-model coupling with the audited set), reachable, emits clean text. Extractor model: fixed,
+set in Phase 1.
+
+Domain scope: core = retail (115 test tasks) + airline (50 test tasks) = **165 tasks/repeat**.
+`sierra-research/tau-bench` main ships only retail + airline; telecom + banking_knowledge live in the
+separate `tau2-bench` repo (stretch, supplies evidence-local). Seed 42. K = 10.
+
+Budget (Phase 0 smoke-calibrated, real OpenRouter spend; all 11 smoke/calib tasks passed with valid
+tool calls, concurrency 5 verified clean):
+
+| Model | $/task (retail / airline) | full-matrix (K=10) | data |
+| --- | --- | --- | --- |
+| `deepseek/deepseek-v4-pro` | 0.080 / 0.072 | **$128** | firm (n=8) |
+| `qwen/qwen3.6-flash` | 0.029 | ~$47 | n=1 |
+| `xiaomi/mimo-v2.5-pro` | 0.011 | ~$18 | n=1 |
+| `z-ai/glm-4.7-flash` | 0.0029 | ~$5 | n=1 |
+| user-sim + extractor | — | ~$6 | — |
+
+Total ≈ **$204** (airline/retail cost ratio measured 0.92). Cost driver = `deepseek-v4-pro` (63%),
+because it is a reasoning model and the agent re-sends full history + the ~2.4-2.9k-token tool
+schemas every step (~80k input tok/task); output is small (per-call ≤1259 tok), so caps don't reduce
+cost. Wall-clock: the two reasoning flagships are slow (raw 170-220 s/task); concurrency 5 is verified
+safe, can ramp to 20-30 — expect ~4-8 h depending on achieved concurrency, less if models run in
+parallel. **Run-harness correctness/robustness spec (snapshot order, shard+resume, retry vs. spurious
+failure, max_tokens caps) is in [architecture.md](architecture.md) → "Run-harness correctness &
+robustness"; it is a Phase 2 prerequisite.**
+
+## Open items (still pending)
+
+- Extractor model ID (set in Phase 1) + grounding-injection design (see architecture.md).
+- Intent-local independent annotation source.
+- banking_knowledge usability for the evidence channel (stretch / tau2-bench).

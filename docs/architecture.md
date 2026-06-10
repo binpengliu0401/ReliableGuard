@@ -66,14 +66,26 @@ and a `_VERIFIERS` registry keyed by domain. Each registered verifier judges the
 legacy self-made ecommerce + reference verifiers were removed in the 2026-06-09 pivot; the τ-bench
 state / trace / evidence verifiers are registered here in Phase 2.
 
+**Open integration point (decide first in Phase 1/2): grounding injection.** The current
+`verify_claims(domain, claims, verifiability)` signature does NOT carry the trajectory's observable
+artifacts (`state_before/after`, `tool_trace`), but `V_structural` needs them. The legacy verifiers
+read a module-global DB cursor (deleted). The replacement must **pass the `Trajectory` grounding
+explicitly** into the verifier (extend the pipeline/verifier signature or a per-call context), and
+the verifier must honor **per-config channel flags** (answer-only vs +state vs +trace vs +evidence)
+so the same claims+trajectory yield the V_answer / V_structural / V_evidence verdicts without
+re-extraction. Do not reintroduce hidden global state.
+
 ## τ-bench integration
 
 - Per task τ-bench exposes: tool trace `env.actions` (list of name+kwargs), DB state `env.data`,
   gold `calculate_reward()` (uses the goal annotation `info.r_actions`).
 - **The monitor reads ONLY `env.actions` + `env.data` + the final answer, never `r_actions`**
   → non-circular by construction.
-- **Snapshot the agent-final `env.data` BEFORE calling `calculate_reward()`** — it reloads
-  `env.data` to ground truth and would overwrite the agent-final state.
+- **Snapshot `env.data` AND `env.actions` BEFORE the terminal `env.step()`.** `calculate_reward()`
+  runs INSIDE that terminal step and (a) reloads `env.data` to ground truth and (b) appends the gold
+  `task.actions` to `env.actions` during its replay — so both are polluted by the time `step()`
+  returns. The agent-final state and a clean trace only exist before that step (see the run-harness
+  spec below for the deepcopy discipline).
 - Each domain ships an explicit policy `wiki.md` (preconditions + action-ordering). The trace channel
   encodes these rules over `env.actions`, so even the rules are the benchmark's own (not self-made).
 
@@ -88,6 +100,42 @@ Trajectory{ task_id, domain, model, repeat, seed, query, final_answer,
 
 The adapter runs an agent in the benchmark harness and emits `Trajectory` records (streaming JSONL,
 resumable); the monitor pass consumes them, applies the configs, and records verdict + locus + reward.
+
+## Run-harness correctness & robustness (Phase 2 prerequisites)
+
+Settled in Phase 0 (2026-06-10) and verified on smoke runs; **not yet implemented** — the capture
+driver that wraps the τ-bench runner must honor all four before the full run.
+
+1. **Snapshot order (correctness).** `calculate_reward()` runs INSIDE the terminal `env.step()` and
+   both reloads `env.data` to ground truth and appends the gold `task.actions` to `env.actions`. So
+   the driver must `deepcopy(env.data)` and `list(env.actions)` after each non-terminal step and use
+   the last pre-terminal snapshot as `state_after` / `tool_trace`. Never read `env.data` /
+   `env.actions` after the run (both ground-truth-polluted), and never read `task.actions` /
+   `reward_info` (the gold annotation) into a `Trajectory` — that is the non-circularity guarantee.
+
+2. **Shard + resume (idempotent, crash-safe).** Work unit / dedup key = `(model, domain, repeat,
+   task_id)` (4 models × 2 domains × K=10 × 165 tasks = 6,600 trajectories). Output = append-only
+   JSONL, one `Trajectory` per line, flushed per record (a crash loses at most the in-flight task).
+   Shard granularity: one file per `model` minimum, optionally per `(model, repeat)` for parallel
+   runs — one writer per shard file (no lock contention). Resume = on start, scan the shard, build the
+   done-set of keys, run only the complement. The stock τ-bench runner does NOT resume (it writes a
+   new timestamped file and re-runs the whole range), so resume is added in the driver.
+
+3. **Retry vs. spurious failure (label integrity — the critical one).** The stock runner wraps
+   `agent.solve` in try/except and records a transient API error (429 / timeout / 5xx) as
+   `reward=0.0` — a real infra hiccup becomes a fake task failure that contaminates the gold label
+   and the monitor's detection/FAR stats. The driver must set litellm globals (`num_retries=4`, a
+   `request_timeout`) so transient errors retry with backoff (but NOT a 400 bad-request, which is a
+   real error); and on retry exhaustion mark the trajectory `status=error`, EXCLUDE it from metrics,
+   and let resume re-run it — never record it as reward-0.
+
+4. **max_tokens cap + truncation alarm (anti-runaway, no truncation).** Per-call output caps: **agent
+   = 4096, user-sim = 2048**. Phase 0 measured per-call output max 1259 (agent) / 489 (user-sim)
+   across the two reasoning agents + the minimax-m3 user-sim with zero `finish_reason="length"`, so
+   the caps give 3-4× margin and will not truncate normal operation; they only guard runaway. Cost is
+   input-driven (re-sent history + tool schemas), not output, so the cap is not a cost lever. The
+   driver must log `finish_reason` and ALARM on any `"length"` (a cap too low for some edge task)
+   rather than silently emit a truncated tool call. `max_num_steps` stays 30 (τ-bench standard).
 
 ## Structural-audit pattern (port target)
 

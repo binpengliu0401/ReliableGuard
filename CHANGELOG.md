@@ -9,6 +9,23 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ## [Unreleased]
 
+### Added
+
+- **Phase 0 closeout (2026-06-10): τ-bench environment locked + run-harness spec.** Cloned
+  `sierra-research/tau-bench` (retail + airline; telecom/banking_knowledge are the separate
+  `tau2-bench` repo, stretch) and verified the env API. **Locked the audited model lineup**
+  (OpenRouter, all `tools=True`): agents `deepseek/deepseek-v4-pro`, `xiaomi/mimo-v2.5-pro`,
+  `z-ai/glm-4.7-flash`, `qwen/qwen3.6-flash` (2 flagship + 2 low-end across 4 vendors); user-simulator
+  `minimax/minimax-m3` (fixed control). Recorded the operational constraint that **OpenAI models are
+  blocked on this OpenRouter account** (403 ToS), so the user-sim cannot be gpt-4o. Smoke-calibrated
+  the budget to ~$204 for the 4-model × K=10 × 165-task matrix (all 11 smoke/calib tasks passed with
+  valid tool calls, concurrency 5 clean; `deepseek-v4-pro` = 63% of cost, firm at n=8). Documented the
+  **run-harness correctness & robustness spec** in `architecture.md` (snapshot `env.data` AND
+  `env.actions` before the reward-bearing terminal `env.step()`; shard + resume keyed on
+  `(model, domain, repeat, task_id)`; retry vs. spurious-failure for gold-label integrity; max_tokens
+  caps agent 4096 / user-sim 2048 + `finish_reason="length"` alarm), and the locked configuration +
+  calibrated budget in `tau_bench_experiment_design.md` (K=5 → K=10).
+
 ### Changed
 
 - **PROJECT PIVOT (2026-06-09): re-grounded on τ-bench; self-made evaluation retired.** The whole
