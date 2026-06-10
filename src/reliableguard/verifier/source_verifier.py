@@ -1,6 +1,12 @@
 from src.reliableguard.schema import Claim, Verifiability, VerificationResult
-from src.reliableguard.verifier.ecommerce_verifier import verify_ecommerce_claims
-from src.reliableguard.verifier.reference_verifier import verify_reference_claims
+
+# Benchmark verifier registry. Each entry verifies a claim-set jointly (not claim-by-claim)
+# against that benchmark's observable grounding artifacts (state / trace / evidence).
+# The legacy self-made ecommerce + reference verifiers were removed in the 2026-06-09 pivot;
+# the tau-bench state / trace / evidence verifiers are registered here in Phase 2.
+# Signature for a registered verifier:
+#   (claims, verifiability) -> dict[claim_id, VerificationResult]
+_VERIFIERS: dict[str, object] = {}
 
 
 def verify_claims(
@@ -8,22 +14,18 @@ def verify_claims(
     claims: list[Claim],
     verifiability: dict[str, Verifiability],
 ) -> dict[str, VerificationResult]:
-    # Both domains verify claim-sets jointly rather than claim-by-claim: reference joins
-    # claims about the same paper (citation-level sufficiency), ecommerce joins the status
-    # claims of the same order (transition-aware state verification). Each is handed the
-    # whole batch through a single entry point.
-    if domain == "reference":
-        return verify_reference_claims(claims, verifiability)
-    if domain == "ecommerce":
-        return verify_ecommerce_claims(claims, verifiability)
+    verifier = _VERIFIERS.get(domain)
+    if verifier is not None:
+        return verifier(claims, verifiability)  # type: ignore[operator]
 
+    # No verifier registered for this domain yet: every claim is reported as unverifiable
+    # (the monitor cannot reach a grounding source). Phase 2 registers the tau-bench verifiers.
     return {
         claim.claim_id: VerificationResult(
             claim_id=claim.claim_id,
             evidence_state="unverifiable",
             confidence=1.0,
-            reason=f"Unsupported domain: {domain}",
+            reason=f"No verifier registered for domain: {domain}",
         )
         for claim in claims
     }
-

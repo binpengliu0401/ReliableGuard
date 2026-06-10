@@ -1,43 +1,13 @@
 #!/bin/bash
 # pre-push hook: documentation discipline gate. See docs/push_checklist.md.
-#   (1) HARD : reject if CHANGELOG.md is not updated in the commits being pushed.
-#   (2) WARN : tracked code changed but README.md did not (judgement call, non-blocking).
-#   (3) HARD : a push is a project "node". On a new node (HEAD differs from the last push),
-#       CLAUDE.md (Code Task Checklist / Status / decisions) must have changed since the last
-#       push, else the push is rejected.
-#   (4) WARN : the memory/ roadmap is checked the same way but only warns when unchanged
-#       (memory hygiene: not every node produces a durable fact worth recording).
-#       CLAUDE.md and memory/ are gitignored, so they cannot be checked from git history; the
-#       hook compares their content hash against a local baseline in .git/doc_push_state.
-#       Re-pushing the same HEAD (e.g. after a network failure) is skipped, and the very first
-#       run only records the baseline.
+#   HARD: reject the push if CHANGELOG.md was not updated in the commits being pushed.
 # Install: bash scripts/install-hooks.sh
 # Emergency bypass (avoid): git push --no-verify
-# Env overrides: RG_MEMORY_DIR (memory location), RG_DOC_STATE (baseline file).
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-CODE_REGEX='^(src/|eval/|scripts/|tasks/|ReliableGuard\.py)'
-STATE_FILE="${RG_DOC_STATE:-$REPO_ROOT/.git/doc_push_state}"
-MEMORY_DIR="${RG_MEMORY_DIR:-$HOME/.claude/projects/$(printf '%s' "$REPO_ROOT" | tr '/_' '--')/memory}"
-
-_sha() {
-    if command -v sha256sum >/dev/null 2>&1; then sha256sum | awk '{print $1}';
-    else shasum -a 256 | awk '{print $1}'; fi
-}
-hash_file() { [ -f "$1" ] && _sha < "$1" || echo "absent"; }
-hash_memory() {
-    [ -d "$MEMORY_DIR" ] || { echo "absent"; return; }
-    local files; files=$(find "$MEMORY_DIR" -type f -name '*.md' | sort)
-    [ -n "$files" ] && printf '%s\n' "$files" | xargs cat | _sha || echo "empty"
-}
-
-# (1) + (2): per-range CHANGELOG gate, plus code/README change flags.
-code_changed=0
-readme_changed=0
 while read -r local_ref local_sha remote_ref remote_sha; do
-    [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue  # deletion
+    [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue  # branch deletion
     if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-        range="$local_sha"
+        range="$local_sha"            # new branch: inspect all its commits
     else
         range="$remote_sha..$local_sha"
     fi
@@ -50,61 +20,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         echo ""
         exit 1
     fi
-    printf '%s\n' "$files" | grep -Eq "$CODE_REGEX" && code_changed=1
-    printf '%s\n' "$files" | grep -q '^README.md$' && readme_changed=1
 done
 
-if [ "$code_changed" = "1" ] && [ "$readme_changed" = "0" ]; then
-    echo ""
-    echo "WARNING: tracked code changed but README.md was not updated."
-    echo "  If a file, directory, command, or workflow changed, update README.md (non-blocking)."
-fi
-
-# (3): local-record gate (CLAUDE.md + memory) keyed by node = current HEAD.
-cur_head="$(git rev-parse HEAD 2>/dev/null)"
-claude_now="$(hash_file "$REPO_ROOT/CLAUDE.md")"
-memory_now="$(hash_memory)"
-
-prev_head=""; prev_claude=""; prev_memory=""
-if [ -f "$STATE_FILE" ]; then
-    prev_head=$(grep '^head=' "$STATE_FILE" | cut -d= -f2-)
-    prev_claude=$(grep '^claude=' "$STATE_FILE" | cut -d= -f2-)
-    prev_memory=$(grep '^memory=' "$STATE_FILE" | cut -d= -f2-)
-fi
-
-if [ -z "$prev_head" ]; then
-    echo ""
-    echo "Records gate: first run — recording baseline, not enforced this time."
-elif [ "$prev_head" = "$cur_head" ]; then
-    echo ""
-    echo "Records gate: same HEAD as last push (re-push) — skipped."
-else
-    problems=""
-    if [ "$claude_now" = "absent" ]; then
-        echo "Records gate: CLAUDE.md not found at repo root — its check is skipped."
-    elif [ "$claude_now" = "$prev_claude" ]; then
-        problems="$problems\n  - CLAUDE.md unchanged since last push — update the Code Task Checklist / Status / decisions."
-    fi
-    if [ "$memory_now" = "absent" ]; then
-        echo "Records gate: memory dir not found ($MEMORY_DIR) — memory reminder skipped."
-    elif [ "$memory_now" = "$prev_memory" ]; then
-        echo "WARNING: no memory/*.md changed since last push — update the roadmap memory if"
-        echo "  this node produced a durable decision/fact (non-blocking, memory hygiene)."
-    fi
-    if [ -n "$problems" ]; then
-        echo ""
-        echo "Push rejected: local record files were not updated for this node:"
-        printf "%b\n" "$problems"
-        echo "  (gitignored files — checked by content hash, not git history.)"
-        echo "  Emergency bypass: git push --no-verify"
-        echo ""
-        exit 1
-    fi
-fi
-
-# Passed: advance the baseline to this node.
-{ echo "head=$cur_head"; echo "claude=$claude_now"; echo "memory=$memory_now"; } > "$STATE_FILE"
-
 echo ""
-echo "Pre-push checks passed (CHANGELOG + local records). See docs/push_checklist.md."
+echo "Pre-push check passed (CHANGELOG.md updated)."
 exit 0

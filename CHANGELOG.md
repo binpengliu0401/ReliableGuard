@@ -9,6 +9,36 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ## [Unreleased]
 
+### Changed
+
+- **PROJECT PIVOT (2026-06-09): re-grounded on τ-bench; self-made evaluation retired.** The whole
+  evaluation moves from a self-made benchmark to the recognized **τ-bench** benchmark
+  (`sierra-research/tau-bench`), whose ground truth is execution-based and externally authored,
+  removing the "self-made data + self-made labels" weakness. **Deleted** from the repo: the
+  ecommerce + reference scenario files (`tasks/*scenarios*.json`, `tier_b_prompts.json`,
+  `verifier_scenarios.json`, etc.), all SQLite databases (`*.db`), all old `results/` and `logs/`
+  outputs, the experiment + figure scripts under `scripts/` (kept `install-hooks.sh`), the
+  `eval/` old harness (`benchmark.py`, `ablation_runner.py`, `fact_scorer.py`,
+  `config/ablation_versions.py`, `annotation/` — kept `metrics.py`), and the corresponding tests.
+  **Kept**: the reusable monitor core (`src/reliableguard/`), `eval/metrics.py`, the structural-audit
+  pattern, `tasks/papers/`, `figures/`, and `docs/thesis/`. The legacy `src/domain`, `src/agent`,
+  `src/graph`, `src/db`, and `ReliableGuard.py` are kept until Phase 2, then removed. The
+  intellectual core is unchanged: observability framing + locus-of-ground-truth taxonomy (now
+  answer / trace / state / evidence / **intent**-local) + the neuro-symbolic pipeline. Three monitor
+  configs (`V_answer` / `V_structural` / `V_evidence`) replace V1/V2/V3; RQs re-grounded (RQ1
+  answer-only ceiling, RQ2 trace/state recovery + cross-model robustness, RQ3 intent-local boundary);
+  statistics = single-seed multi-LLM (4 models) + K repeats + per-task McNemar. Rewrote `CLAUDE.md`,
+  `README.md`, `docs/thesis_scope.md`; added a re-grounding banner to `docs/formal_definitions.md`;
+  added `docs/tau_bench_experiment_design.md` (authoritative design). Documentation + deletion only;
+  no monitor-core logic changed. Memory updated (`project_tau_bench_pivot`).
+- **CLAUDE.md split into overview + router; pre-push gate simplified to CHANGELOG-only.** `CLAUDE.md`
+  is now a thin entry point (identity + conceptual spine + a router table + always-on rules);
+  technical detail moved to the new `docs/architecture.md` (repo layout, pipeline, 3 monitor configs,
+  verifier registry, τ-bench integration, adapter interface, operational conventions). `hooks/pre-push`
+  now enforces only that **CHANGELOG.md** is updated in the pushed commits; the old CLAUDE.md/memory
+  content-hash node gates and the README warning were removed (CLAUDE.md as a thin router would have
+  been falsely flagged every push). Updated `docs/push_checklist.md` accordingly.
+
 ### Added
 
 - **Authoritative ×3-seed batch + RQ figures + thesis writing interface**: the full Set A and Set B ×3-seed batches (seeds 42/123/7) at commit `c74dbb8` are the single source of truth for all thesis numbers (archived under `results/_archive/set_{a,b}_3seed_20260608_c74dbb8/`). `scripts/plot_results.py` renders the RQ-aligned figures from a replay rows CSV (`fig_rq1_claim_only` / `fig_rq2_structural` / `fig_rq3_locus` / `fig_benign_far` + `summary.csv`); committed under `figures/set_a_3seed/`. Set B reframe figure via `scripts/plot_setb_reframe.py` → `figures/set_b_3seed/fig_setb_benign_reframe.{png,pdf}`. Thesis interface docs added: `docs/thesis_outline.md`, `docs/thesis_handoff_brief.md` (§6 carries every ×3 number + locked decisions), `docs/draft_setb_results.md`, `docs/advisor_briefing_20260608.md`. Headline: ecommerce claim-only RDR 35.4% → +structural 76.6% (F2 0.7→100), benign FAR 1.2%; reference RDR 33.8% (no structural channel — the boundary); RQ1 extractor precision 99.15%.

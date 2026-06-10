@@ -1,6 +1,16 @@
 # Formal Definitions for ReliableGuard
 
-This document defines the formal concepts used by ReliableGuard to support three thesis-level goals: quantification, standardization, and traceability. The scope is limited to externally verifiable failures in tool-using LLM agents with observable grounding artifacts, such as database state, bibliographic metadata, tool execution traces, and document references.
+> **Re-grounded 2026-06-09 (τ-bench pivot).** The metric machinery below (evidence-state
+> enumeration, FAR / detection / scoring) **carries over unchanged** to the new τ-bench-based
+> design, with two substitutions: (1) the per-task ground-truth label is now the **τ-bench reward**
+> (1 pass / 0 fail), replacing the old self-made safe/risky label; (2) the failure taxonomy is the
+> **locus of ground truth** (answer / trace / state / evidence / intent-local), replacing the old
+> F0–F5 *injection* categories and the Type I/Type II split — any Section referring to F0–F5 /
+> Type I–II is **historical**. The verdict space also includes `AUDIT_FAILED` (and PASS may be
+> split into PASS_VERIFIED / PASS_UNCHECKED). Authoritative design:
+> [tau_bench_experiment_design.md](tau_bench_experiment_design.md).
+
+This document defines the formal concepts used by ReliableGuard to support three thesis-level goals: quantification, standardization, and traceability. The scope is limited to externally verifiable failures in tool-using LLM agents with observable grounding artifacts, such as database state, retrievable knowledge-base documents, and tool execution traces.
 
 ## 1. Evidence State Enumeration
 

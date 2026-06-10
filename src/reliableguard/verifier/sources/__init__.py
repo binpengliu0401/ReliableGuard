@@ -1,1 +1,0 @@
-"""Configurable verifier source registry."""
