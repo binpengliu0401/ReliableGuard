@@ -11,6 +11,19 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ### Added
 
+- **Phase 1 (2026-06-10): grounding-injection plumbing (decision B) + extractor lock.** Added the
+  benchmark-adapter `Trajectory` record (`src/reliableguard/adapter.py`) and the verification
+  vocabulary `ChannelConfig` / `Grounding` / `VerificationContext` (`schema.py`), with channel
+  presets mapping to the three monitor configs (`CHANNELS_ANSWER` / `_STRUCTURAL` / `_EVIDENCE`).
+  Threaded an optional `VerificationContext` through `verify_claims` and `run_reliability_pipeline`
+  so the same extracted claims + grounding yield the V_answer / V_structural / V_evidence verdicts by
+  varying only `channels`, with no hidden global state. Added `tests/test_verification_context.py`
+  (5 tests). **Locked the extractor model = `minimax/minimax-m3`** (same as the user-sim; both fixed
+  controls off the audited vendor set; JSON extraction verified end-to-end on a real retail
+  trajectory). Recorded the **answer-local input definition** (extractor is fed the concatenation of
+  the agent's `respond` turns, not the last message and not tool calls — channel hygiene for the
+  RQ1-vs-RQ2 contrast). Budget updated to ~$213 (extractor reasoning ≈ $13).
+
 - **Phase 0 closeout (2026-06-10): τ-bench environment locked + run-harness spec.** Cloned
   `sierra-research/tau-bench` (retail + airline; telecom/banking_knowledge are the separate
   `tau2-bench` repo, stretch) and verified the env API. **Locked the audited model lineup**

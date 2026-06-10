@@ -44,6 +44,15 @@ the rejected freeze-as-evidence; it just avoids re-extracting):
 - **V_evidence** (RQ2 extension, banking_knowledge only): V_answer + re-retrieve from the KB and
   check claims against retrieved documents (evidence-local, source-available case).
 
+**Answer-local input (channel hygiene, decided Phase 1).** The text fed to the extractor for the
+answer-local channel is the **concatenation of all the agent's natural-language `respond` turns**
+(everything it told the user across the conversation), NOT just the last message (a chatty closer is
+claim-poor — verified on a real retail trajectory: 1 weak claim) and **NOT the tool calls** (those are
+the trace channel). Mixing tool calls into the answer-local extraction would let V_answer read the
+trace channel and collapse the RQ1-vs-RQ2 contrast. So: answer = what the agent *said* (V_answer);
+`tool_trace` = what it *did* (V_structural); `state_after` = the realized effect (V_structural). An
+agent that does the right action but says nothing → few answer-local claims → the RQ1 ceiling.
+
 Gold label for every task = τ-bench reward (1 pass / 0 fail). Detection = monitor non-PASS on a
 reward-0 task; false alarm = monitor non-PASS on a reward-1 task.
 
@@ -219,8 +228,11 @@ Audited agent models (4 vendors, 2 flagship + 2 low-end spread), all verified `t
 | `qwen/qwen3.6-flash` | Alibaba | low-end | 0.1875 / 1.125 | 1M |
 
 User-simulator (fixed control): `minimax/minimax-m3` (0.30 / 1.20, 1M) — non-audited vendor (no
-cross-model coupling with the audited set), reachable, emits clean text. Extractor model: fixed,
-set in Phase 1.
+cross-model coupling with the audited set), reachable, emits clean text. Extractor model (fixed
+control): **also `minimax/minimax-m3`** (locked Phase 1) — JSON extraction verified (reasoning stays
+in a separate field, content is clean JSON); reused for consistency and to keep both controls off the
+audited vendor set. The two controls share a model but operate in disjoint roles (conversation-time
+user-sim vs. post-hoc claim extraction) with no information sharing, so this introduces no confound.
 
 Domain scope: core = retail (115 test tasks) + airline (50 test tasks) = **165 tasks/repeat**.
 `sierra-research/tau-bench` main ships only retail + airline; telecom + banking_knowledge live in the
@@ -235,9 +247,9 @@ tool calls, concurrency 5 verified clean):
 | `qwen/qwen3.6-flash` | 0.029 | ~$47 | n=1 |
 | `xiaomi/mimo-v2.5-pro` | 0.011 | ~$18 | n=1 |
 | `z-ai/glm-4.7-flash` | 0.0029 | ~$5 | n=1 |
-| user-sim + extractor | — | ~$6 | — |
+| user-sim + extractor (`minimax-m3`) | — | ~$15 | extractor reasoning ≈ $13 |
 
-Total ≈ **$204** (airline/retail cost ratio measured 0.92). Cost driver = `deepseek-v4-pro` (63%),
+Total ≈ **$213** (airline/retail cost ratio measured 0.92). Cost driver = `deepseek-v4-pro` (63%),
 because it is a reasoning model and the agent re-sends full history + the ~2.4-2.9k-token tool
 schemas every step (~80k input tok/task); output is small (per-call ≤1259 tok), so caps don't reduce
 cost. Wall-clock: the two reasoning flagships are slow (raw 170-220 s/task); concurrency 5 is verified

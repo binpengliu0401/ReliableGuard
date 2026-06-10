@@ -3,7 +3,7 @@ import time
 from src.reliableguard.classifier.verifiability_classifier import classify_verifiability
 from src.reliableguard.extractor.claim_extractor import extract_claims
 from src.reliableguard.intervention.policy_engine import decide_interventions
-from src.reliableguard.schema import Claim, ReliabilityReport
+from src.reliableguard.schema import Claim, ReliabilityReport, VerificationContext
 from src.reliableguard.scorer.risk_scorer import score_risks
 from src.reliableguard.trace.report_generator import generate_report
 from src.reliableguard.trace.trace_logger import build_traces, write_trace
@@ -20,6 +20,7 @@ def run_reliability_pipeline(
     write_logs: bool = True,
     run_stamp: str | None = None,
     claims: list[Claim] | None = None,
+    context: VerificationContext | None = None,
     temperature: float = 0.0,
     seed: int | None = None,
     max_tokens: int | None = None,
@@ -43,7 +44,7 @@ def run_reliability_pipeline(
     verifiability = classify_verifiability(domain, claims)
     t2 = time.perf_counter()
 
-    verification_results = verify_claims(domain, claims, verifiability)
+    verification_results = verify_claims(domain, claims, verifiability, context)
     t3 = time.perf_counter()
 
     risks, reliability_score = score_risks(claims, verification_results)

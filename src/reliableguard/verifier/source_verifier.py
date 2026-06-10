@@ -1,11 +1,19 @@
-from src.reliableguard.schema import Claim, Verifiability, VerificationResult
+from src.reliableguard.schema import (
+    Claim,
+    Verifiability,
+    VerificationContext,
+    VerificationResult,
+)
 
 # Benchmark verifier registry. Each entry verifies a claim-set jointly (not claim-by-claim)
 # against that benchmark's observable grounding artifacts (state / trace / evidence).
 # The legacy self-made ecommerce + reference verifiers were removed in the 2026-06-09 pivot;
 # the tau-bench state / trace / evidence verifiers are registered here in Phase 2.
 # Signature for a registered verifier:
-#   (claims, verifiability) -> dict[claim_id, VerificationResult]
+#   (claims, verifiability, context) -> dict[claim_id, VerificationResult]
+# `context` (grounding injection, decision B) carries the trajectory Grounding plus the
+# ChannelConfig; the verifier reads only the channels enabled in `context.channels`, so the
+# same claims + grounding yield the V_answer / V_structural / V_evidence verdicts.
 _VERIFIERS: dict[str, object] = {}
 
 
@@ -13,10 +21,12 @@ def verify_claims(
     domain: str,
     claims: list[Claim],
     verifiability: dict[str, Verifiability],
+    context: VerificationContext | None = None,
 ) -> dict[str, VerificationResult]:
+    context = context or VerificationContext()  # default = answer-only, no grounding
     verifier = _VERIFIERS.get(domain)
     if verifier is not None:
-        return verifier(claims, verifiability)  # type: ignore[operator]
+        return verifier(claims, verifiability, context)  # type: ignore[operator]
 
     # No verifier registered for this domain yet: every claim is reported as unverifiable
     # (the monitor cannot reach a grounding source). Phase 2 registers the tau-bench verifiers.

@@ -110,3 +110,44 @@ class ReliabilityReport(BaseModel):
     unavailable_count: int = 0
     stage_latencies: dict[str, float] = Field(default_factory=dict)
     token_usage: dict[str, int] = Field(default_factory=dict)
+
+
+# --- Grounding injection (decision B) ---------------------------------------------------
+# The verifier consults a per-trajectory `Grounding` (observable artifacts only) through a
+# `VerificationContext` that also carries the `ChannelConfig` gating which channels are read.
+# The three monitor configurations are presets over the channel flags; the same extracted
+# claims + grounding yield the V_answer / V_structural / V_evidence verdicts by varying only
+# `channels`. No hidden global state -- the context is passed explicitly into verify_claims.
+
+
+class ChannelConfig(BaseModel):
+    """Which observation channels the verifier may consult (all black-box, monitor-only)."""
+
+    answer: bool = True
+    state: bool = False
+    trace: bool = False
+    evidence: bool = False
+
+
+# Presets = the three monitor configurations.
+CHANNELS_ANSWER = ChannelConfig(answer=True)  # V_answer (RQ1 baseline)
+CHANNELS_STRUCTURAL = ChannelConfig(answer=True, state=True, trace=True)  # V_structural (RQ2)
+CHANNELS_EVIDENCE = ChannelConfig(answer=True, evidence=True)  # V_evidence (RQ2 extension)
+
+
+class Grounding(BaseModel):
+    """Per-trajectory observable artifacts the verifier may read (never gold labels).
+    `evidence` is a placeholder for the source-available evidence channel, wired in Phase 2."""
+
+    state_before: dict[str, Any] | None = None
+    state_after: dict[str, Any] | None = None
+    tool_trace: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: Any | None = None
+
+
+class VerificationContext(BaseModel):
+    """What one `verify_claims` call is allowed to consult: the trajectory grounding plus the
+    channel flags that gate which parts of it are read. Default = answer-only, no grounding."""
+
+    grounding: Grounding | None = None
+    channels: ChannelConfig = Field(default_factory=ChannelConfig)
