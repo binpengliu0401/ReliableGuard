@@ -131,11 +131,13 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 6. Remove `src/domain/ecommerce`, `src/domain/reference`, `tasks/*scenarios*.json`,
    `tier_b_prompts.json`, F0–F5 injection, Set A/B generators + results.
 7. Keep `src/reliableguard/pipeline.py`, extractor, classifier, scorer, `schema.py` verdicts,
-   `eval/metrics.py`, and the structural-audit pattern (`structural_audit.py`).
+   `eval/metrics.py`. (The old `structural_audit.py` was deleted in the pivot; its pre/post
+   state-change pattern is re-implemented in the Phase 2 trace verifier, not kept as a file.)
 8. Add a benchmark-adapter interface — a `Trajectory` record
-   `{task_id, domain, model, repeat, seed, query, final_answer, tool_trace, state_before,
-   state_after, gold_reward, native_fault}` — and make `verify_claims` dispatch + the structural
-   snapshot take state from the adapter (so they are benchmark-pluggable).
+   `{task_id, domain, model, repeat, seed, query, final_answer, answer_text, tool_trace,
+   state_before, state_after, gold_reward, native_fault, status}` — and make `verify_claims` dispatch
+   take grounding from the adapter via `VerificationContext` (so they are benchmark-pluggable).
+   (`answer_text` = concatenated agent respond turns = the answer-local input; `status` = ok|error.)
 
 ### Phase 2 — τ-bench integration
 
@@ -145,9 +147,26 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 11. **Structural / trace port** (trace-local): encode the `wiki.md` rules as checks over
     `tool_trace` (cancel only pending; auth before action; confirm before write; no modify-then-
     cancel; returns/exchanges only on delivered; etc.); plus the post-state-change assertion.
+    DONE (`verify_trace(context, *, domain)`, trajectory-level → `list[TraceViolation]`;
+    `trace_verdict` = BLOCK on any violation; trajectory verdict = `max(claim verdict,
+    trace_verdict)`). Domain-dispatched: retail rules = `auth_before_action`,
+    `status_precondition` (cancel/modify→pending, return/exchange→delivered via `state_before`),
+    `called_twice` (modify-items / exchange once per order), `modify_after_freeze`, `multi_user`.
+    Airline rules = `auth_before_action`, `basic_economy_no_flight_modify`,
+    `baggage_only_increase`. **Deliberately NOT encoded for either domain:** *confirm-before-write*
+    and the strict *post-state-change assertion* — both need per-tool observations / user turns
+    (not in `tool_trace`). Realized-effect side covered by state channel (step 10). See
+    architecture.md "Structural-audit pattern (ported)".
 12. **Evidence channel** (banking_knowledge): re-retrieve from the KB and check claims vs documents.
 13. **Locus annotator:** native fault type → locus, else the rule-based classifier above; emit a
     locus tag per failure. Unit-test on a few hand-traced tasks.
+    DONE (`src/reliableguard/locus.py`). tau-bench `RewardResult` has no structured fault type
+    (only `reward` 0/1 + `r_actions` fraction), so `native_fault=None` always; annotator is
+    purely rule-based with `override` for manual annotation studies. Priority: pass > trace-local
+    (verify_trace violations) > state-local (state-channel contradictions, source="tau_bench_state")
+    > intent-local (residual; working label — requires independent spot-check before RQ3 claims).
+    Helpers: `locus_is_monitor_detectable` (trace/state/evidence/answer), `locus_needs_structural`
+    (trace/state only; these are the two loci that drive the V_structural vs V_answer lift in RQ2).
 
 ### Phase 3 — Main experiment run (RQ1 + RQ2)
 
@@ -229,10 +248,13 @@ Audited agent models (4 vendors, 2 flagship + 2 low-end spread), all verified `t
 
 User-simulator (fixed control): `minimax/minimax-m3` (0.30 / 1.20, 1M) — non-audited vendor (no
 cross-model coupling with the audited set), reachable, emits clean text. Extractor model (fixed
-control): **also `minimax/minimax-m3`** (locked Phase 1) — JSON extraction verified (reasoning stays
-in a separate field, content is clean JSON); reused for consistency and to keep both controls off the
-audited vendor set. The two controls share a model but operate in disjoint roles (conversation-time
-user-sim vs. post-hoc claim extraction) with no information sharing, so this introduces no confound.
+control): **also `minimax/minimax-m3` with reasoning DISABLED** (`reasoning:{enabled:false}`, locked
+Phase 1) — extraction is structured parsing, and the model's reasoning tokens are unbounded and
+truncated even at `max_tokens=8192` on some trajectories; disabling reasoning makes the output bounded
+(~2168 tok) with no claim-count loss. Reused for consistency and to keep both controls off the audited
+vendor set. The two controls share a model but operate in disjoint roles (conversation-time user-sim
+vs. post-hoc claim extraction) with no information sharing, so this introduces no confound. The
+answer-local input fed to the extractor is the agent's concatenated `respond` turns (see above).
 
 Domain scope: core = retail (115 test tasks) + airline (50 test tasks) = **165 tasks/repeat**.
 `sierra-research/tau-bench` main ships only retail + airline; telecom + banking_knowledge live in the

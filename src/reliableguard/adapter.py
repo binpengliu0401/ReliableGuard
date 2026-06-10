@@ -24,7 +24,12 @@ class Trajectory(BaseModel):
     repeat: int = 0
     seed: int | None = None
     query: str = ""
+    # `answer_text` is the answer-local channel input: the concatenation of the agent's
+    # natural-language `respond` turns (what it told the user), fed to the extractor. It
+    # excludes tool calls (the trace channel) -- channel hygiene for the RQ1-vs-RQ2 contrast.
+    # `final_answer` keeps only the last respond turn, for demo / reference.
     final_answer: str = ""
+    answer_text: str = ""
     tool_trace: list[dict[str, Any]] = Field(default_factory=list)
     state_before: dict[str, Any] | None = None
     state_after: dict[str, Any] | None = None

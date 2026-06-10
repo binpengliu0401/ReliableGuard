@@ -23,6 +23,7 @@ def extract_claims(
     temperature: float = 0.0,
     seed: int | None = None,
     max_tokens: int | None = None,
+    disable_reasoning: bool = False,
     usage_accumulator: dict[str, int] | None = None,
 ) -> list[Claim]:
     api_key = os.getenv("OPENROUTER_API_KEY")
@@ -36,6 +37,7 @@ def extract_claims(
             temperature=temperature,
             seed=seed,
             max_tokens=max_tokens,
+            disable_reasoning=disable_reasoning,
         )
         _merge_usage(usage_accumulator, usage)
         return claims
@@ -52,6 +54,7 @@ def _extract_with_llm(
     temperature: float,
     seed: int | None,
     max_tokens: int | None,
+    disable_reasoning: bool = False,
 ) -> tuple[list[Claim], dict[str, int]]:
     client = OpenAI(api_key=os.environ["OPENROUTER_API_KEY"], base_url=base_url)
     options: dict[str, Any] = {"temperature": temperature}
@@ -59,6 +62,10 @@ def _extract_with_llm(
         options["seed"] = seed
     if max_tokens is not None:
         options["max_tokens"] = max_tokens
+    if disable_reasoning:
+        # OpenRouter: turn off a reasoning model's hidden thinking. Extraction is structured
+        # parsing -- reasoning only adds token-variance that can blow the max_tokens cap.
+        options["extra_body"] = {"reasoning": {"enabled": False}}
     response = client.chat.completions.create(
         model=model,
         messages=build_claim_extraction_prompt(domain, query, agent_answer),  # type: ignore

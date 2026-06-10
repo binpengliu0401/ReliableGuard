@@ -59,21 +59,44 @@ Gold label = τ-bench reward (1 pass / 0 fail). Detection = monitor non-PASS on 
 
 ## Verifier registry
 
-`src/reliableguard/verifier/source_verifier.py` holds `verify_claims(domain, claims, verifiability)`
-and a `_VERIFIERS` registry keyed by domain. Each registered verifier judges the claim-set jointly
-(not claim-by-claim) against that benchmark's observable artifacts and returns
-`{claim_id: VerificationResult}`. Unregistered domains return `unverifiable` for every claim. The
-legacy self-made ecommerce + reference verifiers were removed in the 2026-06-09 pivot; the τ-bench
-state / trace / evidence verifiers are registered here in Phase 2.
+`src/reliableguard/verifier/source_verifier.py` holds
+`verify_claims(domain, claims, verifiability, context)` and a `_VERIFIERS` registry keyed by domain.
+Each registered verifier judges the claim-set jointly (not claim-by-claim) against that benchmark's
+observable artifacts and returns `{claim_id: VerificationResult}`. Unregistered domains return
+`unverifiable` for every claim. The legacy self-made ecommerce + reference verifiers were removed in
+the 2026-06-09 pivot; the τ-bench verifiers register here in Phase 2 (`retail` and `airline` state
+channels done; trace channel = the standalone `verify_trace(context, *, domain)`, below).
 
-**Open integration point (decide first in Phase 1/2): grounding injection.** The current
-`verify_claims(domain, claims, verifiability)` signature does NOT carry the trajectory's observable
-artifacts (`state_before/after`, `tool_trace`), but `V_structural` needs them. The legacy verifiers
-read a module-global DB cursor (deleted). The replacement must **pass the `Trajectory` grounding
-explicitly** into the verifier (extend the pipeline/verifier signature or a per-call context), and
-the verifier must honor **per-config channel flags** (answer-only vs +state vs +trace vs +evidence)
-so the same claims+trajectory yield the V_answer / V_structural / V_evidence verdicts without
-re-extraction. Do not reintroduce hidden global state.
+**Grounding injection (decision B — IMPLEMENTED).** `verify_claims` and the registered verifiers
+take a `VerificationContext` (`src/reliableguard/schema.py`): `grounding` (the trajectory's
+observable `state_before/after`, `tool_trace`, `evidence`) plus a `ChannelConfig` gating which
+channels may be read. The three monitor configs are presets over those flags — `CHANNELS_ANSWER`,
+`CHANNELS_STRUCTURAL`, `CHANNELS_EVIDENCE` — so the same claims + trajectory yield the V_answer /
+V_structural / V_evidence verdicts with no re-extraction and no hidden global state. A verifier
+consults a channel **only** when its flag is on (answer-only verifiers return `unverifiable` for the
+state/trace channels). The `Trajectory.verification_context(channels)` adapter helper builds the
+context from a captured trajectory.
+
+**Trace channel — `verify_trace(context, *, domain)` (trajectory-level).** The state channel is
+per-claim (claims vs `state_after`); the trace channel is per-**trajectory**:
+`verify_trace(context, domain=...)` dispatches to domain-specific rule sets and returns a list of
+`TraceViolation` (no `claim_id`; `locus="trace-local"`).
+Retail rules: **auth_before_action** (write before authentication),
+**status_precondition** (cancel/modify need order `pending`, return/exchange need `delivered`),
+**called_twice** (`modify_pending_order_items`/`exchange_delivered_order_items` once per order),
+**modify_after_freeze** (item-modified order frozen against further modify/cancel),
+**multi_user** (multiple users in one conversation).
+Airline rules: **auth_before_action** (write before `get_user_details`),
+**basic_economy_no_flight_modify** (`update_reservation_flights` on a basic_economy reservation),
+**baggage_only_increase** (`update_reservation_baggages` with new `total_baggages` < old).
+Rules that need the dialogue (e.g. "obtain explicit user confirmation") are deliberately NOT encoded — `tool_trace`
+carries no observations/user turns, so encoding them would only manufacture false positives; the
+realized effect is covered by the state channel instead. Gated on `channels.trace`; status
+preconditions additionally need `state_before` (present in the V_structural preset, which turns
+state + trace on together). The structural verdict combines the two channels:
+`trace_verdict(violations)` returns BLOCK on any violation, and the trajectory verdict is
+`max(claim-level verdict, trace_verdict)` — a clean answer produced by a policy-violating process is
+still escalated to BLOCK.
 
 ## τ-bench integration
 
@@ -94,9 +117,14 @@ re-extraction. Do not reintroduce hidden global state.
 A `Trajectory` record decouples the monitor from any one benchmark:
 
 ```text
-Trajectory{ task_id, domain, model, repeat, seed, query, final_answer,
-            tool_trace, state_before, state_after, gold_reward, native_fault }
+Trajectory{ task_id, domain, model, repeat, seed, query, final_answer, answer_text,
+            tool_trace, state_before, state_after, gold_reward, native_fault, status }
 ```
+
+`answer_text` = the answer-local channel input (concatenated agent `respond` turns); `final_answer` =
+only the last respond turn (demo/reference). `status` = `ok` | `error` (an `error` trajectory is an
+infra failure excluded from metrics and re-run by resume). `native_fault` stays `None` on
+`tau-bench` main (no fault annotation; the locus annotator uses the rule-based classifier instead).
 
 The adapter runs an agent in the benchmark harness and emits `Trajectory` records (streaming JSONL,
 resumable); the monitor pass consumes them, applies the configs, and records verdict + locus + reward.
@@ -137,12 +165,19 @@ driver that wraps the τ-bench runner must honor all four before the full run.
    driver must log `finish_reason` and ALARM on any `"length"` (a cap too low for some edge task)
    rather than silently emit a truncated tool call. `max_num_steps` stays 30 (τ-bench standard).
 
-## Structural-audit pattern (port target)
+## Structural-audit pattern (ported)
 
-The state/trace checks follow a generic pattern: a pre-execution policy check (a condition over tool
-arguments vs the policy), a post-execution state-change assertion (tool reported success but the
-pre/post snapshot is unchanged), and a `snapshot_*_state()` function. This pattern is ported to
-τ-bench by snapshotting `env.data` and checking `env.actions` against `wiki.md`.
+The legacy self-made structural audit followed a generic pattern: a pre-execution policy check (a
+condition over tool arguments vs the policy), a post-execution state-change assertion (tool reported
+success but the pre/post snapshot is unchanged), and a `snapshot_*_state()` function. The τ-bench
+port realizes it as two channels: the **pre-execution policy check** is `verify_trace` (tool-arg /
+action-sequence conditions over `tool_trace` + `state_before` vs `wiki.md`), and the **realized-effect
+check** is the state channel (`_check_state_retail` vs `state_after`). The *snapshot* is
+`eval/capture.py` deepcopying `env.data` before the terminal reward step. **Known gap:** the strict
+"tool reported success but state unchanged" assertion needs the per-tool observation strings, which
+the current capture does not record (`tool_trace` is name+kwargs only); the state channel covers the
+effect from the claim side instead. Enhancing capture to retain observations would let `verify_trace`
+add that assertion directly — deferred unless a failure mode demands it.
 
 ## Operational conventions
 

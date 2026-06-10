@@ -11,6 +11,51 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ### Added
 
+- **Phase 2 (2026-06-10): τ-bench verifiers, capture driver, locus annotator — all Phase 2 steps
+  complete (steps 9–11, 13; step 12 evidence channel deferred as stretch).**
+
+  *Capture driver (`eval/capture.py`):* `capture_trajectory` runs one agent loop with a
+  correctness-critical deepcopy snapshot of `env.data` + `env.actions` BEFORE the terminal
+  `env.step()` that runs `calculate_reward()` (which would otherwise pollute both artifacts).
+  Added `_slice_state` to discard the 997 irrelevant orders/users from the full 1000-order retail
+  DB: **2511 KB → 3 KB per trajectory (840×)**, eliminating a ~16 GB blowup over the full matrix.
+  Batch driver `run_capture_matrix` adds per-model JSONL shards, resume via `_load_done_keys`
+  (status=ok only), credit/auth halt (`_is_halt_error` on 401/402), and `ThreadPoolExecutor`
+  concurrency. Added `LLMResponseTruncatedError` and `USER_SIM_MAX_TOKENS` monkeypatch. Tests:
+  `tests/test_capture_resume.py` (7 tests including `_slice_state` offline validation).
+
+  *Retail state verifier (`tau_bench_verifiers.py`):* claim-level checks against `state_after`
+  (lifecycle-aware status, refund amount, existence), channel-gated on `context.channels.state`.
+  Lifecycle reachability prevents false positives when the agent correctly reports a milestone
+  status (e.g. "delivered" is still true after status advances to "exchange requested"). Tests:
+  `tests/test_tau_bench_state_verifier.py` (11 tests).
+
+  *Airline state verifier:* reservation-level checks against `state_after` (existence,
+  cancellation — `status="cancelled"` or absent, cabin class, baggage count). Registered in
+  `source_verifier._VERIFIERS["airline"]`. Tests: `tests/test_airline_verifiers.py` (18 tests).
+
+  *Retail trace verifier (`verify_trace`, retail):* trajectory-level `wiki.md` policy checks over
+  `tool_trace` + `state_before`; returns `list[TraceViolation]`. Encodes:
+  `auth_before_action`, `status_precondition`, `called_twice`, `modify_after_freeze`,
+  `multi_user`. Tests: `tests/test_tau_bench_trace_verifier.py` (12 tests).
+
+  *Airline trace verifier (`verify_trace`, airline):* `auth_before_action`,
+  `basic_economy_no_flight_modify`, `baggage_only_increase`. `verify_trace` now takes
+  `domain: str = "retail"` keyword arg and dispatches. Tests in `test_airline_verifiers.py`.
+
+  *Locus annotator (`src/reliableguard/locus.py`):* `annotate_locus(gold_reward, violations,
+  structural_results)` assigns the primary failure locus with priority: pass > trace-local >
+  state-local > intent-local (working label; τ-bench has no native fault type). Helpers:
+  `locus_is_monitor_detectable`, `locus_needs_structural` (the two loci driving the
+  V_structural vs V_answer lift in RQ2). Tests: `tests/test_locus_annotator.py` (10 tests).
+
+  *Schema additions:* `TraceViolation` model (rule/action/step/order_id, locus="trace-local").
+
+  *Architecture docs updated:* verifier registry (grounding injection DONE, retail+airline
+  registered), trace channel (domain dispatch, retail+airline rules documented, deliberate
+  omissions explained), structural-audit pattern (ported, known gap documented), locus annotator.
+  Design doc steps 10, 11, 13 marked DONE with implementation notes.
+
 - **Phase 1 (2026-06-10): grounding-injection plumbing (decision B) + extractor lock.** Added the
   benchmark-adapter `Trajectory` record (`src/reliableguard/adapter.py`) and the verification
   vocabulary `ChannelConfig` / `Grounding` / `VerificationContext` (`schema.py`), with channel

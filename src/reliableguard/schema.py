@@ -151,3 +151,18 @@ class VerificationContext(BaseModel):
 
     grounding: Grounding | None = None
     channels: ChannelConfig = Field(default_factory=ChannelConfig)
+
+
+class TraceViolation(BaseModel):
+    """A trajectory-level policy breach found by the trace channel: a `tool_trace` step that
+    violates a `wiki.md` rule/precondition. Unlike a per-claim `VerificationResult`, a violation is
+    about what the agent *did*, not what it *said* -- so it has no `claim_id`. The structural verdict
+    escalates to BLOCK when any violation is present (see `trace_verdict`). `locus` is always
+    'trace-local'; `step` is the offending action's index in `tool_trace`."""
+
+    rule: str
+    action: str
+    step: int
+    order_id: str | None = None
+    locus: Literal["trace-local"] = "trace-local"
+    reason: str = ""
