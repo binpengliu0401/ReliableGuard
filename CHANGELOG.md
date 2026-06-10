@@ -26,6 +26,14 @@ and include CHANGELOG.md in the same commit as the code changes.
   caps agent 4096 / user-sim 2048 + `finish_reason="length"` alarm), and the locked configuration +
   calibrated budget in `tau_bench_experiment_design.md` (K=5 → K=10).
 
+### Fixed
+
+- **AGENTS.md pre-push hook description was stale.** It still documented the removed elaborate gate
+  (hard-reject on missing `CLAUDE.md` update at a new node + `memory`/`README` warns +
+  `doc_push_state` content-hash baseline). Corrected to match the actual `hooks/pre-push`, which
+  enforces exactly one gate: hard-reject if `CHANGELOG.md` was not updated in the pushed commits.
+  Now consistent with `docs/push_checklist.md` and `CLAUDE.md`.
+
 ### Changed
 
 - **PROJECT PIVOT (2026-06-09): re-grounded on τ-bench; self-made evaluation retired.** The whole
