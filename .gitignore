@@ -16,6 +16,9 @@ AGENTS.md
 # ignore large or sensitive files
 logs/*.txt
 
+# thesis drafts and generated PDFs (binary, large, tracked separately)
+docs/thesis/
+
 # IDE
 .vscode/
 

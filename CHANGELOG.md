@@ -11,6 +11,95 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ### Added
 
+- **Phase 3 & 4 (2026-06-15): monitor pass driver + full analysis pipeline — all four thesis
+  metrics plus figures computed end-to-end.**
+
+  *Monitor pass (`eval/monitor_pass.py`):* applies V_answer + V_structural to captured
+  trajectories. Reads per-model JSONL shards from `results/capture/`, runs claim extraction once
+  (minimax/minimax-m3, reasoning disabled), applies both monitor configs via the same claims +
+  grounding, annotates locus, and writes one result row per trajectory. Resumable: rows with
+  `status='done'` are skipped on re-run. Parallel extraction via `ThreadPoolExecutor`. Output
+  fields: `task_id / domain / model / repeat / gold_reward / locus / v_answer_verdict /
+  v_structural_verdict / n_claims / n_violations / n_contradicted / trace_verdict / status`.
+
+  *Run-capture CLI (`eval/run_capture.py`):* thin CLI wrapper over `run_capture_matrix` with
+  `--models / --repeats / --workers / --retail-only / --airline-only` flags.
+
+  *Analysis script (`eval/analyze.py`):* reads `results/monitor/*.jsonl`, computes all thesis
+  metrics, and writes per-model JSON summaries + three figures. Metrics computed:
+  - FAR / RDR / FalseAlarmRate per model, per locus, per domain
+  - π_ℓ — locus distribution over failed tasks
+  - ΔRDR = RDR(V_structural) − RDR(V_answer) per model
+  - McNemar test (V_answer vs V_structural, continuity correction, p-value via `math.erfc` — no
+    scipy dependency)
+  - Bootstrap 95% CIs (B=1000) for RDR, FalseAlarmRate, ΔRDR; paired bootstrap for ΔRDR to
+    preserve per-task correlation
+  - CDR_κ at κ ∈ {5, 7, 9} for K=10 repeats
+  - Per-repeat RDR list (for box chart + within-model std)
+  Figures: `figure6_*.png` (V_answer detection by locus, RQ1), `figure7_*.png` (cross-model RDR
+  box chart, RQ2), `figure8_*.png` (detected/undetected stacked bar, RQ3). Uses matplotlib Agg
+  backend (no display required).
+
+  *Docs:* `docs/thesis_scope.md` finalized to 6-chapter ~20-page structure with full figure/table
+  inventory (17 items). `docs/formal_definitions.md` revised to align with τ-bench metrics and the
+  three monitor configs.
+
+### Fixed
+
+- **State verifier: three systematic false alarm root causes identified and fixed
+  (`tau_bench_verifiers.py`).** Root cause analysis on V_structural FalseAlarmRate on reward-1
+  tasks: 92.5% of false alarms originated in the state verifier (not the trace verifier). Two
+  domain-level patterns were confirmed via live data:
+
+  *(1) Airline cabin — `"economy"` claim on `"basic_economy"` reservation.*
+  The verifier did string-exact comparison: `claimed == actual`. When the actual cabin is
+  `"basic_economy"` and the agent says `"economy"` (colloquial usage, "basic economy is a type of
+  economy"), the comparison failed → `contradicted` → BLOCK on a successful task.
+  Fix: added an explicit branch — `actual == "basic_economy" and claimed == "economy"` →
+  `"supported"`. All other mismatches (e.g. `"business"` vs `"economy"`) still → `"contradicted"`.
+
+  *(2) Retail refund amount — extractor captures item price as refund claim.*
+  In exchange tasks (e.g. return Hiking Boots $253.89, get slightly different pair), the agent
+  mentions the item price during the exchange conversation. The extractor classifies this as a
+  refund claim with `value=$253.89`. The actual `payment_history` refund is the price differential
+  ($0.35). The verifier correctly identified the mismatch, but incorrectly returned `"contradicted"`
+  because the amount ≠ any recorded refund.
+  Fix: when amount mismatch occurs, check the claimed amount against item prices in `state_before`
+  (now passed to the verifier). If the amount matches an item price → `"unverifiable"` (it's a
+  product price mention, not a refund amount assertion). Otherwise → `"not_found"` (refund exists
+  but claimed figure unconfirmed). This required passing `state_before` to `_check_state_retail`.
+
+  *(3) Airline baggage count — extractor captures delta ("added 1 bag") instead of total.*
+  When an agent says "I've added 1 checked bag", the extractor may set `value=1` (the delta).
+  The `total_baggages` in `state_after` is the new total (e.g. 2, if there was 1 before). The
+  check `|2 - 1| = 1 > 0.5` → `"contradicted"`. But the claim is correct in delta form.
+  Fix: when total-form check fails, compute `delta = state_after.total_baggages −
+  state_before.total_baggages` and test `|claimed − delta| ≤ 0.5`. If the delta matches →
+  `"supported"`. If neither total nor delta matches → `"not_found"`. Requires `state_before` in
+  `_check_state_airline` (same plumbing as fix 2 above; no Phase 2 re-capture needed —
+  `state_before` was already stored in capture JSONL).
+
+- **`_slice_state` airline support (`eval/capture.py`):** `_slice_state` only handled the retail
+  state schema (`orders / users / products`). Airline uses `reservations / users / flights`.
+  Fixed by scanning whichever keys are present and applying the same user-reachability join for
+  `reservations` (via `user.reservations[]`) and keeping only trace-referenced `flights`.
+
+- **Extractor JSON robustness (`src/reliableguard/extractor/claim_extractor.py`):** replaced
+  brittle `rfind("}")` JSON extraction with `json.JSONDecoder().raw_decode()`, which stops at the
+  first complete JSON object and ignores trailing LLM text. Fixed `entities` field defaulting to
+  `None` on missing key → now always `{}`, preventing downstream `KeyError` on claim construction.
+
+- **Extractor airline domain hint (`src/reliableguard/extractor/prompts.py`):** added an airline
+  domain hint instructing the extractor to focus on reservation IDs (6-char alphanumeric),
+  `cabin_class` (basic_economy/economy/business), `total_baggages` (numeric), and cancellation
+  status. Previously the generic fallback was used, causing missed or miscategorized claims.
+
+### Removed
+
+- **`eval/metrics.py` deleted.** The old metrics script was built for the self-made benchmark
+  format (`task/state` dict structure) and is entirely incompatible with the monitor_pass JSONL
+  output. Replaced by `eval/analyze.py`.
+
 - **Phase 2 (2026-06-10): τ-bench verifiers, capture driver, locus annotator — all Phase 2 steps
   complete (steps 9–11, 13; step 12 evidence channel deferred as stretch).**
 
@@ -154,6 +243,7 @@ and include CHANGELOG.md in the same commit as the code changes.
 - **English-only repository content**: converted CHANGELOG.md to English and removed the Chinese-language fallback alternative (a CJK synonym for "amount") from the order-amount regex in `claim_extractor.py` (benchmark is English-only; no effect on current data). From now on all committed files (code, comments, output strings, docs, README) are in English; conversation language stays Chinese.
 
 ### Added
+
 - **Coverage-aware PASS verdict (T5)** and **Set B record/replay**. T5 splits `PASS` into
   `PASS_VERIFIED` / `PASS_UNCHECKED` (`schema.OverallVerdict`): `policy_engine._aggregate` now, when it
   would PASS, emits `PASS_UNCHECKED` if the grounded-evidence fraction (TCCR) is below
@@ -181,9 +271,11 @@ and include CHANGELOG.md in the same commit as the code changes.
 - `CHANGELOG.md` and a Git pre-push hook (`hooks/pre-push`, `scripts/install-hooks.sh`): enforce CHANGELOG updates before push
 
 ### Fixed
+
 - `eval/fact_scorer.py`: align with the `doi_status` values the reference tools actually write (`valid`→`verified`, `not_found`→`failed`), fixing Set B reference auxiliary fact metrics (no effect on the main FAR/RDR)
 
 ### Removed
+
 - Removed root `thesis_outline.md` (obsolete after thesis restructuring)
 - Removed orphaned figure artifact `figures/fig3_rq3_structural.pdf` (replaced by `fig3_structural.pdf`)
 

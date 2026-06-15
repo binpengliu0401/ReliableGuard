@@ -108,7 +108,11 @@ def _status_relation(claimed: str, actual: str) -> str:
     return "contradicted"
 
 
-def _check_state_retail(claim: Claim, state_after: dict[str, Any]) -> VerificationResult:
+def _check_state_retail(
+    claim: Claim,
+    state_after: dict[str, Any],
+    state_before: dict[str, Any] | None = None,
+) -> VerificationResult:
     orders = state_after.get("orders", {})
     order_id = _order_id_from_claim(claim)
     if order_id is None:
@@ -126,7 +130,6 @@ def _check_state_retail(claim: Claim, state_after: dict[str, Any]) -> Verificati
             p for p in order.get("payment_history", []) if p.get("transaction_type") == "refund"
         ]
         if not refunds:
-            # softer than contradicted: the refund may be pending/out-of-band -> cannot confirm
             return _result(
                 claim, "not_found",
                 reason=f"claimed refund but none recorded in {order_id} payment_history",
@@ -136,9 +139,23 @@ def _check_state_retail(claim: Claim, state_after: dict[str, Any]) -> Verificati
             return _result(claim, "supported", reason=f"refund present on {order_id}")
         if any(abs(float(p.get("amount", 0)) - amount) <= 0.01 for p in refunds):
             return _result(claim, "supported", value=amount, reason=f"refund ${amount} matches")
+        # Amount mismatch: check whether the claimed figure is an item price from state_before
+        # (extractor often captures item prices during exchange conversations as refund claims).
+        if state_before is not None:
+            order_before = state_before.get("orders", {}).get(order_id, {})
+            item_prices = {
+                round(float(item.get("price", 0)), 2)
+                for item in order_before.get("items", [])
+                if item.get("price") is not None
+            }
+            if any(abs(price - amount) <= 0.01 for price in item_prices):
+                return _result(
+                    claim, "unverifiable",
+                    reason=f"claimed amount ${amount} matches an item price in {order_id}; not a refund figure",
+                )
         return _result(
-            claim, "contradicted", value=[p.get("amount") for p in refunds],
-            reason=f"claimed refund ${amount} != recorded refunds on {order_id}",
+            claim, "not_found", value=[p.get("amount") for p in refunds],
+            reason=f"claimed refund ${amount} != recorded refunds on {order_id} (amount unconfirmed)",
         )
 
     # Status claim: compare against the actual status, respecting the lifecycle.
@@ -167,10 +184,11 @@ def retail_verifier(
     """Retail verifier, channel-gated. STATE channel: claims vs `state_after`."""
     grounding = context.grounding
     state_after = grounding.state_after if grounding is not None else None
+    state_before = grounding.state_before if grounding is not None else None
     results: dict[str, VerificationResult] = {}
     for claim in claims:
         if context.channels.state and state_after is not None:
-            results[claim.claim_id] = _check_state_retail(claim, state_after)
+            results[claim.claim_id] = _check_state_retail(claim, state_after, state_before)
         else:
             results[claim.claim_id] = _result(
                 claim, "unverifiable", reason="answer-only: state channel not consulted"
@@ -344,7 +362,11 @@ def _claimed_cabin(claim: Claim) -> str | None:
     return None
 
 
-def _check_state_airline(claim: Claim, state_after: dict[str, Any]) -> VerificationResult:
+def _check_state_airline(
+    claim: Claim,
+    state_after: dict[str, Any],
+    state_before: dict[str, Any] | None = None,
+) -> VerificationResult:
     reservations = state_after.get("reservations", {})
     rid = _reservation_id_from_claim(claim)
     if rid is None:
@@ -372,7 +394,12 @@ def _check_state_airline(claim: Claim, state_after: dict[str, Any]) -> Verificat
     claimed = _claimed_cabin(claim)
     if claimed is not None and (attribute in {"cabin", "cabin_class"} or claimed in text):
         actual = _norm_cabin(str(reservation.get("cabin", "")))
-        state = "supported" if claimed == actual else "contradicted"
+        # "economy" is colloquially used by agents for "basic_economy" reservations; not a factual
+        # error — the reservation is still an economy-class product.
+        if claimed == actual or (actual == "basic_economy" and claimed == "economy"):
+            state = "supported"
+        else:
+            state = "contradicted"
         reason = (
             f"{rid} cabin={actual}" if state == "supported"
             else f"claimed cabin '{claimed}' but {rid} cabin='{actual}'"
@@ -388,8 +415,19 @@ def _check_state_airline(claim: Claim, state_after: dict[str, Any]) -> Verificat
                 return _result(claim, "not_found", reason=f"no baggages field on {rid}")
             if abs(float(actual_bags) - claimed_bags) <= 0.5:
                 return _result(claim, "supported", value=actual_bags, reason=f"{rid} has {actual_bags} bags")
-            return _result(claim, "contradicted", value=actual_bags,
-                           reason=f"claimed {claimed_bags} bags but {rid} has {actual_bags}")
+            # Count mismatch: check if the claimed figure is the delta (bags added/removed) rather
+            # than the final total, using state_before to compute the session delta.
+            if state_before is not None:
+                prev_bags = state_before.get("reservations", {}).get(rid, {}).get("total_baggages")
+                if prev_bags is not None:
+                    delta = float(actual_bags) - float(prev_bags)
+                    if abs(claimed_bags - delta) <= 0.5:
+                        return _result(
+                            claim, "supported", value=actual_bags,
+                            reason=f"{rid} bags: added {delta:.0f} (delta matches claimed {claimed_bags:.0f})",
+                        )
+            return _result(claim, "not_found", value=actual_bags,
+                           reason=f"claimed {claimed_bags} bags but {rid} has {actual_bags} (count unconfirmed)")
 
     if claim.claim_type == "existence":
         return _result(claim, "supported", value=rid, reason=f"{rid} exists")
@@ -405,10 +443,11 @@ def airline_verifier(
     """Airline verifier, channel-gated. STATE channel: claims vs reservation `state_after`."""
     grounding = context.grounding
     state_after = grounding.state_after if grounding is not None else None
+    state_before = grounding.state_before if grounding is not None else None
     results: dict[str, VerificationResult] = {}
     for claim in claims:
         if context.channels.state and state_after is not None:
-            results[claim.claim_id] = _check_state_airline(claim, state_after)
+            results[claim.claim_id] = _check_state_airline(claim, state_after, state_before)
         else:
             results[claim.claim_id] = _result(
                 claim, "unverifiable", reason="answer-only: state channel not consulted"

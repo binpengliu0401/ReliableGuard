@@ -170,7 +170,7 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 
 ### Phase 3 — Main experiment run (RQ1 + RQ2)
 
-14. **Agent runs:** domains × 4 models × K=5 repeats × all in-scope tasks via the τ-bench runner →
+14. **Agent runs:** domains × 4 models × K=10 repeats × all in-scope tasks via the τ-bench runner →
     capture trajectories (the expensive, parallelizable step; shard like the old record harness).
 15. **Monitor pass** (cheap, zero extra agent cost): per trajectory, 1 extraction (fixed extractor)
     → apply V_answer, V_structural (+ V_evidence for banking_knowledge) → record reward, locus,

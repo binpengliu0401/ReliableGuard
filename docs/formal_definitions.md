@@ -1,13 +1,11 @@
 # Formal Definitions for ReliableGuard
 
-> **Re-grounded 2026-06-09 (τ-bench pivot).** The metric machinery below (evidence-state
-> enumeration, FAR / detection / scoring) **carries over unchanged** to the new τ-bench-based
-> design, with two substitutions: (1) the per-task ground-truth label is now the **τ-bench reward**
-> (1 pass / 0 fail), replacing the old self-made safe/risky label; (2) the failure taxonomy is the
-> **locus of ground truth** (answer / trace / state / evidence / intent-local), replacing the old
-> F0–F5 *injection* categories and the Type I/Type II split — any Section referring to F0–F5 /
-> Type I–II is **historical**. The verdict space also includes `AUDIT_FAILED` (and PASS may be
-> split into PASS_VERIFIED / PASS_UNCHECKED). Authoritative design:
+> **Updated 2026-06-15 (τ-bench metric suite).** Ground-truth label = τ-bench reward (1 pass / 0 fail).
+> Failure taxonomy = locus of ground truth (answer-local / trace-local / state-local / intent-local).
+> Verdict space = {PASS\_VERIFIED, PASS\_UNCHECKED, BLOCK, AUDIT\_FAILED}. Core metric suite includes
+> FAR / RDR, ΔRDR (Detection Lift), CDR_κ (Consistent Detection Rate), locus distribution π_ℓ,
+> McNemar paired test, and bootstrap 95% CIs. Old safe/risky labels, F0–F5 categories, Type I/II
+> split, and ecommerce/reference empirical tables are superseded. Authoritative experiment design:
 > [tau_bench_experiment_design.md](tau_bench_experiment_design.md).
 
 This document defines the formal concepts used by ReliableGuard to support three thesis-level goals: quantification, standardization, and traceability. The scope is limited to externally verifiable failures in tool-using LLM agents with observable grounding artifacts, such as database state, retrievable knowledge-base documents, and tool execution traces.
@@ -34,236 +32,225 @@ where \(e_i\) is the evidence state for claim \(c_i\).
 
 ## 2. Core Metrics
 
-Let \(T\) be a set of evaluated tasks. Each task \(t \in T\) has an expected safety label:
+### 2.0 Ground-Truth Label and Verdict Space
+
+**Ground-truth label.** The τ-bench reward is the sole gold standard:
 
 $$
-y_t \in \{\text{safe}, \text{risky}\}
+y_t = \text{reward}_t \in \{1, 0\}
 $$
 
-Each evaluated system produces an aggregate intervention verdict:
+where \(y_t = 1\) means the agent completed the task correctly (τ-bench `calculate_reward()` = 1.0) and \(y_t = 0\) means it failed. Define:
 
 $$
-v_t \in \{\text{PASS}, \text{WARN}, \text{BLOCK}\}
+T_{\text{fail}} = \{t \in T \mid y_t = 0\}, \quad T_{\text{pass}} = \{t \in T \mid y_t = 1\}
 $$
 
-For metric definitions, `PASS` is treated as acceptance, while `WARN` and `BLOCK` are treated as risk detection actions:
+**Verdict space.** Each monitor configuration \(V \in \{V_{\text{answer}},\ V_{\text{structural}}\}\) produces one verdict per trajectory:
 
 $$
-\operatorname{accept}(v_t) =
-\begin{cases}
-1 & \text{if } v_t = \text{PASS} \\
-0 & \text{otherwise}
-\end{cases}
+v_t^V \in \{\text{PASS\_VERIFIED},\ \text{PASS\_UNCHECKED},\ \text{BLOCK},\ \text{AUDIT\_FAILED}\}
 $$
 
+For binary detection metrics, PASS\_VERIFIED and PASS\_UNCHECKED collapse to PASS:
+
 $$
-\operatorname{detect}(v_t) =
-\begin{cases}
-1 & \text{if } v_t \in \{\text{WARN}, \text{BLOCK}\} \\
-0 & \text{otherwise}
-\end{cases}
+\tilde{v}_t^V = \begin{cases} \text{PASS} & \text{if } v_t^V \in \{\text{PASS\_VERIFIED},\ \text{PASS\_UNCHECKED}\} \\ v_t^V & \text{otherwise} \end{cases}
+$$
+
+AUDIT\_FAILED is treated as a non-PASS gate action: when the extractor produces no claims, the monitor conservatively blocks rather than silently accepts.
+
+**Detection and acceptance operators.**
+
+$$
+\operatorname{detect}(v) = \mathbb{1}[v \neq \text{PASS}], \quad \operatorname{accept}(v) = \mathbb{1}[v = \text{PASS}]
 $$
 
 ### 2.1 False Acceptance Rate (FAR)
 
-**Purpose.** False Acceptance Rate measures the proportion of risky tasks that are incorrectly allowed to pass.
+**Purpose.** Fraction of failed tasks (reward=0) that the monitor incorrectly passes — the primary miss-rate.
 
 **Symbol definition.**
 
-- \(T_{\text{risky}} = \{t \in T \mid y_t = \text{risky}\}\)
-- \(v_t\) is the aggregate verdict for task \(t\)
+- \(T_{\text{fail}} = \{t \in T \mid y_t = 0\}\)
+- \(\tilde{v}_t^V\) is the collapsed aggregate verdict for monitor configuration \(V\)
 
 **Formula.**
 
 $$
-\operatorname{FAR}
-= \frac{\sum_{t \in T_{\text{risky}}} \mathbb{1}[v_t = \text{PASS}]}
-{|T_{\text{risky}}|}
+\operatorname{FAR}(V)
+= \frac{\sum_{t \in T_{\text{fail}}} \mathbb{1}[\tilde{v}_t^V = \text{PASS}]}
+{|T_{\text{fail}}|}
 $$
 
-**Range.**
-
-$$
-0 \leq \operatorname{FAR} \leq 1
-$$
-
-**Intuition.** Lower is better. A FAR of \(0\) means no risky tasks were accepted. A FAR of \(1\) means all risky tasks were accepted.
+**Range.** \(0 \leq \operatorname{FAR}(V) \leq 1\). Lower is better. FAR = 0 means no failed task was silently passed; FAR = 1 means every failed task was missed.
 
 ### 2.2 False Alarm Rate
 
-**Purpose.** False Alarm Rate measures the proportion of safe tasks that are incorrectly warned or blocked.
+**Purpose.** Fraction of successful tasks (reward=1) that the monitor incorrectly flags — the operational cost of using the monitor on correct agent outputs.
 
 **Symbol definition.**
 
-- \(T_{\text{safe}} = \{t \in T \mid y_t = \text{safe}\}\)
-- \(v_t\) is the aggregate verdict for task \(t\)
+- \(T_{\text{pass}} = \{t \in T \mid y_t = 1\}\)
 
 **Formula.**
 
 $$
-\operatorname{FalseAlarmRate}
-= \frac{\sum_{t \in T_{\text{safe}}} \mathbb{1}[v_t \in \{\text{WARN}, \text{BLOCK}\}]}
-{|T_{\text{safe}}|}
+\operatorname{FalseAlarmRate}(V)
+= \frac{\sum_{t \in T_{\text{pass}}} \mathbb{1}[\tilde{v}_t^V \neq \text{PASS}]}
+{|T_{\text{pass}}|}
 $$
 
-**Range.**
-
-$$
-0 \leq \operatorname{FalseAlarmRate} \leq 1
-$$
-
-**Intuition.** Lower is better. A high false alarm rate indicates that the harness is overly conservative and blocks or warns on many acceptable outputs. This metric is written in full to avoid confusion with FAR, which denotes False Acceptance Rate.
+**Range.** \(0 \leq \operatorname{FalseAlarmRate}(V) \leq 1\). Lower is better. Written in full to avoid confusion with FAR (False Acceptance Rate). A high FalseAlarmRate indicates the monitor over-fires on correct outputs — limiting practical utility without reducing the missed-failure burden.
 
 ### 2.3 Risk Detection Rate (RDR)
 
-**Purpose.** Risk Detection Rate measures the proportion of risky tasks that are detected by the audit or intervention mechanism.
-
-**Symbol definition.**
-
-- \(T_{\text{risky}} = \{t \in T \mid y_t = \text{risky}\}\)
-- Risk detection occurs when \(v_t \in \{\text{WARN}, \text{BLOCK}\}\)
+**Purpose.** Fraction of failed tasks (reward=0) detected by the monitor — the positive counterpart of FAR.
 
 **Formula.**
 
 $$
-\operatorname{RDR}
-= \frac{\sum_{t \in T_{\text{risky}}} \mathbb{1}[v_t \in \{\text{WARN}, \text{BLOCK}\}]}
-{|T_{\text{risky}}|}
+\operatorname{RDR}(V)
+= \frac{\sum_{t \in T_{\text{fail}}} \mathbb{1}[\tilde{v}_t^V \neq \text{PASS}]}
+{|T_{\text{fail}}|}
+= 1 - \operatorname{FAR}(V)
 $$
 
-Equivalently:
+**Range.** \(0 \leq \operatorname{RDR}(V) \leq 1\). Higher is better. AUDIT\_FAILED rows count as detected (non-PASS), so \(\operatorname{RDR}(V) + \operatorname{FAR}(V) = 1\) when every row carries a verdict.
 
-$$
-\operatorname{RDR} = 1 - \operatorname{FAR}
-$$
+### 2.4 Detection Lift (ΔRDR)
 
-when every risky task receives exactly one aggregate verdict in \(\{\text{PASS}, \text{WARN}, \text{BLOCK}\}\). In the implementation, some rows may produce `ERROR` or `NOT_TRIGGERED`. These rows remain in the denominator but are neither false acceptances nor detected risks, so \(\operatorname{RDR} + \operatorname{FAR}\) can be less than 1.
-
-**Range.**
-
-$$
-0 \leq \operatorname{RDR} \leq 1
-$$
-
-**Intuition.** Higher is better. RDR is the positive counterpart of FAR for risky tasks.
-
-### 2.4 Safe Pass, Pass Rate, and Gate Action Rate
-
-**Safe Pass Rate.** Safe Pass Rate measures the proportion of safe tasks that are correctly accepted:
-
-$$
-\operatorname{SafePassRate}
-= \frac{\sum_{t \in T_{\text{safe}}} \mathbb{1}[v_t = \text{PASS}]}
-{|T_{\text{safe}}|}
-$$
-
-Higher is better. In the implementation, \(\operatorname{SafePassRate} + \operatorname{FalseAlarmRate}\) can be less than 1 when safe tasks produce `ERROR` or `NOT_TRIGGERED`.
-
-**Pass Rate.** Pass Rate is exact task-level verdict accuracy:
-
-$$
-\operatorname{PassRate}
-= \frac{\sum_{t \in T} \mathbb{1}[v_t = \hat{v}_t]}
-{|T|}
-$$
-
-where \(\hat{v}_t\) is the expected benchmark verdict after normalizing scenario labels. This metric is stricter than RDR: if a risky task expects `BLOCK` but the system returns `WARN`, it counts as detected risk for RDR but not as an exact pass.
-
-**Gate Action Rate.** Gate Action Rate measures how often the system actively warns or blocks:
-
-$$
-\operatorname{GateActionRate}
-= \frac{\sum_{t \in T} \mathbb{1}[v_t \in \{\text{WARN}, \text{BLOCK}\}]}
-{|T|}
-$$
-
-It is especially useful for Set B, where the question is not only whether the system is correct but also how often it intervenes under generalization stress.
-
-### 2.5 Task Claim Coverage Rate (TCCR)
-
-**Purpose.** Task Claim Coverage Rate measures the proportion of tasks for which the reliability pipeline produced at least one grounded (non-unverifiable) claim. A grounded claim is one whose evidence state is supported, contradicted, unsupported, or not_found.
-
-**Symbol definition.**
-
-- \(T\) is the set of evaluated tasks where the verifier ran (V2 and V3 only).
-- \(\operatorname{has\_grounded\_claim}(t) = 1\) if task \(t\) has at least one claim with \(e_i \neq \texttt{unverifiable}\), i.e., \((\text{supported\_count} + \text{contradicted\_count} + \text{unsupported\_count} + \text{not\_found\_count}) > 0\) in the pipeline report.
+**Purpose.** Headline metric for RQ2: the improvement in detection rate when the structural observation channels (state + trace) are added over the answer-only baseline.
 
 **Formula.**
 
 $$
-\operatorname{TCCR}
-= \frac{\sum_{t \in T} \mathbb{1}[\operatorname{has\_grounded\_claim}(t)]}
-{|T|}
+\Delta\operatorname{RDR} = \operatorname{RDR}(V_{\text{structural}}) - \operatorname{RDR}(V_{\text{answer}})
 $$
 
-**Range.**
+**Interpretation.** Positive \(\Delta\operatorname{RDR}\) across all four audited models (deepseek-v4-pro, mimo-v2.5-pro, glm-4.7-flash, qwen3.6-flash) is the primary RQ2 empirical claim. Significance is assessed per-model via McNemar's test (§2.7). A positive \(\Delta\operatorname{RDR}\) with stable or decreasing FalseAlarmRate constitutes an unambiguous improvement: more failures caught without more correct outputs flagged.
+
+### 2.5 Consistent Detection Rate (CDR$_\kappa$)
+
+**Purpose.** Quantifies detection reliability across K=10 repeat runs per task. A monitor that detects a failure only 1 out of 10 runs is practically unreliable even if its mean RDR looks high. Adapted from τ-bench's pass^k metric; addresses LLM non-determinism (~33% outcome flip rate across runs on DeepSeek/OpenRouter at temp=0+seed).
+
+**Formula.** For failed task \(t\) under model \(m\) and monitor \(V\) across \(K = 10\) runs:
 
 $$
-0 \leq \operatorname{TCCR} \leq 1
+\hat{p}_{\text{detect}}(t, V, m) = \frac{1}{K}\sum_{k=1}^{K} \mathbb{1}[\tilde{v}_{t,k}^V \neq \text{PASS}]
 $$
 
-**Intuition.** Higher is better. A low TCCR indicates that the claim extractor is producing mostly unverifiable aggregate claims, preventing the verifier from grounding its audit. For V1 (no verifier), TCCR should be interpreted as no verifier coverage rather than as an extractor-quality signal.
+$$
+\operatorname{CDR}_\kappa(V, m) = \frac{|\{t \in T_{\text{fail}} \mid \hat{p}_{\text{detect}}(t, V, m) \geq \kappa/K\}|}{|T_{\text{fail}}|}
+$$
 
-### 2.6 Evidence State Distribution
+**Recommended thresholds.** \(\kappa \in \{5, 7, 9\}\) for a K=10 design — majority-consistent (\(\geq 50\%\)), strongly consistent (\(\geq 70\%\)), and near-certain (\(\geq 90\%\)). CDR\(_5\) is the primary threshold; CDR\(_9\) bounds the stable detection floor.
 
-**Purpose.** Evidence-state distribution reports the average number of claims in each evidence state among tasks where the verifier produced at least one claim-level evidence count.
+### 2.6 Locus Distribution (π$_\ell$)
+
+**Purpose.** Decomposes failed tasks (reward=0) by the locus of their ground truth. Measures what fraction of failures are in principle detectable by each observation channel, and bounds the maximum achievable RDR for any black-box monitor.
+
+**Formula.**
+
+$$
+\pi_\ell = \frac{|\{t \in T_{\text{fail}} \mid \operatorname{locus}(t) = \ell\}|}{|T_{\text{fail}}|}, \quad \ell \in \{\text{answer-local},\ \text{trace-local},\ \text{state-local},\ \text{intent-local}\}
+$$
+
+**Constraint.** \(\sum_\ell \pi_\ell = 1\).
+
+**Theoretical detection ceiling.** For \(V_{\text{structural}}\) (which observes answer + state + trace):
+
+$$
+\operatorname{RDR}(V_{\text{structural}})^* \leq 1 - \pi_{\text{intent-local}}
+$$
+
+The empirical gap \([1 - \pi_{\text{intent-local}}] - \operatorname{RDR}(V_{\text{structural}})\) measures the monitor's implementation shortfall above the theoretical limit. RQ3 reports \(\pi_{\text{intent-local}}\) as the irreducible observability boundary.
+
+### 2.7 Paired Significance Test (McNemar)
+
+**Purpose.** Test whether \(\Delta\operatorname{RDR}\) is statistically significant for each audited model. McNemar's test is appropriate because the unit of observation is the task (paired across monitor configurations).
+
+**Setup.** Restrict to \(T_{\text{fail}}\). For each task \(t\), record \(a_t = \operatorname{detect}(\tilde{v}_t^{V_{\text{answer}}})\) and \(s_t = \operatorname{detect}(\tilde{v}_t^{V_{\text{structural}}})\). The paired \(2 \times 2\) table:
+
+| | \(V_{\text{structural}}\) detects (\(s_t=1\)) | \(V_{\text{structural}}\) misses (\(s_t=0\)) |
+| --- | --- | --- |
+| \(V_{\text{answer}}\) detects (\(a_t=1\)) | \(n_{11}\) | \(n_{10}\) |
+| \(V_{\text{answer}}\) misses (\(a_t=0\)) | \(n_{01}\) | \(n_{00}\) |
+
+Only the discordant cells \(n_{01}\) (structural gains) and \(n_{10}\) (structural loses) carry information.
+
+**Statistic (with continuity correction).**
+
+$$
+\chi^2_{\text{McNemar}} = \frac{(|n_{01} - n_{10}| - 1)^2}{n_{01} + n_{10}}, \quad p = P(\chi^2_1 > \chi^2_{\text{McNemar}})
+$$
+
+Reject \(H_0\) at \(p < 0.05\). A significant result with \(n_{01} \gg n_{10}\) confirms that \(V_{\text{structural}}\) gains substantially more detections than it loses versus \(V_{\text{answer}}\).
+
+### 2.8 Bootstrap Confidence Intervals
+
+**Purpose.** Report uncertainty on all headline rates. Agent evaluation papers rarely report CIs; this thesis does so to make LLM non-determinism explicit and support reproducibility claims.
+
+**Method.** For a rate metric \(\hat{\mu}\) (e.g., \(\operatorname{RDR}(V)\)) over \(|T|\) tasks with \(K=10\) repeats each:
+
+1. Compute per-task detect-fraction \(\hat{p}_t = \frac{1}{K}\sum_k \operatorname{detect}(\tilde{v}_{t,k}^V)\) for \(t \in T_{\text{fail}}\).
+2. Draw \(B = 1000\) bootstrap resamples (with replacement over tasks); compute \(\hat{\mu}^{(b)}\) for each.
+3. Report \([\hat{\mu}^{(0.025)},\ \hat{\mu}^{(0.975)}]\) as the 95% CI.
+
+Implementation: `eval/metrics.bootstrap_ci(values, n_resamples=1000, seed=0)`. All headline rates (FAR, FalseAlarmRate, RDR, \(\Delta\operatorname{RDR}\)) are reported with 95% CIs.
+
+### 2.9 Coverage Split: PASS\_VERIFIED vs PASS\_UNCHECKED
+
+**Purpose.** Distinguish substantiated passes (at least one claim corroborated by grounding evidence) from low-evidence passes (no contradictions found but no positive support either). Diagnostic for verifier grounding quality on reward=1 tasks.
+
+For tasks processed by the monitor pipeline with \(y_t = 1\):
+
+$$
+\operatorname{VerifiedPassRate}(V) = \frac{|\{t \in T_{\text{pass}} \mid v_t^V = \text{PASS\_VERIFIED}\}|}{|T_{\text{pass}}|}
+$$
+
+$$
+\operatorname{UncheckedPassRate}(V) = \frac{|\{t \in T_{\text{pass}} \mid v_t^V = \text{PASS\_UNCHECKED}\}|}{|T_{\text{pass}}|}
+$$
+
+A high UncheckedPassRate for \(V_{\text{structural}}\) indicates that many correct tasks pass without any claim being positively grounded — the monitor accepts by absence of contradiction rather than by positive corroboration.
+
+### 2.10 Evidence State Distribution
+
+**Purpose.** Reports the average number of claims in each evidence state among tasks where the verifier produced at least one claim-level result. Diagnostic for verifier and extractor quality.
 
 For each task \(t\), ReliableGuard records:
 
 $$
-n_t^{sup}, n_t^{con}, n_t^{uns}, n_t^{unv}, n_t^{nf}
+n_t^{\text{sup}},\ n_t^{\text{con}},\ n_t^{\text{uns}},\ n_t^{\text{unv}},\ n_t^{\text{nf}}
 $$
 
-corresponding to `supported_count`, `contradicted_count`, `unsupported_count`, `unverifiable_count`, and `not_found_count`.
-
-Let:
+corresponding to `supported`, `contradicted`, `unsupported`, `unverifiable`, and `not_found` counts. Let \(T_E = \{t \mid n_t^{\text{sup}}+n_t^{\text{con}}+n_t^{\text{uns}}+n_t^{\text{unv}}+n_t^{\text{nf}} > 0\}\).
 
 $$
-T_E = \{t \in T \mid n_t^{sup}+n_t^{con}+n_t^{uns}+n_t^{unv}+n_t^{nf} > 0\}
-$$
-
-The average supported count is:
-
-$$
-\operatorname{AvgSupported}
-= \frac{\sum_{t \in T_E} n_t^{sup}}{|T_E|}
-$$
-
-The same form applies to contradicted, unsupported, unverifiable, and not_found counts. The evidence-state coverage field is:
-
-$$
+\operatorname{AvgSupported} = \frac{\sum_{t \in T_E} n_t^{\text{sup}}}{|T_E|}, \quad
 \operatorname{EvidenceStateCoverage} = \frac{|T_E|}{|T|}
 $$
 
-**Implementation fields.** `compute_metrics` reports `avg_supported_count`, `avg_contradicted_count`, `avg_unsupported_count`, `avg_unverifiable_count`, `avg_not_found_count`, and `evidence_state_coverage`.
+The same form applies to each evidence state. Implementation fields: `avg_supported_count`, `avg_contradicted_count`, `avg_unsupported_count`, `avg_unverifiable_count`, `avg_not_found_count`, and `evidence_state_coverage` in `eval/metrics.compute_metrics`.
 
-### 2.7 Stage Latency and Token Cost
+### 2.11 Stage Latency and Token Cost
 
-ReliableGuard records per-stage audit latency in `ReliabilityReport.stage_latencies`. The aggregated metrics report mean and p95 latency for:
+ReliableGuard records per-stage audit latency in `ReliabilityReport.stage_latencies`. Aggregated metrics report mean and p95 latency for each pipeline stage: `extract_claims`, `classify_verifiability`, `verify_claims`, `score_risks`, `decide_interventions`, `generate_report`, `total_pipeline`.
 
-- `extract_claims`
-- `classify_verifiability`
-- `verify_claims`
-- `score_risks`
-- `decide_interventions`
-- `generate_report`
-- `total_pipeline`
-
-For each stage \(s\), with observed latency values \(L_s = \{\ell_1, \ldots, \ell_m\}\):
+For each stage \(s\) with observed latency values \(L_s = \{\ell_1, \ldots, \ell_m\}\):
 
 $$
 \operatorname{MeanLatency}_s = \frac{1}{m}\sum_{i=1}^{m}\ell_i
 $$
 
-and p95 is computed from the sorted latency list using the experiment code's percentile index rule.
-
-Token usage is aggregated from positive token counts in result rows or `state["total_tokens"]`:
+and p95 is the 95th percentile of the sorted latency list. Token usage:
 
 $$
 \operatorname{AvgTokens} = \frac{\sum_{t \in T_\tau}\tau_t}{|T_\tau|}
 $$
 
-where \(T_\tau\) contains only tasks with \(\tau_t > 0\). The implementation fields are `stage_latency_mean_ms`, `stage_latency_p95_ms`, `avg_tokens`, and `total_tokens_sum`.
+where \(T_\tau\) contains only tasks with positive token counts. Implementation fields: `stage_latency_mean_ms`, `stage_latency_p95_ms`, `avg_tokens`, `total_tokens_sum`.
 
 ## 3. Domain Verifier Adapter Interface Contract
 
@@ -428,54 +415,39 @@ V_{\text{agg}}
 \right)
 $$
 
-### 4.2 Detection Scope Boundary: Type I versus Type II Failures
+### 4.2 Detection Scope Boundary: Locus Taxonomy
 
-This boundary is an **observability** statement. The final answer \(A\) is a partial, self-reported observation of the true execution trajectory; the claim-level pipeline can only audit what is recoverable from \(A\) together with the domain state \(D_{\text{after}}\) at audit time. A failure class is *unobservable* through this channel exactly when there exists a correct execution that is indistinguishable from the failing one under the observable artifacts. The Type I / Type II split below partitions failures by the **locus of their ground truth** relative to that observation, and thereby determines observability: Type I ground truth is recoverable from \((A, D_{\text{after}})\); Type II ground truth resides in the pre-execution policy predicate or the pre/post state transition, neither of which is exposed by \(A\) or by \(D_{\text{after}}\) alone. This is the formal basis for the claim, established empirically in RQ1, that the final-answer blind spot is a property of the observation channel rather than of extraction quality.
+This boundary is an **observability** statement. Each failure is attributed to a _locus_ — the location in the execution artifact space where its ground truth resides. Whether a monitor can detect the failure depends entirely on whether its observation channel reaches that locus.
 
-**Type I: Factual inconsistency failures.**
+**The locus taxonomy.** Partitions all tasks by the location of the ground truth needed to determine correctness:
 
-A failure is Type I if the agent's final answer contains claims that contradict or are unsupported by the observable domain state at the time of verification:
+| Locus | Ground truth location | \(V_{\text{answer}}\) | \(V_{\text{structural}}\) |
+| --- | --- | --- | --- |
+| answer-local | Self-contradiction in the answer text | detectable | detectable |
+| trace-local | Tool call sequence violates policy rule | not reachable | detectable (trace channel) |
+| state-local | Claimed effect not realized in DB `state_after` | not reachable | detectable (state channel) |
+| intent-local | Agent's action is valid but not what the user wanted | not reachable | not reachable |
 
-$$
-\text{Type I}: \exists\, c_i \in C \text{ such that } e_i \in \{\texttt{contradicted}, \texttt{not\_found}\}
-\text{ when } V(c_i, D_{\text{after}}) \text{ is evaluated.}
-$$
-
-Type I failures are detectable by post-hoc claim verification when the relevant claim is present in \(A\) and extracted into \(C\). The claim pipeline acts as a post-hoc consistency checker between extracted claims and the current domain state, so its empirical coverage still depends on final-answer wording and claim extraction quality.
-
-- **F3 (fabricated claim)**: The agent asserts an entity that does not exist in \(D_{\text{after}}\). Evidence state: \(\texttt{not\_found}\).
-- **F4 (false-success)**: The tool reports success but \(D_{\text{after}} = D_{\text{before}}\). If the agent's answer contains an extracted claim of a completed operation, that claim contradicts \(D_{\text{after}}\). Evidence state: \(\texttt{contradicted}\). Structural audit covers this case more directly by checking the state transition itself.
-
-**Type II: Policy violation failures.**
-
-A failure is Type II if the agent initiated an operation that violated a pre-execution policy constraint, yet the resulting domain state \(D_{\text{after}}\) is factually consistent with the agent's final answer:
+**Theoretical detection limit.** For any black-box monitor \(M\) operating on (answer text, `state_after`, tool trace):
 
 $$
-\text{Type II}: \forall\, c_i \in C,\ e_i = \texttt{supported}
-\text{ when } V(c_i, D_{\text{after}}) \text{ is evaluated,}
-\text{ yet } P(T_{\text{args}}) = \texttt{violated}
+\operatorname{RDR}(M)^* \leq \pi_{\text{answer-local}} + \pi_{\text{trace-local}} + \pi_{\text{state-local}} = 1 - \pi_{\text{intent-local}}
 $$
 
-where \(P\) is a pre-condition policy and \(T_{\text{args}}\) are the tool arguments supplied at execution time.
+This bound is not an implementation shortfall; it follows from the definition of intent-local: the agent's final answer, the DB state, and the tool trace are all consistent with a correct execution, yet the user's goal was not achieved. No monitor reading those artifacts can distinguish this case from a correct run.
 
-Type II failures are not detectable by post-hoc claim verification. The domain state is correct; the violation occurred in the decision to permit the operation, not in its outcome. Detecting Type II failures requires structural audit: evaluating \(P(T_{\text{args}})\) before the tool executes.
+**Locus annotator.** The assignment is rule-based, operating on verified artifacts independently of the monitor's verdict to avoid circularity. Source: `src/reliableguard/locus.py → annotate_locus()`.
 
-- **F2 (policy violation)**: An agent creates an order with amount = 8000. The database records amount = 8000 correctly. All claims in \(A\) are \(\texttt{supported}\). The violation is that amount \(> 5000\) requires approval, a constraint that exists in the pre-execution policy \(P\), not in \(D_{\text{after}}\).
+1. Any `TraceViolation` from `verify_trace()` → locus = **trace-local**.
+2. Any claim with `evidence_state = contradicted` (state channel) → locus = **state-local**.
+3. `gold_reward = 0` with no violation and no contradiction → locus = **intent-local** (unobservable residual).
+4. `gold_reward = 1` → locus = **pass**.
 
-**Empirical confirmation.**
+**RQ3 operationalization.** The intent-local label in step 3 is the observational residual: tasks where no artifact in any channel carries a detectable contradiction. The thesis does not claim these are intent failures in a philosophical sense — only that they are observationally indistinguishable from correct executions under \(V_{\text{structural}}\). The empirical claim is \(\pi_{\text{intent-local}} > 0\), establishing that the unobservable class is non-empty; its magnitude sets the practical detection ceiling.
 
-The current post-fix V3 versus V3\_NoStructural controlled ablation on the ecommerce Set A benchmark confirms that structural audit improves both policy precondition checking and state-transition checking:
+**Connection to RQ1 and RQ2.** RQ1 establishes that \(V_{\text{answer}}\) is structurally limited to answer-local detections — the channel limit is not an extractor quality issue. RQ2 shows that \(V_{\text{structural}}\) extends coverage to trace-local and state-local loci (the \(\Delta\operatorname{RDR}\) gain). RQ3 shows that \(\pi_{\text{intent-local}}\) remains after both channels — the irreducible boundary. Together the three RQs traverse the full locus taxonomy from the most observable locus to the least.
 
-| Metric / failure type | V3\_NoStructural (no structural audit) | V3 (structural audit enabled) |
-| --- | ---: | ---: |
-| Overall ecommerce RDR | 0.237 | 0.640 |
-| Overall ecommerce FAR | 0.762 | 0.231 |
-| F2 policy violation detection | 0.225 | 0.735 |
-| F4 false-success detection | 0.353 | 0.827 |
-
-F2 remains the clearest Type II case: the resulting database state may be factually consistent with the agent answer, while the operation violates a pre-execution policy. F4 is a Type I state inconsistency, but the latest result shows that final-answer claim verification is not sufficient in practice because it depends on the answer wording and the extractor. The post-execution structural check detects the state-transition anomaly directly.
-
-This boundary has a design implication for new domain instantiations: structural audit is necessary when target failures involve policy preconditions, permission constraints, transaction side effects, or environment state transitions that are not reliably exposed as final-answer claims.
+**Design implication.** For new domain instantiations, structural audit is necessary when target failures involve policy preconditions, permission constraints, or environment state transitions not reliably exposed in the final answer text. The intent-local class is irreducible regardless of structural channel expansion; only intent-aware evaluation (e.g., human annotation of user goals independent of agent output) could push detection further.
 
 ## 5. Risk Scoring Framework
 

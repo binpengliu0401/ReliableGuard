@@ -75,7 +75,7 @@ def _extract_with_llm(
     content = response.choices[0].message.content or "{}"
     payload = _load_json_object(content)
     claims = [
-        Claim(**item)
+        Claim(**{**item, "entities": item.get("entities") or {}})
         for item in payload.get("claims", [])
         if isinstance(item, dict) and item.get("text")
     ]
@@ -117,10 +117,11 @@ def _load_json_object(content: str) -> dict[str, Any]:
         content = re.sub(r"^```(?:json)?", "", content).strip()
         content = re.sub(r"```$", "", content).strip()
     start = content.find("{")
-    end = content.rfind("}")
-    if start >= 0 and end >= start:
-        content = content[start : end + 1]
-    return json.loads(content)
+    if start < 0:
+        return {}
+    # raw_decode stops at the first complete JSON object, ignoring any trailing text
+    obj, _ = json.JSONDecoder().raw_decode(content[start:])
+    return obj if isinstance(obj, dict) else {}
 
 
 def _extract_with_heuristics(domain: str, agent_answer: str) -> list[Claim]:

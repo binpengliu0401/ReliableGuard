@@ -80,3 +80,35 @@ def test_is_halt_error_only_on_credit_auth() -> None:
     assert _is_halt_error(Exception("401 Unauthorized"))
     assert not _is_halt_error(Exception("429 rate limit exceeded"))
     assert not _is_halt_error(Exception("timeout while reading"))
+
+
+def test_slice_state_airline_preserves_reservations() -> None:
+    """_slice_state must not drop airline-domain keys (reservations, flights).
+    Before the fix it only kept orders/users/products, making all airline state checks return
+    not_found."""
+    res_id = "4WQ150"
+    before = {
+        "reservations": {res_id: {"cabin": "business", "total_baggages": 2}},
+        "users": {"u1": {"reservations": [res_id]}},
+        "flights": {"HAT170": {"origin": "JFK"}},
+    }
+    after = {
+        "reservations": {res_id: {"cabin": "business", "total_baggages": 4, "status": "cancelled"}},
+        "users": {"u1": {"reservations": [res_id]}},
+        "flights": {"HAT170": {"origin": "JFK"}},
+    }
+    trace = [
+        {"name": "get_user_details", "kwargs": {"user_id": "u1"}},
+        {"name": "cancel_reservation", "kwargs": {"reservation_id": res_id}},
+    ]
+    sliced_before, sliced_after = _slice_state(before, after, trace)
+    # reservations must be present in the sliced state
+    assert res_id in sliced_after.get("reservations", {}), "reservation dropped from sliced state_after"
+    assert res_id in sliced_before.get("reservations", {}), "reservation dropped from sliced state_before"
+    assert sliced_after["reservations"][res_id]["status"] == "cancelled"
+    assert sliced_before["reservations"][res_id]["total_baggages"] == 2
+    # flights not mentioned in trace are dropped (correct: monitor doesn't need static flight data)
+    assert sliced_after.get("flights", {}) == {}
+    # retail keys absent (clean airline slice)
+    assert "orders" not in sliced_after
+    assert "products" not in sliced_after

@@ -22,7 +22,10 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import litellm
+from dotenv import load_dotenv
 from litellm import completion
+
+load_dotenv()  # make OPENROUTER_API_KEY available from .env before any litellm/openai calls
 
 from src.reliableguard.adapter import Trajectory
 from src.reliableguard.errors import LLMResponseTruncatedError
@@ -56,10 +59,12 @@ def _patch_user_sim_max_tokens() -> None:
 def _slice_state(
     state_before: dict[str, Any], state_after: dict[str, Any], tool_trace: list[dict[str, Any]]
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Keep only the entities the monitor can need, not the whole 1000-order DB (which would be
-    ~2.5 MB/trajectory ≈ 16 GB over the full matrix). An entity is kept if its id appears in the
-    tool trace (read or written), if it changed between before/after, or (for orders) if it belongs
-    to a kept user. Returns sliced (before, after)."""
+    """Keep only the entities the monitor can need, not the whole DB (~2.5 MB/trajectory for retail
+    ≈ 16 GB over the full matrix). An entity is kept if its id appears in the tool trace (read or
+    written), if it changed between before/after, or if it is reachable from a kept user (orders for
+    retail, reservations for airline). Handles both retail (orders/users/products) and airline
+    (reservations/users/flights) state schemas by scanning whichever keys are present. Returns
+    sliced (before, after)."""
     blob = json.dumps(tool_trace)
     before, after = state_before or {}, state_after or {}
 
@@ -68,20 +73,42 @@ def _slice_state(
         return {k for k in set(b) | set(a) if k in blob or b.get(k) != a.get(k)}
 
     user_keys = _keep_keys("users")
+
+    # Retail: orders owned by kept users are pulled in even if not directly in trace.
     order_keys = _keep_keys("orders")
     for users in (before.get("users", {}), after.get("users", {})):
         for key in user_keys:
             user = users.get(key)
             if user:
                 order_keys.update(user.get("orders", []))
-    product_keys = {k for k in set(before.get("products", {})) | set(after.get("products", {})) if k in blob}
 
-    keep = {"orders": order_keys, "users": user_keys, "products": product_keys}
+    # Airline: reservations owned by kept users are pulled in (same join pattern as retail orders).
+    reservation_keys = _keep_keys("reservations")
+    for users in (before.get("users", {}), after.get("users", {})):
+        for key in user_keys:
+            user = users.get(key)
+            if user:
+                reservation_keys.update(user.get("reservations", []))
+
+    # Products (retail) and flights (airline): keep only those referenced in the trace blob.
+    product_keys = {k for k in set(before.get("products", {})) | set(after.get("products", {})) if k in blob}
+    flight_keys = {k for k in set(before.get("flights", {})) | set(after.get("flights", {})) if k in blob}
+
+    keep = {
+        "orders": order_keys,
+        "users": user_keys,
+        "products": product_keys,
+        "reservations": reservation_keys,
+        "flights": flight_keys,
+    }
 
     def _slice(state: dict[str, Any]) -> dict[str, Any]:
+        # Only include a category key if the source state actually has it (keeps airline states
+        # clean of empty "orders"/{} and retail states clean of empty "reservations"/{}).
         return {
-            category: {k: state.get(category, {})[k] for k in keys if k in state.get(category, {})}
+            category: {k: state[category][k] for k in keys if k in state.get(category, {})}
             for category, keys in keep.items()
+            if category in state
         }
 
     return _slice(before), _slice(after)

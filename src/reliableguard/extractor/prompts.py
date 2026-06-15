@@ -6,6 +6,19 @@ def build_claim_extraction_prompt(domain: str, query: str, agent_answer: str) ->
         f"- {name}: {meta['definition']}" for name, meta in CLAIM_TAXONOMY.items()
     )
     domain_hint = {
+        "retail": (
+            "Focus on order ids (format #Wnnnn), order statuses (pending/cancelled/delivered/"
+            "return requested/exchange requested), refund amounts, item counts, and payment methods. "
+            "Use attribute for status fields, numeric for amounts or counts, existence for order "
+            "presence, and relational for modifications or cancellations."
+        ),
+        "airline": (
+            "Focus on reservation ids (6-char uppercase alphanumeric, e.g. 4WQ150), cabin class "
+            "(basic_economy/economy/business), baggage counts (total_baggages), cancellation status, "
+            "flight numbers, insurance, and payment history. "
+            "Use attribute for cabin/status fields, numeric for bag counts, existence for reservation "
+            "presence."
+        ),
         "ecommerce": (
             "Focus on order ids, amounts, counts, statuses, refunds, and tool-reported results. "
             "Use attribute for status fields and numeric for amounts or counts."
