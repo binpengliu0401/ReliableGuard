@@ -16,6 +16,11 @@ from src.reliableguard.schema import (
 # same claims + grounding yield the V_answer / V_structural / V_evidence verdicts.
 _VERIFIERS: dict[str, object] = {}
 
+# Claims with these time_range values describe pre-action history or future intentions,
+# not the current post-action database state. Verifying them against state_after produces
+# spurious contradictions (false alarms). Skip them before routing to domain verifiers.
+_NON_CURRENT_SCOPES = {"before_action", "future_plan", "during_action"}
+
 
 def verify_claims(
     domain: str,
@@ -24,18 +29,39 @@ def verify_claims(
     context: VerificationContext | None = None,
 ) -> dict[str, VerificationResult]:
     context = context or VerificationContext()  # default = answer-only, no grounding
+
+    scoped, skipped_claims = [], []
+    for c in claims:
+        if c.time_range in _NON_CURRENT_SCOPES:
+            skipped_claims.append(c)
+        else:
+            scoped.append(c)
+
+    skipped_results: dict[str, VerificationResult] = {
+        c.claim_id: VerificationResult(
+            claim_id=c.claim_id,
+            evidence_state="unverifiable",
+            confidence=1.0,
+            reason=f"Temporal scope excluded: {c.time_range}",
+        )
+        for c in skipped_claims
+    }
+
     verifier = _VERIFIERS.get(domain)
     if verifier is not None:
-        return verifier(claims, verifiability, context)  # type: ignore[operator]
+        return {**skipped_results, **verifier(scoped, verifiability, context)}  # type: ignore[operator]
 
     # No verifier registered for this domain yet: every claim is reported as unverifiable
     # (the monitor cannot reach a grounding source). Phase 2 registers the tau-bench verifiers.
     return {
-        claim.claim_id: VerificationResult(
-            claim_id=claim.claim_id,
-            evidence_state="unverifiable",
-            confidence=1.0,
-            reason=f"No verifier registered for domain: {domain}",
-        )
-        for claim in claims
+        **skipped_results,
+        **{
+            claim.claim_id: VerificationResult(
+                claim_id=claim.claim_id,
+                evidence_state="unverifiable",
+                confidence=1.0,
+                reason=f"No verifier registered for domain: {domain}",
+            )
+            for claim in scoped
+        },
     }

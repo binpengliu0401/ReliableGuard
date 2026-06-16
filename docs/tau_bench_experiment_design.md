@@ -22,6 +22,17 @@ free order creation** (operates on pre-existing orders) — so custom adversaria
 -1000 order) are NOT injected; that would reintroduce self-made data and is allowed only as an
 illustrative demo, never as headline evidence.
 
+**Benchmark source (2026-06-16 decision): tau2-bench (τ³-bench) replaces the original tau-bench.**
+A systematic bug audit found that 27/50 airline tasks (54%) and 26/115 retail tasks (23%) in the
+original `sierra-research/tau-bench` had incorrect gold expected actions, impossible constraints,
+ambiguous user instructions, or policy-loophole tasks scored as failures despite correct agent
+behaviour. Running our monitor on these tasks produces misleading RDR numbers. We adopt
+`sierra-research/tau2-bench` (v1.0.0), which ships fixed retail + airline tasks and adds the
+`banking_knowledge` domain. The capture driver moves from the `tau_bench` package API to the `tau2`
+package API (different runner architecture; see architecture.md). **`banking_knowledge` is promoted
+from stretch to core** (97 tasks, 698 policy/procedure documents) — it is the only domain with
+evidence-local failures (agent gives wrong KB-policy information), closing the locus coverage gap.
+
 ## Non-circularity (the spine's defense)
 
 τ-bench reward needs the goal annotation `r_actions`; the monitor reads ONLY deployment-observable
@@ -121,9 +132,11 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 4. Confirm capture: `env.actions`, `env.data` (initial via `data_load_func()`, final snapshot
    **before** `calculate_reward()` since it reloads `env.data` to ground truth), `reward`, native
    fault type.
-5. **Domain scope decision:** core = retail + airline; stretch (for full locus coverage) = telecom
-   + banking_knowledge (banking_knowledge supplies evidence-local). If banking_knowledge (newest) is
-   unstable, evidence-local stays conceptual and intent-local carries RQ3.
+5. **Domain scope decision (updated 2026-06-16):** core = retail + airline + **banking_knowledge**
+   (all three via tau2-bench); telecom excluded (2285 tasks — too large for this project's scope).
+   Banking_knowledge is promoted to core because it is the only domain providing evidence-local
+   failures (agent gives wrong KB-policy information), which is necessary for full locus coverage.
+   Evidence-local was previously a gap in the locus taxonomy; this decision closes it.
    Deliverable: feasibility note + locked model IDs + domain/task scope + time estimate.
 
 ### Phase 1 — Repo refactor
@@ -141,8 +154,17 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 
 ### Phase 2 — τ-bench integration
 
-9. **Adapter:** wrap the τ-bench runner to emit one `Trajectory` (JSONL, streaming, resumable) per
-   (task, model, repeat); correct snapshot order.
+9. **Adapter (updated 2026-06-16):** new `eval/capture_tau2.py` using the `tau2` package API (not
+   the old `tau_bench` API). The tau2 runner is fundamentally different: simulation runs as a whole
+   via `build_environment` + `build_orchestrator` + `run_simulation`; there is no step-level loop.
+   Key extraction points: `state_before = task.initial_state` (available pre-run); `state_after =
+   env.db.model_dump()` (accessed after sim completes); `tool_trace` from `AssistantMessage.tool_calls`
+   in `sim.messages`; `gold_reward = sim.reward_info.reward`. For banking_knowledge only: `evidence`
+   = the list of KB documents referenced by `task.required_documents`, loaded from the domain's
+   document store and passed through the `Trajectory.evidence` field into `Grounding.evidence`.
+   Old `eval/capture.py` (old tau_bench API) is retired after migration; the output JSONL schema is
+   unchanged (same `Trajectory` model) so the monitor pass requires no changes for retail/airline.
+   JSONL streaming, resume by `(model, domain, repeat, task_id)` key, same shard discipline.
 10. **τ-bench state verifier** (state-local): check claimed entities/effects against `state_after`.
 11. **Structural / trace port** (trace-local): encode the `wiki.md` rules as checks over
     `tool_trace` (cancel only pending; auth before action; confirm before write; no modify-then-
@@ -157,7 +179,14 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
     and the strict *post-state-change assertion* — both need per-tool observations / user turns
     (not in `tool_trace`). Realized-effect side covered by state channel (step 10). See
     architecture.md "Structural-audit pattern (ported)".
-12. **Evidence channel** (banking_knowledge): re-retrieve from the KB and check claims vs documents.
+12. **Evidence channel** (banking_knowledge, **promoted to core** 2026-06-16): `banking_knowledge_verifier`
+    in `tau_bench_verifiers.py` checks agent claims against KB policy documents. Two claim routes:
+    (a) state claims (transactional assertions about account/balance changes) → state_after DB check,
+    same as retail/airline; (b) policy/feature claims ("the annual fee for the Gold card is $X") →
+    BM25 keyword retrieval over the 698 documents + LLM judge (minimax-m3) returns
+    `supported / contradicted / unsupported`. A `contradicted` result on a policy claim → locus =
+    `evidence-local`. Registered in `source_verifier._VERIFIERS["banking_knowledge"]`. Channel gated
+    on `ChannelConfig.evidence=True`, enabled only for banking_knowledge domain in monitor_pass.
 13. **Locus annotator:** native fault type → locus, else the rule-based classifier above; emit a
     locus tag per failure. Unit-test on a few hand-traced tasks.
     DONE (`src/reliableguard/locus.py`). tau-bench `RewardResult` has no structured fault type
@@ -256,32 +285,41 @@ vendor set. The two controls share a model but operate in disjoint roles (conver
 vs. post-hoc claim extraction) with no information sharing, so this introduces no confound. The
 answer-local input fed to the extractor is the agent's concatenated `respond` turns (see above).
 
-Domain scope: core = retail (115 test tasks) + airline (50 test tasks) = **165 tasks/repeat**.
-`sierra-research/tau-bench` main ships only retail + airline; telecom + banking_knowledge live in the
-separate `tau2-bench` repo (stretch, supplies evidence-local). Seed 42. K = 10.
+Domain scope (updated 2026-06-16): **retail (115 tasks) + airline (50 tasks) + banking_knowledge
+(97 tasks) = 262 tasks/repeat**. All three domains via `tau2-bench`; telecom excluded (2285 tasks,
+scope too large). Source: `sierra-research/tau2-bench` v1.0.0 (fixed tasks + new banking domain).
+Seed 42. K = 10. Total trajectories: 4 models × 262 tasks × 10 repeats = **10,480**.
 
-Budget (Phase 0 smoke-calibrated, real OpenRouter spend; all 11 smoke/calib tasks passed with valid
-tool calls, concurrency 5 verified clean):
+Budget (Phase 0 calibrated on retail/airline; banking_knowledge cost estimated):
 
-| Model | $/task (retail / airline) | full-matrix (K=10) | data |
-| --- | --- | --- | --- |
-| `deepseek/deepseek-v4-pro` | 0.080 / 0.072 | **$128** | firm (n=8) |
-| `qwen/qwen3.6-flash` | 0.029 | ~$47 | n=1 |
-| `xiaomi/mimo-v2.5-pro` | 0.011 | ~$18 | n=1 |
-| `z-ai/glm-4.7-flash` | 0.0029 | ~$5 | n=1 |
-| user-sim + extractor (`minimax-m3`) | — | ~$15 | extractor reasoning ≈ $13 |
+| Model | $/task (retail/airline) | est. $/task (banking) | full-matrix (K=10, 262 tasks) | data |
+| --- | --- | --- | --- | --- |
+| `deepseek/deepseek-v4-pro` | 0.080 / 0.072 | ~0.09 (RAG overhead) | **~$207** | firm retail/airline |
+| `qwen/qwen3.6-flash` | 0.029 | ~0.035 | ~$76 | n=1 |
+| `xiaomi/mimo-v2.5-pro` | 0.011 | ~0.013 | ~$29 | n=1 |
+| `z-ai/glm-4.7-flash` | 0.0029 | ~0.004 | ~$8 | n=1 |
+| user-sim + extractor (`minimax-m3`) | — | — | ~$24 | scaled |
 
-Total ≈ **$213** (airline/retail cost ratio measured 0.92). Cost driver = `deepseek-v4-pro` (63%),
-because it is a reasoning model and the agent re-sends full history + the ~2.4-2.9k-token tool
-schemas every step (~80k input tok/task); output is small (per-call ≤1259 tok), so caps don't reduce
-cost. Wall-clock: the two reasoning flagships are slow (raw 170-220 s/task); concurrency 5 is verified
-safe, can ramp to 20-30 — expect ~4-8 h depending on achieved concurrency, less if models run in
-parallel. **Run-harness correctness/robustness spec (snapshot order, shard+resume, retry vs. spurious
+Total ≈ **$344** (banking adds ~60% more tasks; banking LLM-judge adds extractor cost ~$11).
+Cost driver = `deepseek-v4-pro` (~60%). Wall-clock: ~6-12 h with concurrency 5-20.
+**Run-harness correctness/robustness spec (snapshot order, shard+resume, retry vs. spurious
 failure, max_tokens caps) is in [architecture.md](architecture.md) → "Run-harness correctness &
-robustness"; it is a Phase 2 prerequisite.**
+robustness"; it applies to the tau2 driver as well.**
 
-## Open items (still pending)
+## Open items (updated 2026-06-16)
 
-- Extractor model ID (set in Phase 1) + grounding-injection design (see architecture.md).
-- Intent-local independent annotation source.
-- banking_knowledge usability for the evidence channel (stretch / tau2-bench).
+- **Intent-local independent annotation**: the locus annotator currently uses the rule-based
+  classifier (residual after trace/state/evidence checks). For RQ3 the thesis needs a spot-check
+  showing the residual *coincides with* an independently-derived intent-local class. A small sample
+  manual annotation is required before the RQ3 boundary claim can be stated non-circularly.
+- **tau2 API probe**: before writing `capture_tau2.py` in full, verify `env.db.model_dump()` is
+  accessible after `run_simulation()` and that the state schema matches what retail/airline verifiers
+  expect. One smoke run per domain confirms this.
+- **Banking verifier LLM cost**: the LLM judge (minimax-m3) is called once per claim per trajectory
+  in banking_knowledge. With ~5 claims/trajectory × 970 tasks × 10 repeats = ~48,500 judge calls;
+  estimate ~$11 added extractor cost. Acceptable but should be monitored.
+
+### Resolved (previously open)
+- ~~Extractor model ID~~ — locked: `minimax/minimax-m3` with reasoning disabled (Phase 1).
+- ~~Grounding-injection design~~ — implemented: `VerificationContext` + `ChannelConfig` (Phase 1).
+- ~~banking_knowledge usability~~ — resolved: promoted to core (2026-06-16); tau2-bench v1.0.0 confirmed stable.

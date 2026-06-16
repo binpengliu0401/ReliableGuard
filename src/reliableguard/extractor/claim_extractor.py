@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from typing import Any
 
 from openai import OpenAI
@@ -66,20 +67,26 @@ def _extract_with_llm(
         # OpenRouter: turn off a reasoning model's hidden thinking. Extraction is structured
         # parsing -- reasoning only adds token-variance that can blow the max_tokens cap.
         options["extra_body"] = {"reasoning": {"enabled": False}}
-    response = client.chat.completions.create(
-        model=model,
-        messages=build_claim_extraction_prompt(domain, query, agent_answer),  # type: ignore
-        **options,
-    )
-    _raise_if_truncated(response, max_tokens)
-    content = response.choices[0].message.content or "{}"
-    payload = _load_json_object(content)
-    claims = [
-        Claim(**{**item, "entities": item.get("entities") or {}})
-        for item in payload.get("claims", [])
-        if isinstance(item, dict) and item.get("text")
-    ]
-    return claims, _usage_from_response(response)
+    messages = build_claim_extraction_prompt(domain, query, agent_answer)  # type: ignore
+    last_json_err: json.JSONDecodeError | None = None
+    for attempt in range(2):
+        if attempt:
+            time.sleep(2)
+        response = client.chat.completions.create(model=model, messages=messages, **options)
+        _raise_if_truncated(response, max_tokens)
+        content = response.choices[0].message.content or "{}"
+        try:
+            payload = _load_json_object(content)
+        except json.JSONDecodeError as exc:
+            last_json_err = exc
+            continue
+        claims = [
+            c for item in payload.get("claims", [])
+            if isinstance(item, dict) and item.get("text")
+            if (c := _safe_claim(item)) is not None
+        ]
+        return claims, _usage_from_response(response)
+    raise last_json_err  # type: ignore[misc]
 
 
 def _raise_if_truncated(response: Any, max_tokens: int | None) -> None:
@@ -91,6 +98,14 @@ def _raise_if_truncated(response: Any, max_tokens: int | None) -> None:
             "Claim extraction response stopped because "
             f"max_tokens={max_tokens} was reached"
         )
+
+
+def _safe_claim(item: dict[str, Any]) -> "Claim | None":
+    """Return a Claim from a raw dict, or None if validation fails."""
+    try:
+        return Claim(**{**item, "entities": item.get("entities") or {}})
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def _usage_from_response(response: Any) -> dict[str, int]:

@@ -45,6 +45,10 @@ from src.reliableguard.verifier.tau_bench_verifiers import (
 
 EXTRACTOR_MODEL = "minimax/minimax-m3"
 EXTRACTOR_MAX_TOKENS = 16384
+# Airline agents occasionally produce very long answer texts that cause the extractor to
+# generate 16k+ tokens of claims JSON and hit the cap. Truncate to the tail of the answer
+# (where the final verdict/summary lives) to keep extraction output well within limits.
+_MAX_ANSWER_CHARS = 8000
 
 
 def _compute_verdict(
@@ -87,10 +91,13 @@ def _load_done_keys(path: Path) -> set[str]:
 
 def _process_trajectory(traj: Trajectory) -> dict[str, Any]:
     """Full monitor pipeline for one trajectory: extract → V_answer → V_structural → locus."""
+    answer_text = traj.answer_text
+    if len(answer_text) > _MAX_ANSWER_CHARS:
+        answer_text = answer_text[-_MAX_ANSWER_CHARS:]
     claims = extract_claims(
         traj.domain,
         traj.query,
-        traj.answer_text,
+        answer_text,
         model=EXTRACTOR_MODEL,
         disable_reasoning=True,
         max_tokens=EXTRACTOR_MAX_TOKENS,
@@ -107,6 +114,33 @@ def _process_trajectory(traj: Trajectory) -> dict[str, Any]:
 
     locus = annotate_locus(traj.gold_reward or 0.0, violations, structural_results)
 
+    n_contradicted = sum(
+        1 for r in structural_results.values() if r.evidence_state == "contradicted"
+    )
+
+    # For every BLOCKed trajectory, record which claims were contradicted and why.
+    # Enables post-hoc false-alarm analysis without re-running the extractor.
+    block_detail: dict[str, Any] | None = None
+    if v_structural_verdict == "BLOCK":
+        claim_by_id = {c.claim_id: c for c in claims}
+        contradicted = []
+        for cid, result in structural_results.items():
+            if result.evidence_state != "contradicted":
+                continue
+            c = claim_by_id.get(cid)
+            contradicted.append({
+                "claim_id": cid,
+                "text": c.text if c else None,
+                "time_range": c.time_range if c else None,
+                "attribute": c.attribute if c else None,
+                "value": str(c.value) if c else None,
+                "reason": result.reason,
+            })
+        block_detail = {
+            "contradicted_claims": contradicted,
+            "trace_violations": [str(v) for v in violations],
+        }
+
     return {
         "task_id": traj.task_id,
         "domain": traj.domain,
@@ -118,10 +152,9 @@ def _process_trajectory(traj: Trajectory) -> dict[str, Any]:
         "v_structural_verdict": v_structural_verdict,
         "n_claims": len(claims),
         "n_violations": len(violations),
-        "n_contradicted": sum(
-            1 for r in structural_results.values() if r.evidence_state == "contradicted"
-        ),
+        "n_contradicted": n_contradicted,
         "trace_verdict": "BLOCK" if violations else "PASS",
+        "block_detail": block_detail,
         "status": "done",
     }
 
@@ -164,23 +197,37 @@ def run_monitor_shard(
     def _do(traj: Trajectory) -> None:
         try:
             row = _process_trajectory(traj)
+            print(
+                f"  ok  [{traj.domain} t{traj.task_id} r{traj.repeat}] "
+                f"locus={row['locus']} v_struct={row['v_structural_verdict']} "
+                f"claims={row['n_claims']} viol={row['n_violations']}",
+                flush=True,
+            )
         except Exception as exc:  # noqa: BLE001
             print(
                 f"  ERR [{traj.model} {traj.domain} t{traj.task_id} r{traj.repeat}]: "
                 f"{type(exc).__name__}: {str(exc)[:120]}",
                 flush=True,
             )
-            return
+            row = {
+                "task_id": traj.task_id,
+                "domain": traj.domain,
+                "model": traj.model,
+                "repeat": traj.repeat,
+                "gold_reward": traj.gold_reward,
+                "locus": "unknown",
+                "v_answer_verdict": "AUDIT_FAILED",
+                "v_structural_verdict": "AUDIT_FAILED",
+                "n_claims": 0,
+                "n_violations": 0,
+                "n_contradicted": 0,
+                "trace_verdict": "PASS",
+                "status": "done",
+            }
         with lock:
             with out_path.open("a") as fh:
                 fh.write(json.dumps(row) + "\n")
                 fh.flush()
-        print(
-            f"  ok  [{traj.domain} t{traj.task_id} r{traj.repeat}] "
-            f"locus={row['locus']} v_struct={row['v_structural_verdict']} "
-            f"claims={row['n_claims']} viol={row['n_violations']}",
-            flush=True,
-        )
 
     if max_workers > 1:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:

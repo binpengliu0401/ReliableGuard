@@ -218,7 +218,20 @@ def _per_repeat_rdr(failed_rows: list[dict], verdict_key: str, k: int) -> list[f
 # Core: per-model metrics
 # ---------------------------------------------------------------------------
 
+def _is_audit_failed(row: dict) -> bool:
+    """True if both monitor configs produced AUDIT_FAILED (extractor returned no claims)."""
+    return (
+        row.get("v_answer_verdict") == "AUDIT_FAILED"
+        and row.get("v_structural_verdict") == "AUDIT_FAILED"
+    )
+
+
 def compute_model_metrics(rows: list[dict], model: str, k: int = K_DEFAULT) -> dict[str, Any]:
+    # Exclude rows where the extractor produced no output for both configs; these cannot
+    # contribute to RDR or FAR and would otherwise inflate both by counting as detections.
+    n_audit_failed = sum(1 for r in rows if _is_audit_failed(r))
+    rows = [r for r in rows if not _is_audit_failed(r)]
+
     failed = [r for r in rows if _is_fail_task(r)]
     passed = [r for r in rows if _is_pass_task(r)]
     n_fail, n_pass, n_total = len(failed), len(passed), len(rows)
@@ -237,6 +250,7 @@ def compute_model_metrics(rows: list[dict], model: str, k: int = K_DEFAULT) -> d
         "n_total": n_total,
         "n_fail": n_fail,
         "n_pass": n_pass,
+        "n_audit_failed": n_audit_failed,
         "pi_l": pi_l,
         "locus_counts": {l: locus_counts.get(l, 0) for l in LOCI},
     }

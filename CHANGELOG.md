@@ -11,6 +11,79 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ### Added
 
+- **tau2-bench migration decision (2026-06-16): upgrade to tau2-bench for all three core domains.**
+  Following a systematic bug audit of the original `sierra-research/tau-bench` tasks, we decided to
+  migrate the entire capture pipeline from the old `tau_bench` API to `tau2` (τ³-bench, the
+  successor at `sierra-research/tau2-bench`) and expand the experiment from 2 to 3 domains:
+
+  *Bug scope in the old benchmark:* airline 27/50 tasks (54%) had incorrect gold expected actions,
+  ambiguous user instructions, impossible constraints (e.g. Mastercard not in user profile), or
+  policy-loophole tasks where the correct agent behaviour was nonetheless scored 0. Retail had 26/115
+  tasks (23%) with similar issues. Running our monitor on these tasks produces misleading RDR numbers:
+  a low RDR on airline is partly explained by the agent correctly refusing an impossible action — not
+  a monitor failure. The tau2-bench (v1.0.0) changelog lists every fix; we adopt the corrected tasks.
+
+  *Scope decision:* retire `eval/capture.py` (old `tau_bench` API) after the tau2 migration;
+  `banking_knowledge` (97 tasks, 698 policy/procedure documents) is promoted from stretch to **core**
+  — it is the only domain with evidence-local failures (agent gives wrong policy information from KB
+  documents). Total: **retail 115 + airline 50 + banking_knowledge 97 = 262 tasks / repeat**.
+
+  *Planned files (implementation pending):*
+  - `eval/capture_tau2.py` — new capture driver using `tau2.runner` API (replaces `capture.py`)
+  - `eval/run_capture_tau2.py` — CLI wrapper
+  - `src/reliableguard/verifier/tau_bench_verifiers.py` — `banking_knowledge_verifier` (BM25 retrieve + LLM judge)
+  - `src/reliableguard/locus.py` — evidence-local detection branch
+  - `eval/monitor_pass.py` — evidence channel activation for banking_knowledge
+
+  Key API difference from old tau_bench: tau2 uses `build_environment` + `build_orchestrator` +
+  `run_simulation`; `state_before` comes from `task.initial_state`; `state_after` from
+  `env.db.model_dump()` after sim; tool trace from `AssistantMessage.tool_calls` in `sim.messages`.
+  Both packages coexist in the same venv (different names: `tau_bench` vs `tau2`).
+
+### Fixed
+
+- **Phase 3 follow-up (2026-06-16): four pipeline robustness fixes discovered on the 6,600-trajectory
+  monitor pass.**
+
+  *(1) Temporal-scope filter (`src/reliableguard/verifier/source_verifier.py`).* Added
+  `_NON_CURRENT_SCOPES = {"before_action", "future_plan", "during_action"}`. `verify_claims` now
+  filters these claims out before routing to any domain verifier and returns them as `unverifiable`.
+  Root cause of elevated FAR: the extractor occasionally emits `before_action` claims (the "Before"
+  column in a Before/After comparison table, or the pre-modification value the agent describes while
+  explaining the change) which the state verifier then contradicts against `state_after` → false BLOCK
+  on a reward-1 task. The fix complements the prompt-level instruction in `prompts.py` (which already
+  asks the extractor to discard these) with an enforcement layer in the verifier.
+
+  *(2) Answer truncation (`eval/monitor_pass.py`).* Added `_MAX_ANSWER_CHARS = 8000` cap (tail of
+  the answer text fed to the extractor). Airline agents occasionally emit very long answers (full
+  policy recitations, itinerary summaries) that drove the extractor to generate 16k+ tokens of claims
+  JSON and hit the `max_tokens` ceiling → `LLMResponseTruncatedError`. The tail of the answer carries
+  the final verdict/state assertion; leading policy-citation context does not add verifiable claims.
+
+  *(3) ERR rows write AUDIT_FAILED (`eval/monitor_pass.py`).* Previously an exception in
+  `_process_trajectory` hit `return` before the write, silently dropping the trajectory from the
+  output file. The resume logic skips rows by key, so a silently-dropped row was re-run on every
+  resume attempt. Fix: the except block now writes an `AUDIT_FAILED` row (`status="done"`), making
+  the trajectory present in the monitor output and correctly excluded from metrics by `analyze.py`.
+  Added `block_detail` field on every BLOCK row — a list of contradicted claim texts + reasons —
+  enabling post-hoc false-alarm analysis without re-running the extractor.
+
+  *(4) JSON decode retry (`src/reliableguard/extractor/claim_extractor.py`).* Wrapped the LLM call
+  in a 2-attempt loop (2-second sleep between retries); added `_safe_claim()` to skip individual
+  malformed claim dicts rather than failing the whole batch. Eliminates the intermittent
+  `JSONDecodeError` that surfaced on minimax-m3 outputs (model occasionally emits trailing text after
+  the JSON object).
+
+### Changed
+
+- **`analyze.py`: AUDIT_FAILED rows excluded from RDR/FAR denominators (2026-06-16).** Added
+  `_is_audit_failed()` predicate; `compute_model_metrics` filters rows where both config verdicts are
+  `AUDIT_FAILED` before computing any metric. `n_audit_failed` is reported separately. Previously
+  these rows were included in both the failed-task denominator (deflating RDR) and the passed-task
+  denominator (inflating FAR).
+
+### Added
+
 - **Phase 3 & 4 (2026-06-15): monitor pass driver + full analysis pipeline — all four thesis
   metrics plus figures computed end-to-end.**
 
