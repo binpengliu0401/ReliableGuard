@@ -21,7 +21,7 @@ import argparse
 
 from eval.capture import run_capture_matrix
 
-RETAIL_TASKS = list(range(115))   # tau-bench retail: 115 test tasks (index 0-114)
+RETAIL_TASKS = list(range(114))   # tau-bench retail: 114 test tasks (index 0-113)
 AIRLINE_TASKS = list(range(50))   # tau-bench airline: 50 test tasks (index 0-49)
 USER_MODEL = "minimax/minimax-m3"
 

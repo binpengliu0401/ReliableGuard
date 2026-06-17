@@ -13,7 +13,7 @@ from src.reliableguard.schema import (
 #   (claims, verifiability, context) -> dict[claim_id, VerificationResult]
 # `context` (grounding injection, decision B) carries the trajectory Grounding plus the
 # ChannelConfig; the verifier reads only the channels enabled in `context.channels`, so the
-# same claims + grounding yield the V_answer / V_structural / V_evidence verdicts.
+# same claims + grounding yield the V_answer / V_structural verdicts.
 _VERIFIERS: dict[str, object] = {}
 
 # Claims with these time_range values describe pre-action history or future intentions,

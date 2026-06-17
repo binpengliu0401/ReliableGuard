@@ -22,7 +22,7 @@ src/
     trace/              # trace_logger.py, report_generator.py, artifacts.py
   config/runtime_config.py   # RuntimeConfig dataclass (verifier / channel flags)
 eval/
-  capture.py            # RETIRED — old tau_bench API capture driver (retail+airline, 6600 trajs done)
+  capture.py            # RETIRED — old tau_bench API capture driver (retail+airline, 6560 trajs done)
   capture_tau2.py       # PLANNED — new tau2 API capture driver (retail+airline+banking, 10480 trajs)
   run_capture_tau2.py   # PLANNED — CLI wrapper for capture_tau2
   monitor_pass.py       # monitor pipeline driver: extract → V_answer + V_structural → locus → JSONL
@@ -50,19 +50,33 @@ Orchestrated by `src/reliableguard/pipeline.py`,
 Returns a `ReliabilityReport` with `stage_latencies` and `token_usage`. Everything after stage 1 is
 deterministic and symbolic; the only neural component is extraction (validated separately).
 
-## The three monitor configurations
+## The two monitor configurations
 
 All are black-box, monitor-only, and share ONE claim extraction per trajectory (fixed extractor
 model). They differ only in which observation channel the verifier consults:
 
 | Config | Channels | Serves |
 | --- | --- | --- |
-| `V_answer` | answer / conversation only | RQ1 baseline (answer-local) |
-| `V_structural` | `V_answer` + state (`env.data`) + trace (`env.actions` vs `wiki.md` policy) + post-state-change assertion | RQ2 (trace/state recovery) |
-| `V_evidence` | `V_answer` + re-retrieve from a knowledge base (banking_knowledge) | RQ2 extension (evidence-local) |
+| `V_answer` | answer / conversation only + **answer-completeness** | RQ1 baseline (answer-local) |
+| `V_structural` | `V_answer` + state (`env.data`) + trace (`env.actions` vs `wiki.md` policy, incl. **agent-loop guard**) + post-state-change assertion | RQ2 (trace/state recovery) |
 
 Gold label = τ-bench reward (1 pass / 0 fail). Detection = monitor non-PASS on reward-0; false alarm
 = monitor non-PASS on reward-1.
+
+**Answer-completeness (answer channel, 2026-06-17).** `verifier/answer_completeness.detect_incomplete_answer`:
+the answer terminating on an unanswered substantive question (excluding polite closers) =>
+non-completion, an answer-local signal fed to BOTH configs (it reads only `answer_text`). Because it
+is in both, the V_structural-over-V_answer lift (ΔRDR) is attributable purely to state + trace.
+
+**Metrics (`eval/analyze.py`).** Per config: RDR / FalseAlarmRate + detector-classifier
+**Precision / F1 / MCC** (+ `confusion`), all with bootstrap CIs; MCC is the cross-model axis (the
+4 agents fail at different base rates). Figures: `figure6` (RQ1 locus), `figure7`/`figure9` (RQ2
+cross-model + detector-quality), `figure8` (RQ3 stacked). Reported results: `results/monitor_v2` →
+`results/metrics_v2` → `results/figures_v2`, produced by the deterministic overlay
+`eval/reannotate_signals.py` (loop + completeness + state-framing fix, no re-extraction).
+
+`V_evidence` (KB re-retrieval for banking_knowledge) was removed from the formal experiment;
+banking_knowledge is documented in the thesis as Future Work.
 
 ## Verifier registry
 
@@ -71,8 +85,8 @@ Gold label = τ-bench reward (1 pass / 0 fail). Detection = monitor non-PASS on 
 Each registered verifier judges the claim-set jointly (not claim-by-claim) against that benchmark's
 observable artifacts and returns `{claim_id: VerificationResult}`. Unregistered domains return
 `unverifiable` for every claim. The legacy self-made ecommerce + reference verifiers were removed in
-the 2026-06-09 pivot; the τ-bench verifiers register here in Phase 2 (`retail` and `airline` state
-channels done; trace channel = the standalone `verify_trace(context, *, domain)`, below).
+the 2026-06-09 pivot; banking_knowledge verifier removed 2026-06-16 (domain out of formal scope).
+Active registrations: `retail` and `airline` (state + trace channels).
 
 **Grounding injection (decision B — IMPLEMENTED).** `verify_claims` and the registered verifiers
 take a `VerificationContext` (`src/reliableguard/schema.py`): `grounding` (the trajectory's
@@ -96,9 +110,8 @@ Retail rules: **auth_before_action** (write before authentication),
 Airline rules: **auth_before_action** (write before `get_user_details`),
 **basic_economy_no_flight_modify** (`update_reservation_flights` on a basic_economy reservation),
 **baggage_only_increase** (`update_reservation_baggages` with new `total_baggages` < old).
-Rules that need the dialogue (e.g. "obtain explicit user confirmation") are deliberately NOT encoded — `tool_trace`
-carries no observations/user turns, so encoding them would only manufacture false positives; the
-realized effect is covered by the state channel instead. Gated on `channels.trace`; status
+Rules deliberately NOT encoded: *confirm-before-write* (needs user-turn observations).
+The realized effect is covered by the state channel instead. Gated on `channels.trace`; status
 preconditions additionally need `state_before` (present in the V_structural preset, which turns
 state + trace on together). The structural verdict combines the two channels:
 `trace_verdict(violations)` returns BLOCK on any violation, and the trajectory verdict is
@@ -107,9 +120,9 @@ still escalated to BLOCK.
 
 ## τ-bench integration
 
-**Current status (2026-06-16): migrating from old `tau_bench` to `tau2` package (τ³-bench).**
-The old retail+airline capture (6600 trajectories) used `tau_bench`; new capture for all three
-domains (retail + airline + banking_knowledge, 10480 trajectories) uses `tau2`.
+**Current status (2026-06-16): migrated from old `tau_bench` to `tau2` package (τ³-bench).**
+Formal experiment: retail + airline (164 tasks/repeat, 6,560 trajectories total). `capture_tau2.py`
+and `run_capture_tau2.py` are the active capture drivers.
 
 **Old `tau_bench` API (capture.py — retired):**
 - `from tau_bench.envs import get_env` → step-level loop
@@ -119,17 +132,16 @@ domains (retail + airline + banking_knowledge, 10480 trajectories) uses `tau2`.
 - Non-circularity: `env.data` and `env.actions` are snapshotted BEFORE `calculate_reward()` runs
   inside the terminal step (which would reload `env.data` to ground truth and append gold actions)
 
-**New `tau2` API (capture_tau2.py — planned):**
-- `from tau2.runner import build_environment, build_orchestrator, run_simulation`
-- Simulation runs as a whole: `sim = run_simulation(orchestrator)`; no step-level loop
-- `state_before`: `task.initial_state` (available before run, from task metadata)
-- `state_after`: `env.db.model_dump()` (accessed after sim completes)
-- `tool_trace`: extract from `sim.messages` — `AssistantMessage.tool_calls` → `[{name, arguments}]`
+**New `tau2` API (capture_tau2.py — active):**
+
+- `from tau2.runner import build_text_orchestrator, get_tasks, run_simulation`
+- Simulation runs as a whole: `sim = run_simulation(orch)`; no step-level loop
+- `state_before`: deepcopy of `env.tools.db` after orchestrator built, before `run_simulation`
+- `state_after`: deepcopy of `env.tools.db` after sim completes
+- `tool_trace`: extract from `sim.messages` — `AssistantMessage.tool_calls` → `[{name, kwargs}]`
 - `answer_text`: concatenate `AssistantMessage.content` across conversation
 - `gold_reward`: `sim.reward_info.reward`
-- `evidence` (banking_knowledge only): KB documents for `task.required_documents`, loaded from
-  the domain document store, stored as `list[{id, title, content}]` in `Trajectory.evidence`
-- Both packages coexist in the same venv (different names: `tau_bench` vs `tau2`); the old retail
+- Both packages coexist in the same venv (different names: `tau_bench` vs `tau2`); the retail
   + airline verifiers work unchanged against the same `state_after` DB schema.
 
 Each domain ships an explicit policy `wiki.md` (preconditions + action-ordering). The trace channel
@@ -172,7 +184,7 @@ driver that wraps the τ-bench runner must honor all four before the full run.
    `reward_info` (the gold annotation) into a `Trajectory` — that is the non-circularity guarantee.
 
 2. **Shard + resume (idempotent, crash-safe).** Work unit / dedup key = `(model, domain, repeat,
-   task_id)` (4 models × 2 domains × K=10 × 165 tasks = 6,600 trajectories). Output = append-only
+   task_id)` (4 models × 2 domains × K=10 × 164 tasks = 6,560 trajectories). Output = append-only
    JSONL, one `Trajectory` per line, flushed per record (a crash loses at most the in-flight task).
    Shard granularity: one file per `model` minimum, optionally per `(model, repeat)` for parallel
    runs — one writer per shard file (no lock contention). Resume = on start, scan the shard, build the
@@ -208,31 +220,6 @@ check** is the state channel (`_check_state_retail` vs `state_after`). The *snap
 the current capture does not record (`tool_trace` is name+kwargs only); the state channel covers the
 effect from the claim side instead. Enhancing capture to retain observations would let `verify_trace`
 add that assertion directly — deferred unless a failure mode demands it.
-
-## Banking knowledge verifier (planned, 2026-06-16)
-
-`banking_knowledge_verifier` will be registered in `source_verifier._VERIFIERS["banking_knowledge"]`
-alongside the existing retail and airline verifiers. It handles two claim categories differently:
-
-**State claims** (transactional assertions: account balance, transfer amounts, fee charges):
-routed to the same DB state-check logic as retail/airline — compare claimed value against
-`state_after` fields.
-
-**Policy/feature claims** (KB-policy assertions: "the annual fee for the Gold card is $X",
-"there is a 30-day dispute window"):
-1. **BM25 retrieval** — tokenize the claim text, score all 698 documents by keyword overlap, take
-   top-k=3. No external dependency: pure Python `Counter` over `re.findall(r'\w+', ...)`.
-2. **LLM judge** — call minimax-m3 with a compact prompt: claim text + retrieved document excerpts
-   (≤500 chars each) → JSON response `{state: "supported"|"contradicted"|"unsupported", reason, evidence_snippet}`.
-3. Map to `VerificationResult.evidence_state`: `contradicted` → locus annotator sees evidence-local.
-
-The judge adds ~1 API call per policy claim per trajectory. Claims with `time_range` in
-`_NON_CURRENT_SCOPES` are filtered by `source_verifier.verify_claims` before reaching the verifier.
-
-**Locus annotation for evidence-local** (`src/reliableguard/locus.py`): after the state-local
-check, add: if any `VerificationResult` has `evidence_state="contradicted"` and `source="banking_kb"`
-→ return `"evidence-local"`. Priority order becomes: pass → trace-local → state-local →
-**evidence-local** → intent-local (residual).
 
 ## Temporal-scope filter (implemented 2026-06-16)
 

@@ -58,8 +58,12 @@ monitor's channels. The **locus of ground truth** organizes this:
 | answer-local | Self-contradiction in the answer | detectable | detectable |
 | trace-local | Tool-call sequence violates policy | not reachable | detectable |
 | state-local | Claimed effect not realized in state_after | not reachable | detectable |
-| evidence-local (source-available) | Unsupported by retrievable KB | not reachable | detectable (V_evidence) |
 | intent-local | Valid action, wrong user goal | not reachable | **not reachable** |
+
+Evidence-local (claim unsupported by KB documents) is excluded from the formal taxonomy: no KB
+exists in the two formal domains (retail + airline), giving zero evidence detection surface.
+Banking_knowledge — the only tau2-bench domain with a KB — is moved to Future Work (see §6.2)
+because tau2-bench evaluates it via tool-call optimality, not factual accuracy.
 
 The theoretical detection ceiling for any black-box monitor:
 
@@ -88,24 +92,23 @@ claims from unstructured agent output. Symbolic: verify those claims against obs
 artifacts (environment state, tool trace, policy, retrievable evidence), score risk, and decide a
 verdict. Six-stage pipeline: **Extract → Classify → Verify → Score → Intervene → Trace**.
 
-Three monitor configurations differing only in which observation channel the verifier consults
-(one claim extraction shared across all three):
+Two monitor configurations differing only in which observation channel the verifier consults
+(one claim extraction shared across both):
 
 | Config | Channels | RQ served |
 | --- | --- | --- |
 | V_answer | Answer / conversation only | RQ1 baseline |
 | V_structural | V_answer + state (env.data) + trace (env.actions vs wiki.md) | RQ2 primary |
-| V_evidence | V_answer + KB re-retrieval | RQ2 extension (evidence-local) |
 
 ---
 
 ## Evaluation Substrate: τ-bench
 
-The evaluation is grounded entirely on **τ-bench** (Yao et al. 2024; `sierra-research/tau-bench`),
+The evaluation is grounded entirely on **τ²-bench** (`sierra-research/tau2-bench` v1.0.0),
 a recognized tool-agent benchmark whose ground truth is execution-based and not authored by us.
-Core domains: retail (115 tasks) + airline (50 tasks). The benchmark exposes tool trace
-(`env.actions`), DB state (`env.data`), and a reward function (`calculate_reward()` using the
-goal annotation `r_actions`).
+Formal domains: **retail (115 tasks) + airline (50 tasks) = 165 tasks/repeat**. The benchmark
+exposes tool trace, DB state, and a reward function (`calculate_reward()` using the goal
+annotation `r_actions`).
 
 τ-bench is the **environment and oracle**, not a competing method. The monitor reads only
 deployment-observable artifacts (final answer, `env.actions`, `env.data` before/after) and never
@@ -125,8 +128,9 @@ K repeats.
 1. **An observability characterization** of black-box post-hoc agent auditing, organizing failures
    by the locus of their ground truth and establishing (not assuming) that the answer-channel
    blind spot is a property of the channel, not of extraction quality.
-2. **A locus-of-ground-truth taxonomy** (answer / trace / state / evidence / intent) as a
-   domain-independent analysis lens over real benchmark failures.
+2. **A locus-of-ground-truth taxonomy** (answer / trace / state / intent) as a
+   domain-independent analysis lens over real benchmark failures, with a principled account of
+   which loci fall outside any black-box observable channel.
 3. **A claim-level neuro-symbolic audit pipeline** with a benchmark-adapter pattern (neural
    extraction; symbolic verification, scoring, intervention, and tracing).
 4. **A statistically principled evaluation** on τ-bench across four base models with per-task
@@ -236,9 +240,19 @@ Restates core claim grounded in empirical results. Three sentences per RQ: what 
 why it matters, what it establishes.
 
 **6.2 Future Work** (~0.7 pages)
-Three directions: (1) intent-local annotation via independent human labeling to harden RQ3;
-(2) multi-domain extension (telecom, banking_knowledge evidence channel); (3) online / in-loop
-monitoring with latency budget.
+Three directions:
+(1) **Intent-local annotation**: independent human labeling to harden the RQ3 boundary claim
+(spot-check that the residual coincides with a separately-derived intent-local class).
+(2) **Action-centric domain extension**: banking_knowledge (tau2-bench) as a case study where
+the monitor hits a structural observability limit — the benchmark evaluates tool-call optimality
+(reward_basis="DB"/"ACTION") rather than factual accuracy, so `communicate_info=[]` for all 97
+tasks and the monitor's detectable locus coverage approaches zero. This exposes a new failure
+mode: the intent-local boundary is not just about user goals but also about action-selection
+optimality in domains with no factual grounding surface. Future approaches include an action-local
+verifier (checking agent's self-reported actions against tool_trace for phantom-action /
+parameter-mismatch detection) or an LLM-as-judge for action optimality.
+(3) **Online / in-loop monitoring**: integrating the verdict into the agent loop with a latency
+budget, exploring whether early intervention on trace violations reduces downstream state errors.
 
 ---
 
@@ -255,11 +269,11 @@ monitoring with latency budget.
 | Figure 7 | Box/violin | 5 | Cross-model RDR comparison (RQ2 money chart) |
 | Figure 8 | Stacked bar | 5 | Detected vs. undetected by locus (RQ3) |
 | Table 1 | Comparison matrix | 2 | Related work × 6 dimensions |
-| Table 2 | Locus taxonomy | 3 | 5 loci × detectability |
+| Table 2 | Locus taxonomy | 3 | 4 loci × detectability (evidence-local excluded) |
 | Table 3 | RQ table | 3 | RQ × operationalization × test |
 | Table 4 | Monitor configs | 4 | 3 configs × channels × flags |
 | Table 5 | Pipeline stages | 4 | Stage × I/O × neural/symbolic |
-| Table 6 | Trace rules | 4 | Retail + airline policy rules |
+| Table 6 | Trace rules | 4 | Retail + airline policy rules (2 domains) |
 | Table 7 | Model lineup | 5 | 4 audited + 2 controls |
 | Table 8 | Domain stats | 5 | Domains × task count × structure |
 | Table 9 | Limitations | 5 | Limitation × cause × mitigation |

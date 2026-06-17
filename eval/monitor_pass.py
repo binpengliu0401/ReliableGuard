@@ -37,6 +37,7 @@ from src.reliableguard.schema import (
     TraceViolation,
     VerificationResult,
 )
+from src.reliableguard.verifier.answer_completeness import detect_incomplete_answer
 from src.reliableguard.verifier.source_verifier import verify_claims
 from src.reliableguard.verifier.tau_bench_verifiers import (
     register_tau_bench_verifiers,
@@ -54,11 +55,20 @@ _MAX_ANSWER_CHARS = 8000
 def _compute_verdict(
     results: dict[str, VerificationResult],
     violations: list[TraceViolation],
+    *,
+    answer_incomplete: bool = False,
 ) -> str:
-    """Collapse per-claim results + trace violations into one OverallVerdict string."""
-    if not results and not violations:
+    """Collapse per-claim results + trace violations (+ optional answer-incompleteness) into one
+    OverallVerdict string. `answer_incomplete` is an answer-channel signal, so BOTH V_answer and
+    V_structural consult it; the V_structural lift over V_answer therefore comes purely from the
+    state + trace channels (violations / contradictions)."""
+    if not results and not violations and not answer_incomplete:
         return "AUDIT_FAILED"
-    if violations or any(r.evidence_state == "contradicted" for r in results.values()):
+    if (
+        violations
+        or answer_incomplete
+        or any(r.evidence_state == "contradicted" for r in results.values())
+    ):
         return "BLOCK"
     if any(r.evidence_state == "supported" for r in results.values()):
         return "PASS_VERIFIED"
@@ -103,16 +113,30 @@ def _process_trajectory(traj: Trajectory) -> dict[str, Any]:
         max_tokens=EXTRACTOR_MAX_TOKENS,
     )
 
+    # Answer-channel completeness signal: non-completion visible in the agent's own answer
+    # (terminated on an unanswered substantive question). Read the FULL answer text, not the
+    # length-truncated tail, so a terminal question is not lost to truncation.
+    incomplete_reason = detect_incomplete_answer(traj.answer_text)
+    answer_incomplete = incomplete_reason is not None
+
+    # Completeness is a pure answer-channel signal (read only from answer_text), so it belongs to
+    # the answer-only baseline: V_answer detects it too. Keeping it in BOTH configs means the
+    # V_structural vs V_answer lift (RQ2) is attributable purely to the state + trace channels.
     ctx_answer = traj.verification_context(CHANNELS_ANSWER)
     answer_results = verify_claims(traj.domain, claims, {}, ctx_answer)
-    v_answer_verdict = _compute_verdict(answer_results, [])
+    v_answer_verdict = _compute_verdict(answer_results, [], answer_incomplete=answer_incomplete)
 
     ctx_structural = traj.verification_context(CHANNELS_STRUCTURAL)
     structural_results = verify_claims(traj.domain, claims, {}, ctx_structural)
     violations = verify_trace(ctx_structural, domain=traj.domain)
-    v_structural_verdict = _compute_verdict(structural_results, violations)
+    v_structural_verdict = _compute_verdict(
+        structural_results, violations, answer_incomplete=answer_incomplete
+    )
 
-    locus = annotate_locus(traj.gold_reward or 0.0, violations, structural_results)
+    locus = annotate_locus(
+        traj.gold_reward or 0.0, violations, structural_results,
+        answer_incomplete=answer_incomplete,
+    )
 
     n_contradicted = sum(
         1 for r in structural_results.values() if r.evidence_state == "contradicted"
@@ -139,6 +163,7 @@ def _process_trajectory(traj: Trajectory) -> dict[str, Any]:
         block_detail = {
             "contradicted_claims": contradicted,
             "trace_violations": [str(v) for v in violations],
+            "answer_incomplete": incomplete_reason,
         }
 
     return {
@@ -153,6 +178,7 @@ def _process_trajectory(traj: Trajectory) -> dict[str, Any]:
         "n_claims": len(claims),
         "n_violations": len(violations),
         "n_contradicted": n_contradicted,
+        "answer_incomplete": answer_incomplete,
         "trace_verdict": "BLOCK" if violations else "PASS",
         "block_detail": block_detail,
         "status": "done",

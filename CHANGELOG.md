@@ -9,7 +9,131 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ## [Unreleased]
 
+### Added (2026-06-17 — two observable signals recover a slice of "intent-local")
+
+- **Agent-loop guard (trace channel) + answer-completeness check (answer channel).** Control-group
+  analysis of the captured tau2 matrix found ~22% of failures labelled `intent-local` are in fact
+  observable and were mislabelled by the rule-based annotator:
+  - `verifier/tau_bench_verifiers.detect_agent_loops`: a tool call re-issued with identical
+    arguments (>= 2x) is a stuck/looping process — a `TraceViolation` (rule `agent_loop`), now
+    folded into `verify_trace` for both domains. Validated precision ~80%, false-alarm ~2.6%.
+    Reclassifies these failures to their true `trace-local` locus.
+  - `verifier/answer_completeness.detect_incomplete_answer`: the answer terminates on an unanswered
+    substantive question (excluding polite closers) — the agent never executed the action and says
+    so. Validated precision ~90%, false-alarm ~0.7%. New `answer-local` assignment in
+    `annotate_locus` (priority: pass > trace-local > state-local > answer-local > intent-local).
+  - Channel placement: loop → V_structural (trace); completeness → BOTH configs (it is a pure
+    answer-channel signal, so it belongs to the V_answer baseline — this lifts V_answer off its
+    structural RDR=0 floor and makes the V_structural-over-V_answer lift attributable purely to
+    state + trace). `monitor_pass` threads completeness through `_compute_verdict`/`annotate_locus`
+    for both configs; new row fields `answer_incomplete`, `n_agent_loops`.
+
+- **State-channel framing fix (retail status verifier).** A claim whose status word is capability/
+  negation/modal framed ("Order X **cannot** be cancelled", "can no longer be modified") is not a
+  current-state assertion; the old `_check_state_retail` matched the bare word "cancelled" and
+  flagged it as a false `status=cancelled` claim. Added `_is_nonstate_status_framing` (Route 2 →
+  `unverifiable`), mirroring the airline verifier's positive/negated/ambiguous routing. ~73% of
+  retail state-channel false alarms were this misparse. Trade is a genuine soundness-for-coverage
+  one (the removed detections were "right verdict, wrong reason"): pooled V_structural RDR 34→30%,
+  false-alarm 13→8%; `state-local` π drops sharply (it was bug-inflated), so the V_structural lift
+  is now driven mainly by the trace channel (policy + loop).
+
+- **Detector-classifier metrics in `analyze.py` (RQ2 honesty).** Per config: `precision` (+ bootstrap
+  CI), `f1`, `mcc`, and the raw `confusion` matrix, alongside the existing RDR/FalseAlarmRate. MCC is
+  the recommended cross-model axis (the four agents have different failure base rates). New
+  **Figure 9** (`figure9_rq2_detector_quality.png`): RDR / Precision / FalseAlarm / MCC, V_answer vs
+  V_structural, per model. Definitions added to `docs/formal_definitions.md` §2.3a.
+
+- **`eval/reannotate_signals.py`**: overlays all three corrections (loop, completeness, state-framing)
+  on existing monitor shards WITHOUT re-running the claim extractor — the signals are pure functions
+  of `tool_trace` / `answer_text` / the recorded `block_detail`, already captured in Phase 2. Output
+  dir is re-run through `eval.analyze` for updated metrics. (A full monitor re-run will bake the
+  state-framing fix into the extractor path once the design is frozen.)
+
+- **Final per-model metrics (monitor_v2, all three corrections):** V_answer RDR 4–20% / precision
+  87–96%; V_structural RDR 30–40% (mean 30%) / false-alarm 5–13% (mean 8%) / precision 66–79%;
+  ΔRDR positive on all four models (+8 to +27, McNemar p≈0); corrected π_intent ≈ 60–88%.
+
+### Changed (2026-06-16 — banking_knowledge retired; evidence-local locus removed)
+
+- **Formal experiment scope narrowed to retail + airline (165 tasks/repeat).** Following a 45-trajectory
+  smoke test, `banking_knowledge` was found structurally incompatible with the monitor's observable
+  channels: tau2-bench evaluates banking tasks via tool-call optimality (`communicate_info=[]` for all
+  97 tasks), so no factual-accuracy ground truth is reachable by the monitor. 85% of banking failures
+  were intent-local (agent chose wrong action but reported it honestly). Domain is retired from the
+  formal experiment and documented in `docs/thesis_scope.md §6.2` (Future Work: action-centric domains
+  and the intent-local boundary). Total trajectories in full run: 4 models × 165 tasks × 10 repeats = 6,600.
+
+- **Evidence-local locus removed from formal taxonomy.** No KB exists in retail/airline; without
+  banking_knowledge there is zero evidence detection surface. Locus priority simplified to:
+  pass > trace-local > state-local > intent-local.
+
+- **Code cleanup — banking and evidence-local deleted from all pipeline files:**
+  - `src/reliableguard/locus.py`: removed `evidence-local` from `Locus` Literal, removed
+    `_EVIDENCE_SOURCES`, removed evidence-local check in `annotate_locus`, removed from
+    `locus_is_monitor_detectable`.
+  - `src/reliableguard/verifier/tau_bench_verifiers.py`: removed `_verify_trace_banking`,
+    `_check_state_banking`, `banking_knowledge_verifier`, all `_BANKING_*` constants, BM25
+    retrieval, LLM judge; removed banking dispatch from `verify_trace`; removed
+    `source_verifier._VERIFIERS["banking_knowledge"]` registration.
+  - `eval/capture_tau2.py`: removed `_get_kb_dir`, `_load_documents`, `_slice_state_banking`,
+    `is_banking` branches, `retrieval_variant` parameter, `evidence` field from Trajectory return.
+  - `eval/run_capture_tau2.py`: removed `banking_knowledge` from CLI choices and default; removed
+    `BANKING_TASKS`; removed `--retrieval-variant` flag.
+  - `eval/monitor_pass.py`: removed `CHANNELS_EVIDENCE` import; removed banking_knowledge
+    V_evidence branch in `_process_trajectory`.
+
+- **Docs updated:** `docs/tau_bench_experiment_design.md`, `docs/architecture.md`,
+  `docs/thesis_scope.md` — removed V_evidence config, banking verifier sections, evidence-local
+  locus; updated domain scope, task counts, budget table, locus taxonomy table, Future Work.
+
 ### Added
+
+- **Banking trace + state verifiers (2026-06-16): full multi-channel support for banking_knowledge domain.**
+
+  *Trace verifier (`_verify_trace_banking`):* Three rules encoded as `TraceViolation` objects.
+  `user_info_before_log_verification` — `log_verification` (identity confirmation) must be preceded
+  by a `get_user_information_*` call (agent cannot confirm 2-of-4 identity fields it has not retrieved).
+  `auth_before_write` — `call_discoverable_agent_tool` and other write tools must not be invoked before
+  `log_verification`. `unlock_before_call` — `call_discoverable_agent_tool` requires a prior
+  `unlock_discoverable_agent_tool` for the same `agent_tool_name`. Added `domain="banking_knowledge"`
+  routing branch in `verify_trace()`.
+
+  *State verifier (`_check_state_banking`):* Checks verification/identity claims against
+  `state_after.verification_history`; returns `supported` if new entries appeared since `state_before`,
+  `unverifiable` for balance/amount claims (no resolvable account IDs in claim text).
+  Source tag `"tau_bench_state"` prevents evidence-merge from overwriting state results.
+
+  *Verifier routing update (`banking_knowledge_verifier`):* Dual-channel with priority. State channel
+  (0 tokens, deterministic) runs first; evidence channel (BM25 + LLM judge) runs in parallel when
+  evidence is available. Routing: prefer non-unverifiable state result; fall back to evidence result.
+
+  *Bug fix in task ID generation (`eval/run_capture_tau2.py`):* Retail and airline use plain integer
+  task IDs (`"0"`, `"1"`, …) while banking_knowledge uses `"task_001"` format. Fixed `RETAIL_TASKS`
+  and `AIRLINE_TASKS` constants (were incorrectly using the `task_NNN` format).
+
+- **Smoke test — 45 trajectories (15 × 3 domains) with qwen3.6-flash (2026-06-16).** Results:
+  agent pass rates: retail 47%, airline 67%, banking 13% (overall 42%). V_structural correctly blocked
+  4/4 observable failures (100% conditioned detection rate, 0% false alarm rate): 1 retail state-local
+  (order status misrepresentation), 1 airline trace-local (basic_economy flight modification violation),
+  2 banking evidence-local (policy number errors: 9-day vs 7-day rolling window; $100 vs $75 referral
+  bonus). 85% of failures were intent-local (agent chose wrong action, not a verifiable factual error).
+  V_answer never blocked any task (all PASS_UNCHECKED or AUDIT_FAILED), confirming the answer-only
+  baseline cannot catch these categories of failure.
+
+### Fixed
+
+- **Airline state verifier false positives — 3-route cancellation logic (2026-06-16).** The original
+  verifier triggered on any text containing "cancel" and always returned `contradicted` when the
+  reservation was not in `status="cancelled"` state. This produced 2–3 false alarms per monitor run:
+  (a) claims asserting "not cancelled" were labeled "claimed cancelled"; (b) eligibility claims
+  ("cannot be cancelled through the automated system") were treated as cancellation assertions;
+  (c) `attribute="refund_processing_time", value="5-7 business days"` matched "business" as a
+  cabin-class claim via the text-matching fallback. Replaced with three-route logic:
+  positive cancellation assertion (→ state check), explicit non-cancellation assertion (→ inverse
+  check), anything else (eligibility, transfer, ambiguous) → `unverifiable`. Cabin check now requires
+  `attribute` to be in an explicit whitelist (`cabin`, `cabin_class`, `class`, `seat_class`, etc.)
+  rather than matching the cabin keyword anywhere in free text.
 
 - **tau2-bench migration decision (2026-06-16): upgrade to tau2-bench for all three core domains.**
   Following a systematic bug audit of the original `sierra-research/tau-bench` tasks, we decided to
@@ -28,17 +152,27 @@ and include CHANGELOG.md in the same commit as the code changes.
   — it is the only domain with evidence-local failures (agent gives wrong policy information from KB
   documents). Total: **retail 115 + airline 50 + banking_knowledge 97 = 262 tasks / repeat**.
 
-  *Planned files (implementation pending):*
-  - `eval/capture_tau2.py` — new capture driver using `tau2.runner` API (replaces `capture.py`)
-  - `eval/run_capture_tau2.py` — CLI wrapper
-  - `src/reliableguard/verifier/tau_bench_verifiers.py` — `banking_knowledge_verifier` (BM25 retrieve + LLM judge)
-  - `src/reliableguard/locus.py` — evidence-local detection branch
-  - `eval/monitor_pass.py` — evidence channel activation for banking_knowledge
+  *Implemented (2026-06-16):*
+  - `eval/capture_tau2.py` — new capture driver using `tau2.runner` API; supports retail +
+    airline + banking_knowledge; `state_before` from `env.tools.db` snapshot before `run_simulation`;
+    `state_after` from `env.tools.db` snapshot after; tool trace from `AssistantMessage.tool_calls`
+    in `sim.messages` (requestor="assistant" only); evidence from task.required_documents → KB lookup.
+    Model strings auto-prefixed with `openrouter/` for litellm routing.
+  - `eval/run_capture_tau2.py` — CLI wrapper; `--retrieval-variant bm25` for offline smoke tests.
+  - `src/reliableguard/verifier/tau_bench_verifiers.py` — `banking_knowledge_verifier` (pure-Python
+    BM25 keyword retrieval + minimax-m3 LLM judge via OpenRouter; registered as
+    `_VERIFIERS["banking_knowledge"]`).
+  - `src/reliableguard/schema.py` — `Grounding.evidence: list[dict]|None` (typed, was `Any|None`).
+  - `src/reliableguard/adapter.py` — `Trajectory.evidence: list[dict]|None` field; `grounding()`
+    propagates evidence into `Grounding`.
+  - `src/reliableguard/locus.py` — evidence-local detection branch: after state-local check,
+    `r.evidence_state=="contradicted" and r.source=="banking_kb"` → `"evidence-local"`.
+  - `eval/monitor_pass.py` — for banking_knowledge domain with evidence, runs V_evidence channel
+    (CHANNELS_STRUCTURAL + evidence=True), layers evidence results over structural_results so
+    annotate_locus can assign evidence-local.
 
-  Key API difference from old tau_bench: tau2 uses `build_environment` + `build_orchestrator` +
-  `run_simulation`; `state_before` comes from `task.initial_state`; `state_after` from
-  `env.db.model_dump()` after sim; tool trace from `AssistantMessage.tool_calls` in `sim.messages`.
-  Both packages coexist in the same venv (different names: `tau_bench` vs `tau2`).
+  Smoke test confirmed: 1 banking_knowledge task captured (task_026, 11 tool-call steps, 8 KB docs,
+  JSONL with tool_trace + evidence); monitor pass ran (17 claims, 0 violations, locus=intent-local).
 
 ### Fixed
 

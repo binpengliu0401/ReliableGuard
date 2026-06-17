@@ -33,7 +33,7 @@ from typing import Any
 # Constants
 # ---------------------------------------------------------------------------
 
-LOCI = ("answer-local", "trace-local", "state-local", "intent-local", "evidence-local")
+LOCI = ("answer-local", "trace-local", "state-local", "intent-local")
 CONFIGS = ("v_answer", "v_structural")
 K_DEFAULT = 10
 CDR_KAPPAS = (5, 7, 9)
@@ -102,6 +102,32 @@ def _bootstrap_mean_ci(
     alpha = (1.0 - confidence) / 2.0
     lo = means[max(0, int(alpha * b))]
     hi = means[min(b - 1, int((1.0 - alpha) * b) - 1)]
+    return (lo, hi)
+
+
+def _bootstrap_precision_ci(
+    failed_rows: list[dict],
+    passed_rows: list[dict],
+    vkey: str,
+    b: int = BOOTSTRAP_B,
+    seed: int = BOOTSTRAP_SEED,
+    confidence: float = 0.95,
+) -> tuple[float, float]:
+    """95% bootstrap CI for precision = TP / (TP + FP). Resamples the failed (positive) and passed
+    (negative) pools independently, since precision mixes detections from both classes."""
+    if not failed_rows and not passed_rows:
+        return (float("nan"), float("nan"))
+    rng = random.Random(seed)
+    nf, nps = len(failed_rows), len(passed_rows)
+    precs = []
+    for _ in range(b):
+        tp = sum(1 for r in (rng.choices(failed_rows, k=nf) if nf else []) if not _is_pass(r.get(vkey)))
+        fp = sum(1 for r in (rng.choices(passed_rows, k=nps) if nps else []) if not _is_pass(r.get(vkey)))
+        precs.append(tp / (tp + fp) if (tp + fp) else 0.0)
+    precs.sort()
+    alpha = (1.0 - confidence) / 2.0
+    lo = precs[max(0, int(alpha * b))]
+    hi = precs[min(b - 1, int((1.0 - alpha) * b) - 1)]
     return (lo, hi)
 
 
@@ -269,6 +295,20 @@ def compute_model_metrics(rows: list[dict], model: str, k: int = K_DEFAULT) -> d
         false_alarm_rate = sum(fa_flags) / n_pass if n_pass else 0.0
         far_ci = _bootstrap_mean_ci(fa_flags)
 
+        # Detector view: treat reward=0 as the positive class and a non-PASS verdict as a detection.
+        # Precision / F1 / MCC make the recall-vs-false-alarm trade legible in a single number and
+        # are robust to the differing failure base rates across the four models (MCC especially).
+        tp = int(sum(detect_flags))
+        fn = n_fail - tp
+        fp = int(sum(fa_flags))
+        tn = n_pass - fp
+        precision = tp / (tp + fp) if (tp + fp) else 0.0
+        recall = rdr
+        f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
+        mcc_denom = math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+        mcc = ((tp * tn - fp * fn) / mcc_denom) if mcc_denom > 0 else 0.0
+        prec_ci = _bootstrap_precision_ci(failed, passed, vkey)
+
         # Per-locus detection
         locus_det = _locus_detection(failed, vkey)
 
@@ -294,6 +334,12 @@ def compute_model_metrics(rows: list[dict], model: str, k: int = K_DEFAULT) -> d
             "false_alarm_rate": round(false_alarm_rate, 4),
             "false_alarm_rate_ci_lo": round(far_ci[0], 4),
             "false_alarm_rate_ci_hi": round(far_ci[1], 4),
+            "precision": round(precision, 4),
+            "precision_ci_lo": round(prec_ci[0], 4),
+            "precision_ci_hi": round(prec_ci[1], 4),
+            "f1": round(f1, 4),
+            "mcc": round(mcc, 4),
+            "confusion": {"tp": tp, "fp": fp, "tn": tn, "fn": fn},
             "locus_detection": locus_det,
             "cdr": {str(kappa): round(v, 4) for kappa, v in cdr.items()},
             "per_repeat_rdr": [round(x, 4) if not math.isnan(x) else None for x in repeat_rdrs],
@@ -363,6 +409,9 @@ def print_report(all_metrics: list[dict]) -> None:
             print(f"    FAR  = {c['far']:.4f}")
             print(f"    FalseAlarmRate = {c['false_alarm_rate']:.4f}  "
                   f"CI=[{c['false_alarm_rate_ci_lo']:.4f}, {c['false_alarm_rate_ci_hi']:.4f}]")
+            print(f"    Precision = {c['precision']:.4f}  "
+                  f"CI=[{c['precision_ci_lo']:.4f}, {c['precision_ci_hi']:.4f}]  "
+                  f"F1 = {c['f1']:.4f}  MCC = {c['mcc']:.4f}")
             cdr = c["cdr"]
             print(f"    CDR_5={cdr.get('5', 0):.4f}  CDR_7={cdr.get('7', 0):.4f}  "
                   f"CDR_9={cdr.get('9', 0):.4f}")
@@ -569,6 +618,39 @@ def make_figures(all_metrics: list[dict], figures_dir: Path) -> None:
     fig.savefig(out, dpi=150)
     plt.close(fig)
     print(f"  Figure 8 → {out}")
+
+    # -------------------------------------------------------------------
+    # Figure 9 — Detector quality: RDR / Precision / FalseAlarm / MCC (RQ2)
+    # V_answer vs V_structural per model. Makes the recall-vs-false-alarm
+    # trade legible (RDR alone hides the cost of the extra detections).
+    # -------------------------------------------------------------------
+    panels = [
+        ("rdr", "RDR (recall)", False),
+        ("precision", "Precision", False),
+        ("false_alarm_rate", "False-alarm rate", True),
+        ("mcc", "MCC", False),
+    ]
+    fig, axes = plt.subplots(1, 4, figsize=(17, 4.6))
+    x9 = np.arange(n_models)
+    bw = 0.38
+    for ax9, (key, title, lower_better) in zip(axes, panels):
+        ans = [m["v_answer"][key] for m in all_metrics]
+        str_ = [m["v_structural"][key] for m in all_metrics]
+        ax9.bar(x9 - bw / 2, ans, bw, label="$V_{answer}$", color="#74add1", alpha=0.9)
+        ax9.bar(x9 + bw / 2, str_, bw, label="$V_{structural}$", color="#2166ac", alpha=0.9)
+        ax9.set_xticks(x9)
+        ax9.set_xticklabels(short_names, fontsize=8, rotation=20)
+        ax9.set_title(title + ("  (lower better)" if lower_better else ""), fontsize=11)
+        ax9.grid(axis="y", alpha=0.3)
+        top = max(ans + str_ + [0.01])
+        ax9.set_ylim(0, max(0.3, top * 1.2) if key == "mcc" else 1.05 if key != "mcc" else top * 1.2)
+    axes[0].legend(fontsize=9)
+    fig.suptitle("Figure 9 — Detector Quality: $V_{answer}$ vs $V_{structural}$ (RQ2)", fontsize=13)
+    fig.tight_layout()
+    out = figures_dir / "figure9_rq2_detector_quality.png"
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    print(f"  Figure 9 → {out}")
 
 
 # ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-"""tau-bench domain verifiers, registered into `source_verifier._VERIFIERS`.
+"""tau-bench domain verifiers (retail + airline) registered into `source_verifier._VERIFIERS`.
 
 Each domain verifier is channel-gated by `context.channels`: it consults a channel only when that
 flag is on, so the SAME claims + grounding yield V_answer / V_structural verdicts. This module adds
@@ -15,10 +15,15 @@ Status checks respect the wiki.md order lifecycle so a true *historical* stateme
 A claim of an earlier milestone than the current status (e.g. "delivered" when now "exchange
 requested") is SUPPORTED (the milestone was reached); a claim of a later/incompatible status is
 CONTRADICTED (the claimed effect was not realized).
+
+Scope: retail + airline. Banking_knowledge is out of scope for the formal experiment and documented
+in the thesis as Future Work (action-centric domain; monitor cannot reach correctness without oracle
+access to goal/intent).
 """
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
 
@@ -93,6 +98,31 @@ def _claimed_status(claim: Claim) -> str | None:
     return None
 
 
+# Route 2 (capability / negated / modal framing): a status word in the claim text does NOT assert
+# the order's *current* status when it is framed as a capability, permission, conditional, or
+# negation -- e.g. "cannot be cancelled", "can no longer be modified", "this order can be returned",
+# "eligible to cancel". These are statements about what is *possible/permitted*, not about the
+# realized state, so the status-equality check does not apply and would manufacture false alarms
+# (validated: ~70% of retail state-channel false alarms are these). Mirrors the airline verifier's
+# positive/negated/ambiguous routing. Such claims route to `unverifiable` rather than `contradicted`.
+_NONSTATE_STATUS_FRAMING = re.compile(
+    r"\b("
+    r"cannot|can\s?not|can't|could\s+not|couldn't|can\s+no\s+longer|no\s+longer|"
+    r"won't|will\s+not|would\s+not|not\s+be|unable|not\s+eligible|ineligible|"
+    r"not\s+possible|not\s+allowed|can\s+be|could\s+be|may\s+be|can\s+only|able\s+to|"
+    r"eligible\s+to|eligible\s+for|to\s+be\s+(cancel|modif|return|exchang)|"
+    r"if\s+you|would\s+you|you\s+can|you\s+may"
+    r")\b",
+    re.I,
+)
+
+
+def _is_nonstate_status_framing(text: str) -> bool:
+    """True if the status word is framed as capability/permission/conditional/negation (Route 2),
+    so it is not a current-state assertion and must not be status-equality checked."""
+    return bool(_NONSTATE_STATUS_FRAMING.search(text or ""))
+
+
 def _claimed_amount(claim: Claim) -> float | None:
     if isinstance(claim.value, (int, float)):
         return float(claim.value)
@@ -161,6 +191,15 @@ def _check_state_retail(
     # Status claim: compare against the actual status, respecting the lifecycle.
     claimed = _claimed_status(claim)
     if claimed is not None and (attribute in {"status", "order_status"} or claimed in text):
+        # Route 2: capability/negated/modal framing ("cannot be cancelled") is not a current-state
+        # assertion -> unverifiable, not contradicted. Skip only when the status came from the text
+        # (a clean structured value=<status> with attribute=status is a direct assertion we trust).
+        structured = _norm_status(str(claim.value or "")) in _REACHABLE and attribute in {"status", "order_status"}
+        if not structured and _is_nonstate_status_framing(text):
+            return _result(
+                claim, "unverifiable",
+                reason=f"status word framed as capability/negation, not a current-state assertion ({order_id})",
+            )
         actual = _norm_status(str(order.get("status", "")))
         state = _status_relation(claimed, actual)
         reason = (
@@ -377,22 +416,65 @@ def _check_state_airline(
     attribute = (claim.attribute or "").lower()
 
     if reservation is None:
-        if "cancel" in text or attribute in {"status", "cancelled"}:
+        if "cancel" in text or attribute in {"cancelled", "cancellation_status"}:
             return _result(claim, "supported", value="absent",
                            reason=f"{rid} absent from state_after (cancelled)")
         return _result(claim, "not_found", reason=f"reservation {rid} absent from state_after")
 
-    # Cancellation claim on a present reservation: must have status="cancelled".
-    if "cancel" in text or attribute in {"status", "cancelled"}:
-        actual_status = reservation.get("status", "active")
-        if actual_status == "cancelled":
-            return _result(claim, "supported", value="cancelled", reason=f"{rid} is cancelled")
-        return _result(claim, "contradicted", value=actual_status,
-                       reason=f"claimed cancelled but {rid} status={actual_status!r}")
+    # Cancellation-related claim on a present reservation.
+    # Three-way routing: positive assertion / negative assertion / anything else → unverifiable.
+    claim_value_lower = str(claim.value or "").lower()
+    is_cancellation_claim = (
+        "cancel" in text
+        or attribute in {"cancelled", "cancellation_status"}
+        or claim_value_lower in {"cancelled", "canceled"}
+    )
+    if is_cancellation_claim:
+        # In tau2 airline, active reservations have status=None (not "active").
+        actual_status = reservation.get("status")
+        is_cancelled = actual_status == "cancelled"
 
-    # Cabin claim.
+        # Route 1 — claim positively asserts reservation IS now cancelled.
+        positively_cancelled = (
+            claim_value_lower in {"cancelled", "canceled"}
+            or any(p in text for p in ("has been cancelled", "was cancelled", " is cancelled",
+                                       "have been cancelled", "successfully cancelled",
+                                       "has been canceled", "was canceled", "have been canceled"))
+        )
+        if positively_cancelled:
+            if is_cancelled:
+                return _result(claim, "supported", value="cancelled", reason=f"{rid} is cancelled")
+            return _result(claim, "contradicted", value=actual_status,
+                           reason=f"claimed cancelled but {rid} status={actual_status!r}")
+
+        # Route 2 — claim explicitly asserts reservation is NOT cancelled.
+        _NOT_CANCEL_VALUES = {
+            "not_cancelled", "not_canceled", "not cancelled", "not canceled", "active",
+        }
+        negated = (
+            claim_value_lower in _NOT_CANCEL_VALUES
+            or any(p in text for p in ("has not been cancelled", "has not been canceled",
+                                       "not been cancelled", "not been canceled",
+                                       "not cancelled", "not canceled",
+                                       "remain active", "still active", "remains active"))
+        )
+        if negated:
+            if not is_cancelled:
+                return _result(claim, "supported", value="active",
+                               reason=f"{rid} is active (not cancelled)")
+            return _result(claim, "contradicted", value="cancelled",
+                           reason=f"claimed not cancelled but {rid} is actually cancelled")
+
+        # Route 3 — eligibility, transfer, ambiguous status: can't determine from state alone.
+        return _result(claim, "unverifiable",
+                       reason=f"cancellation-related claim for {rid} is about eligibility or "
+                               "outcome transfer, not a checkable current-state assertion")
+
+    # Cabin claim — require an explicit cabin-related attribute to avoid matching "business days".
+    _CABIN_ATTRIBUTES = {"cabin", "cabin_class", "class", "seat_class", "booking_class",
+                         "travel_class", "fare_class", "fare_type"}
     claimed = _claimed_cabin(claim)
-    if claimed is not None and (attribute in {"cabin", "cabin_class"} or claimed in text):
+    if claimed is not None and attribute in _CABIN_ATTRIBUTES:
         actual = _norm_cabin(str(reservation.get("cabin", "")))
         # "economy" is colloquially used by agents for "basic_economy" reservations; not a factual
         # error — the reservation is still an economy-class product.
@@ -528,9 +610,45 @@ def _verify_trace_airline(context: VerificationContext) -> list[TraceViolation]:
     return violations
 
 
+# Domain-agnostic loop guard: an agent that re-issues the SAME tool call (identical name + kwargs)
+# is stuck/looping -- a process pathology observable purely from `tool_trace`, independent of any
+# domain policy. Threshold = 2 (a single exact repeat already signals the agent made no progress).
+# Validated on the captured tau2 matrix (2026-06-17): a >=2 identical-call repeat separates
+# intent-local failures from passes at ~80% precision, 2.6% false-alarm rate. Lifts a slice the
+# rule-based annotator mislabels `intent-local` back to its true `trace-local` locus.
+_LOOP_THRESHOLD = 2
+
+
+def detect_agent_loops(trace: list[dict[str, Any]]) -> list[TraceViolation]:
+    """Return one TraceViolation per tool call repeated (identical name + kwargs) >= threshold.
+
+    Pure function of the observable trace; no policy, no state, no oracle. Flags each looping call
+    once, at the step where it first reaches the threshold.
+    """
+    seen: dict[tuple[str, str], int] = {}
+    flagged: set[tuple[str, str]] = set()
+    violations: list[TraceViolation] = []
+    for step, action in enumerate(trace or []):
+        name = action.get("name", "")
+        key = (name, json.dumps(action.get("kwargs", {}) or {}, sort_keys=True))
+        seen[key] = seen.get(key, 0) + 1
+        if seen[key] >= _LOOP_THRESHOLD and key not in flagged:
+            flagged.add(key)
+            violations.append(TraceViolation(
+                rule="agent_loop", action=name, step=step,
+                order_id=_norm_order_id((action.get("kwargs") or {}).get("order_id")),
+                reason=(
+                    f"{name} re-issued with identical arguments "
+                    f"(>= {_LOOP_THRESHOLD}x); agent stuck/looping, no progress"
+                ),
+            ))
+    return violations
+
+
 def verify_trace(context: VerificationContext, *, domain: str = "retail") -> list[TraceViolation]:
-    """Trajectory-level trace audit: return the `wiki.md` policy violations in `tool_trace`. Reads
-    only the observable trace and `state_before` (never gold actions / reward). Empty list = clean.
+    """Trajectory-level trace audit: return the `wiki.md` policy violations in `tool_trace`, plus
+    the domain-agnostic agent-loop guard. Reads only the observable trace and `state_before` (never
+    gold actions / reward). Empty list = clean.
 
     Gated on `context.channels.trace`; status-precondition checks additionally require
     `state_before` (present in the V_structural preset, which turns state + trace on together).
@@ -539,8 +657,10 @@ def verify_trace(context: VerificationContext, *, domain: str = "retail") -> lis
     if not context.channels.trace or context.grounding is None:
         return []
     if domain == "airline":
-        return _verify_trace_airline(context)
-    return _verify_trace_retail(context)
+        violations = _verify_trace_airline(context)
+    else:
+        violations = _verify_trace_retail(context)
+    return violations + detect_agent_loops(context.grounding.tool_trace or [])
 
 
 def trace_verdict(violations: list[TraceViolation]) -> str:

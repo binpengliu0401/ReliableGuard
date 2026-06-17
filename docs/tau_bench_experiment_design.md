@@ -23,15 +23,19 @@ free order creation** (operates on pre-existing orders) — so custom adversaria
 illustrative demo, never as headline evidence.
 
 **Benchmark source (2026-06-16 decision): tau2-bench (τ³-bench) replaces the original tau-bench.**
-A systematic bug audit found that 27/50 airline tasks (54%) and 26/115 retail tasks (23%) in the
+A systematic bug audit found that 27/50 airline tasks (54%) and 26/114 retail tasks (23%) in the
 original `sierra-research/tau-bench` had incorrect gold expected actions, impossible constraints,
 ambiguous user instructions, or policy-loophole tasks scored as failures despite correct agent
 behaviour. Running our monitor on these tasks produces misleading RDR numbers. We adopt
-`sierra-research/tau2-bench` (v1.0.0), which ships fixed retail + airline tasks and adds the
-`banking_knowledge` domain. The capture driver moves from the `tau_bench` package API to the `tau2`
-package API (different runner architecture; see architecture.md). **`banking_knowledge` is promoted
-from stretch to core** (97 tasks, 698 policy/procedure documents) — it is the only domain with
-evidence-local failures (agent gives wrong KB-policy information), closing the locus coverage gap.
+`sierra-research/tau2-bench` (v1.0.0), which ships fixed retail + airline tasks. The capture driver
+moves from the `tau_bench` package API to the `tau2` package API (different runner architecture; see
+architecture.md). **Formal experiment scope: retail + airline.** `banking_knowledge` (tau2) was
+explored in a smoke test (45 trajectories) and found structurally incompatible with the monitor's
+observable channels: tau2-bench evaluates banking tasks via tool-call optimality
+(reward_basis="DB"/"ACTION"), `communicate_info=[]` for all 97 tasks — the monitor cannot verify
+factual correctness because the benchmark does not evaluate it. Banking is documented in the thesis
+as Future Work (action-centric domains; see thesis_scope.md §6.2). Evidence-local locus is therefore
+removed from the formal taxonomy (no KB in retail/airline; no evidence detection surface).
 
 ## Non-circularity (the spine's defense)
 
@@ -42,18 +46,35 @@ exactly those where observable consistency ≠ goal (intent-local) — this is R
 
 ---
 
-## The three monitor configurations (what we compare)
+## The two monitor configurations (what we compare)
 
 All are black-box, monitor-only; they share ONE claim extraction per trajectory (fixed extractor
 model) and differ only in which observation channel the verifier uses (this intra-run reuse is not
 the rejected freeze-as-evidence; it just avoids re-extracting):
 
-- **V_answer** (baseline, RQ1): verify claims using the answer + conversation only (answer-local).
+- **V_answer** (baseline, RQ1): verify claims using the answer + conversation only (answer-local),
+  PLUS the answer-completeness check (the answer terminates on an unanswered substantive question =>
+  non-completion; `verifier/answer_completeness.detect_incomplete_answer`). Completeness is a pure
+  answer-text signal, so it belongs to the answer-only baseline (and lifts V_answer off the
+  structural RDR≈0 floor seen in execution-grounded domains).
 - **V_structural** (RQ2): V_answer + state channel (claims vs `env.data` after) + trace channel
-  (`env.actions` vs `wiki.md` policy/preconditions) + post-state-change assertion (tool reported
-  success but state unchanged).
-- **V_evidence** (RQ2 extension, banking_knowledge only): V_answer + re-retrieve from the KB and
-  check claims against retrieved documents (evidence-local, source-available case).
+  (`env.actions` vs `wiki.md` policy/preconditions, PLUS the domain-agnostic agent-loop guard:
+  a tool call re-issued with identical kwargs >= 2x => `agent_loop` violation) + post-state-change
+  assertion (tool reported success but state unchanged). Because completeness is in BOTH configs, the
+  V_structural-over-V_answer lift (ΔRDR, RQ2) is attributable purely to the state + trace channels.
+
+V_evidence (evidence channel via KB re-retrieval) was designed for banking_knowledge but is
+removed from the formal experiment along with that domain. See thesis_scope.md §6.2.
+
+**Three control-group-validated corrections (2026-06-17), all deterministic over captured artifacts:**
+(1) **agent-loop guard** — repeated-identical tool call (trace channel; threshold = 2, chosen by F1/MCC
+across the 4 models); (2) **answer-completeness** — terminal substantive question excluding polite
+closers (answer channel, fed to both configs); (3) **retail state-framing fix** — a status word framed
+as capability/negation ("cannot be cancelled", "can no longer be modified") is NOT a current-state
+assertion and routes to `unverifiable` (`_is_nonstate_status_framing`, Route 2; mirrors the airline
+verifier). The state fix removed ~73% of retail state-channel false alarms (it was a misparse, not a
+boundary); state-local is consequently minor (~2% of failures) and the V_structural lift is now driven
+mainly by the trace channel (policy + loop).
 
 **Answer-local input (channel hygiene, decided Phase 1).** The text fed to the extractor for the
 answer-local channel is the **concatenation of all the agent's natural-language `respond` turns**
@@ -81,7 +102,10 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
   show the monitor's residual *coincides* with this independently-tagged class. (Defining
   intent-local as the residual and then concluding the monitor misses intent-local would be
   circular; the RQ3 boundary claim requires the independent tag.)
-- **evidence-local**: claim unsupported by the KB documents (banking_knowledge).
+
+Note: **evidence-local** (claim unsupported by KB documents) is removed from the formal taxonomy.
+No KB exists in retail/airline (zero evidence detection surface without banking_knowledge, which
+is out of scope). The locus priority is: pass > trace-local > state-local > intent-local.
 
 ---
 
@@ -106,15 +130,22 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 ## RQ → experiment mapping
 
 - **RQ1** (answer-only ceiling): V_answer detection / precision / FAR on τ-bench, broken out by
-  locus; expectation = catches answer-local, near-blind on trace/state/intent. Ceiling argument:
-  a small extraction-quality spot-check (precision on a sample of trajectories) shows the blind spot
-  is a channel limit, not extraction failure.
+  locus; expectation = catches answer-local (incl. completeness — high precision 87–96%, RDR ~12%
+  pooled), near-blind on trace/state/intent. Ceiling argument: a small extraction-quality spot-check
+  (precision on a sample of trajectories) shows the blind spot is a channel limit, not extraction
+  failure. Result (monitor_v2): V_answer is high-precision but structurally capped — it cannot reach
+  trace/state failures.
 - **RQ2** (trace/state recovery + robustness): V_structural vs V_answer detection lift by locus,
-  FAR unchanged; significance by McNemar; **robustness across the 4 models** (box chart); evidence
-  channel (banking_knowledge) extends the recovery to source-available evidence-local.
-- **RQ3** (boundary): the residual reward-0 tasks V_structural still misses ≈ intent-local (+ any
-  source-unavailable evidence-local); show the monitor saturates and the gap to the τ-bench oracle
-  reward is exactly the intent-local class (truth not in any observable artifact).
+  FalseAlarmRate; significance by McNemar; **robustness across the 4 models** (box chart + MCC).
+  Reported with the detector-classifier metrics (Precision / F1 / MCC, §2.3a) so the recall gain is
+  not read in isolation from its false-alarm cost. Result (monitor_v2): V_structural RDR ~30% /
+  false-alarm ~8% / precision 66–79%; **ΔRDR positive on all 4 models (+8 … +27, McNemar p≈0)** —
+  sign-consistent generality (4 points carry generality, not significance).
+- **RQ3** (boundary): the residual reward-0 tasks V_structural still misses ≈ intent-local; show the
+  monitor saturates and the gap to the τ-bench oracle reward is exactly the intent-local class
+  (truth not in any observable artifact). Corrected π_ℓ (monitor_v2): answer ~6% / trace ~20% /
+  state ~2% / intent ~60–88%. The intent-local residual is characterized (right action on the wrong
+  object, plus ambiguous queries) to support the irreducibility claim non-circularly.
 
 ---
 
@@ -132,11 +163,9 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
 4. Confirm capture: `env.actions`, `env.data` (initial via `data_load_func()`, final snapshot
    **before** `calculate_reward()` since it reloads `env.data` to ground truth), `reward`, native
    fault type.
-5. **Domain scope decision (updated 2026-06-16):** core = retail + airline + **banking_knowledge**
-   (all three via tau2-bench); telecom excluded (2285 tasks — too large for this project's scope).
-   Banking_knowledge is promoted to core because it is the only domain providing evidence-local
-   failures (agent gives wrong KB-policy information), which is necessary for full locus coverage.
-   Evidence-local was previously a gap in the locus taxonomy; this decision closes it.
+5. **Domain scope decision:** core = **retail (114 tasks) + airline (50 tasks)** via tau2-bench;
+   telecom excluded (2285 tasks — scope too large); banking_knowledge excluded (action-centric
+   domain structurally incompatible with the monitor's observable channels — see thesis Future Work).
    Deliverable: feasibility note + locked model IDs + domain/task scope + time estimate.
 
 ### Phase 1 — Repo refactor
@@ -171,56 +200,67 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
     cancel; returns/exchanges only on delivered; etc.); plus the post-state-change assertion.
     DONE (`verify_trace(context, *, domain)`, trajectory-level → `list[TraceViolation]`;
     `trace_verdict` = BLOCK on any violation; trajectory verdict = `max(claim verdict,
-    trace_verdict)`). Domain-dispatched: retail rules = `auth_before_action`,
-    `status_precondition` (cancel/modify→pending, return/exchange→delivered via `state_before`),
-    `called_twice` (modify-items / exchange once per order), `modify_after_freeze`, `multi_user`.
-    Airline rules = `auth_before_action`, `basic_economy_no_flight_modify`,
-    `baggage_only_increase`. **Deliberately NOT encoded for either domain:** *confirm-before-write*
-    and the strict *post-state-change assertion* — both need per-tool observations / user turns
-    (not in `tool_trace`). Realized-effect side covered by state channel (step 10). See
+    trace_verdict)`). Domain-dispatched:
+    Retail rules = `auth_before_action`, `status_precondition` (cancel/modify→pending,
+    return/exchange→delivered via `state_before`), `called_twice` (modify-items / exchange once
+    per order), `modify_after_freeze`, `multi_user`.
+    Airline rules = `auth_before_action`, `basic_economy_no_flight_modify`, `baggage_only_increase`.
+    Banking rules = `user_info_before_log_verification` (get_user_information_* must precede
+    log_verification — agent needs retrieved field values to confirm 2-of-4 identity fields),
+    `auth_before_write` (log_verification must precede call_discoverable_agent_tool /
+    change_user_email / give_discoverable_user_tool / apply_for_credit_card / submit_referral),
+    `unlock_before_call` (unlock_discoverable_agent_tool(agent_tool_name=X) must precede
+    call_discoverable_agent_tool(agent_tool_name=X)).
+    **Deliberately NOT encoded for any domain:** *confirm-before-write* (needs user-turn
+    observations) and the strict *post-state-change assertion*; banking-specific *2-of-4 identity
+    field check* (needs the actual values the user provided — not in `tool_trace`). See
     architecture.md "Structural-audit pattern (ported)".
-12. **Evidence channel** (banking_knowledge, **promoted to core** 2026-06-16): `banking_knowledge_verifier`
-    in `tau_bench_verifiers.py` checks agent claims against KB policy documents. Two claim routes:
-    (a) state claims (transactional assertions about account/balance changes) → state_after DB check,
-    same as retail/airline; (b) policy/feature claims ("the annual fee for the Gold card is $X") →
-    BM25 keyword retrieval over the 698 documents + LLM judge (minimax-m3) returns
-    `supported / contradicted / unsupported`. A `contradicted` result on a policy claim → locus =
-    `evidence-local`. Registered in `source_verifier._VERIFIERS["banking_knowledge"]`. Channel gated
-    on `ChannelConfig.evidence=True`, enabled only for banking_knowledge domain in monitor_pass.
-13. **Locus annotator:** native fault type → locus, else the rule-based classifier above; emit a
+12. **Locus annotator:** native fault type → locus, else the rule-based classifier above; emit a
     locus tag per failure. Unit-test on a few hand-traced tasks.
     DONE (`src/reliableguard/locus.py`). tau-bench `RewardResult` has no structured fault type
     (only `reward` 0/1 + `r_actions` fraction), so `native_fault=None` always; annotator is
-    purely rule-based with `override` for manual annotation studies. Priority: pass > trace-local
-    (verify_trace violations) > state-local (state-channel contradictions, source="tau_bench_state")
-    > intent-local (residual; working label — requires independent spot-check before RQ3 claims).
-    Helpers: `locus_is_monitor_detectable` (trace/state/evidence/answer), `locus_needs_structural`
-    (trace/state only; these are the two loci that drive the V_structural vs V_answer lift in RQ2).
+    purely rule-based with `override` for manual annotation studies. Priority (updated 2026-06-17):
+    pass > trace-local (verify_trace violations, including `agent_loop`) > state-local (state-channel
+    contradictions, source="tau_bench_state") > answer-local (`answer_incomplete`, the completeness
+    signal) > intent-local (residual; working label — requires independent spot-check before RQ3
+    claims). Loci are defined by which **observation channel** reaches the ground truth (per the
+    observability spine): trace-local = observable in `tool_trace` (policy violation OR loop),
+    answer-local = observable in the answer text (false claim OR non-completion). Helpers:
+    `locus_is_monitor_detectable` (trace/state/answer), `locus_needs_structural` (now trace/state/
+    answer — answer-local completeness is recovered in the V_structural pass, not by V_answer's
+    claim verification alone).
 
 ### Phase 3 — Main experiment run (RQ1 + RQ2)
 
-14. **Agent runs:** domains × 4 models × K=10 repeats × all in-scope tasks via the τ-bench runner →
-    capture trajectories (the expensive, parallelizable step; shard like the old record harness).
+14. **Agent runs:** retail + airline × 4 models × K=10 repeats × all in-scope tasks via the τ2
+    runner → capture trajectories (the expensive, parallelizable step; shard like the old harness).
 15. **Monitor pass** (cheap, zero extra agent cost): per trajectory, 1 extraction (fixed extractor)
-    → apply V_answer, V_structural (+ V_evidence for banking_knowledge) → record reward, locus,
-    each config's verdict.
+    → apply V_answer, V_structural → record reward, locus, each config's verdict.
 
 ### Phase 4 — Metrics & statistics
 
-16. Per (model, domain): detection / precision / FAR for V_answer and V_structural, + per-locus
-    breakdown.
-17. **McNemar** per-task (V_answer vs V_structural) within each model; **bootstrap CIs** over tasks.
-18. **Cross-model** mean±std + p25/p75; **within-model** std across K repeats.
+16. Per (model, domain): RDR / FalseAlarmRate + the detector-classifier metrics
+    **Precision / F1 / MCC** (+ `confusion` matrix) for V_answer and V_structural, + per-locus
+    breakdown. (Definitions: formal_definitions.md §2.3a. MCC is the cross-model axis.)
+    DONE — emitted in `eval/analyze.py` per config.
+17. **McNemar** per-task (V_answer vs V_structural) within each model; **bootstrap CIs** over tasks
+    (RDR, FalseAlarmRate, Precision, ΔRDR).
+18. **Cross-model** mean±std; **within-model** std across K repeats.
 19. **RQ3:** quantify the intent-local residual (reward=0 ∧ no inconsistency found); show the
     monitor-vs-oracle gap = intent-local share.
+    Note (2026-06-17): the two new signals (loop, completeness) + the state-framing fix are applied
+    by `eval/reannotate_signals.py` as a deterministic overlay on the captured artifacts (no
+    re-extraction); reported results live in `results/monitor_v2` → `results/metrics_v2`. No
+    authoritative full re-run: the extractor is non-deterministic, so reproducibility is
+    distributional (CIs), not point-exact; the overlay is a valid representative draw.
 
 ### Phase 5 — Figures & demo (per RQ)
 
-20. RQ1: V_answer detection-by-locus bar (high answer-local, ≈0 trace/state).
-21. RQ2: cross-model box/violin V_answer vs V_structural (money chart) + per-locus lift table +
-    McNemar p-values + FAR-unchanged panel.
+20. RQ1: V_answer detection-by-locus bar (high answer-local, ≈0 trace/state). → `figure6`.
+21. RQ2: cross-model box V_answer vs V_structural + ΔRDR panel (`figure7`); **detector-quality
+    money chart** RDR / Precision / FalseAlarm / MCC, V_answer vs V_structural (`figure9`).
 22. RQ3: stacked detected-vs-undetected by locus with intent-local as the irreducible residual;
-    oracle-vs-monitor gap.
+    oracle-vs-monitor gap (`figure8`). Figures emitted by `eval/analyze.py` → `results/figures_v2`.
 23. **Live demo:** one retail task where V_structural BLOCKs (e.g. "cancelled" but state unchanged,
     or cancelled a non-pending order) while V_answer PASSes; pre-record a fallback.
 
@@ -242,23 +282,20 @@ Correctness is always τ-bench's reward. For each reward-0 task we add a **locus
    count exists for a positive RQ1 data point; if not, frame RQ1 as the ceiling = answer-local only.
 2. **User-simulator is itself an LLM (extra nondeterminism).** Mitigated: fix the user-sim model
    across all runs (control); the K repeats absorb its variance.
-3. **Cost/time of the matrix.** retail+airline ×4 models ×5 repeats ≈ thousands of multi-turn runs
-   (~1–2 days parallelized). Mitigation: core = retail+airline; telecom/banking_knowledge are
-   stretch; shard + resume the capture.
+3. **Cost/time of the matrix.** retail+airline ×4 models ×10 repeats ≈ 6,560 multi-turn runs
+   (~4-8 h parallelized). Mitigation: shard + resume the capture.
 4. **Locus annotation could be contested.** Mitigated: prefer τ-bench native fault types; document
    the rule-based mapping; hand-validate a sample. Correctness label is never the locus tag.
 5. **Significance vs sample size.** 4 models is too few for significance → significance comes from
    per-task McNemar (hundreds of pairs); models carry only generality. Explicitly separated.
-6. **banking_knowledge maturity.** It is the newest (tau3); if unstable, drop evidence-local to
-   conceptual and let intent-local carry RQ3 — RQ1/RQ2 unaffected (they live on retail/airline).
-7. **Circularity.** Monitor must never read `r_actions`; snapshot final state before
+6. **Circularity.** Monitor must never read `r_actions`; snapshot final state before
    `calculate_reward()`. Stated and enforced in the adapter.
-8. **RQ3 operationalization.** intent-local = reward=0 ∧ V_structural finds no inconsistency — sound
+7. **RQ3 operationalization.** intent-local = reward=0 ∧ V_structural finds no inconsistency — sound
    because if the task failed yet everything observable is consistent, the fault lives in the
-   unobservable goal/intent (or unavailable evidence). Documented.
-9. **"Schema" (old F1) under-covered.** Accepted by user (low impact); trace-local carried by
+   unobservable goal/intent. Documented.
+8. **"Schema" (old F1) under-covered.** Accepted by user (low impact); trace-local carried by
    policy + dependency, which are richer in τ-bench.
-10. **Extractor reuse across configs** is intra-run, not the rejected freeze-as-evidence — noted.
+9. **Extractor reuse across configs** is intra-run, not the rejected freeze-as-evidence — noted.
 
 ## Locked configuration (Phase 0, 2026-06-10)
 
@@ -285,23 +322,22 @@ vendor set. The two controls share a model but operate in disjoint roles (conver
 vs. post-hoc claim extraction) with no information sharing, so this introduces no confound. The
 answer-local input fed to the extractor is the agent's concatenated `respond` turns (see above).
 
-Domain scope (updated 2026-06-16): **retail (115 tasks) + airline (50 tasks) + banking_knowledge
-(97 tasks) = 262 tasks/repeat**. All three domains via `tau2-bench`; telecom excluded (2285 tasks,
-scope too large). Source: `sierra-research/tau2-bench` v1.0.0 (fixed tasks + new banking domain).
-Seed 42. K = 10. Total trajectories: 4 models × 262 tasks × 10 repeats = **10,480**.
+Domain scope: **retail (114 tasks) + airline (50 tasks) = 164 tasks/repeat**. Both via
+`tau2-bench`; telecom excluded (2285 tasks, scope too large); banking_knowledge excluded (see
+Context above). Source: `sierra-research/tau2-bench` v1.0.0. Seed 42. K = 10.
+Total trajectories: 4 models × 164 tasks × 10 repeats = **6,560**.
 
-Budget (Phase 0 calibrated on retail/airline; banking_knowledge cost estimated):
+Budget (Phase 0 calibrated on retail/airline):
 
-| Model | $/task (retail/airline) | est. $/task (banking) | full-matrix (K=10, 262 tasks) | data |
-| --- | --- | --- | --- | --- |
-| `deepseek/deepseek-v4-pro` | 0.080 / 0.072 | ~0.09 (RAG overhead) | **~$207** | firm retail/airline |
-| `qwen/qwen3.6-flash` | 0.029 | ~0.035 | ~$76 | n=1 |
-| `xiaomi/mimo-v2.5-pro` | 0.011 | ~0.013 | ~$29 | n=1 |
-| `z-ai/glm-4.7-flash` | 0.0029 | ~0.004 | ~$8 | n=1 |
-| user-sim + extractor (`minimax-m3`) | — | — | ~$24 | scaled |
+| Model | $/task (retail/airline) | full-matrix (K=10, 164 tasks) | data |
+| --- | --- | --- | --- |
+| `deepseek/deepseek-v4-pro` | 0.080 / 0.072 | **~$126** | firm |
+| `qwen/qwen3.6-flash` | 0.029 | ~$48 | n=1 |
+| `xiaomi/mimo-v2.5-pro` | 0.011 | ~$18 | n=1 |
+| `z-ai/glm-4.7-flash` | 0.0029 | ~$5 | n=1 |
+| user-sim + extractor (`minimax-m3`) | — | ~$16 | scaled |
 
-Total ≈ **$344** (banking adds ~60% more tasks; banking LLM-judge adds extractor cost ~$11).
-Cost driver = `deepseek-v4-pro` (~60%). Wall-clock: ~6-12 h with concurrency 5-20.
+Total ≈ **$213**. Cost driver = `deepseek-v4-pro` (~60%). Wall-clock: ~4-8 h with concurrency 5-20.
 **Run-harness correctness/robustness spec (snapshot order, shard+resume, retry vs. spurious
 failure, max_tokens caps) is in [architecture.md](architecture.md) → "Run-harness correctness &
 robustness"; it applies to the tau2 driver as well.**
@@ -309,15 +345,12 @@ robustness"; it applies to the tau2 driver as well.**
 ## Open items (updated 2026-06-16)
 
 - **Intent-local independent annotation**: the locus annotator currently uses the rule-based
-  classifier (residual after trace/state/evidence checks). For RQ3 the thesis needs a spot-check
-  showing the residual *coincides with* an independently-derived intent-local class. A small sample
-  manual annotation is required before the RQ3 boundary claim can be stated non-circularly.
-- **tau2 API probe**: before writing `capture_tau2.py` in full, verify `env.db.model_dump()` is
-  accessible after `run_simulation()` and that the state schema matches what retail/airline verifiers
-  expect. One smoke run per domain confirms this.
-- **Banking verifier LLM cost**: the LLM judge (minimax-m3) is called once per claim per trajectory
-  in banking_knowledge. With ~5 claims/trajectory × 970 tasks × 10 repeats = ~48,500 judge calls;
-  estimate ~$11 added extractor cost. Acceptable but should be monitored.
+  classifier (residual after trace/state checks). For RQ3 the thesis needs a spot-check showing the
+  residual *coincides with* an independently-derived intent-local class. A small sample manual
+  annotation is required before the RQ3 boundary claim can be stated non-circularly.
+- **tau2 API probe**: verify `env.db.model_dump()` is accessible after `run_simulation()` and that
+  the state schema matches what retail/airline verifiers expect. Smoke runs on 5+5 tasks confirm
+  this before the full run.
 
 ### Resolved (previously open)
 - ~~Extractor model ID~~ — locked: `minimax/minimax-m3` with reasoning disabled (Phase 1).

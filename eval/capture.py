@@ -41,7 +41,11 @@ RESPOND = "respond"
 
 def _patch_user_sim_max_tokens() -> None:
     """tau-bench's user simulator calls `completion` with no max_tokens; inject a runaway-guard
-    cap. Idempotent (patches the module-level symbol once)."""
+    cap and fix openrouter routing: when custom_llm_provider="openrouter", litellm prefixes the
+    model string internally but OpenRouter rejects the resulting path for minimax models. Fix by
+    prefixing the model with "openrouter/" and dropping custom_llm_provider so litellm routes
+    via the native openrouter/* path instead.
+    Idempotent (patches the module-level symbol once)."""
     import tau_bench.envs.user as user_mod
 
     if getattr(user_mod, "_rg_capped", False):
@@ -50,6 +54,11 @@ def _patch_user_sim_max_tokens() -> None:
 
     def capped(*args: Any, **kwargs: Any):  # noqa: ANN202
         kwargs.setdefault("max_tokens", USER_SIM_MAX_TOKENS)
+        if kwargs.get("custom_llm_provider") == "openrouter":
+            model = kwargs.get("model", "")
+            if not model.startswith("openrouter/"):
+                kwargs["model"] = f"openrouter/{model}"
+            kwargs.pop("custom_llm_provider")
         return original(*args, **kwargs)
 
     user_mod.completion = capped

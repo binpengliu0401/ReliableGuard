@@ -38,15 +38,18 @@ class Trajectory(BaseModel):
     # `error` marks an infra failure (retries exhausted), excluded from metrics and re-run by
     # resume -- never recorded as a reward-0 task failure (see the run-harness spec).
     status: Literal["ok", "error"] = "ok"
+    # Reserved for future evidence-channel domains; None for retail/airline.
+    evidence: list[dict[str, Any]] | None = None
 
     def grounding(self) -> Grounding:
         return Grounding(
             state_before=self.state_before,
             state_after=self.state_after,
             tool_trace=self.tool_trace,
+            evidence=self.evidence,
         )
 
     def verification_context(self, channels: ChannelConfig) -> VerificationContext:
         """Build the context for one monitor config; the same grounding is reused across the
-        V_answer / V_structural / V_evidence channel presets."""
+        V_answer / V_structural channel presets."""
         return VerificationContext(grounding=self.grounding(), channels=channels)

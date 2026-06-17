@@ -118,6 +118,23 @@ $$
 
 **Range.** \(0 \leq \operatorname{RDR}(V) \leq 1\). Higher is better. AUDIT\_FAILED rows count as detected (non-PASS), so \(\operatorname{RDR}(V) + \operatorname{FAR}(V) = 1\) when every row carries a verdict.
 
+### 2.3a Detector view: Precision, F1, MCC
+
+**Purpose.** RDR (recall) and FalseAlarmRate report the two error rates separately; neither alone reveals whether a gain in detection was *bought* with false alarms. Treating the monitor as a binary detector — positive class = failed task (reward=0), prediction = non-PASS verdict — gives a 2×2 confusion matrix \((\mathrm{TP},\mathrm{FP},\mathrm{TN},\mathrm{FN})\) per (model, config) and three standard summaries. (Detector-classifier framing follows the hallucination-detection literature — SelfCheckGPT's sentence-level precision/recall, FActScore's supported-fact precision.)
+
+$$
+\operatorname{Precision}(V) = \frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FP}}, \qquad
+\operatorname{Recall}(V) = \operatorname{RDR}(V), \qquad
+\operatorname{F1}(V) = \frac{2\,\operatorname{Precision}\cdot\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}
+$$
+
+$$
+\operatorname{MCC}(V) = \frac{\mathrm{TP}\cdot\mathrm{TN} - \mathrm{FP}\cdot\mathrm{FN}}
+{\sqrt{(\mathrm{TP}+\mathrm{FP})(\mathrm{TP}+\mathrm{FN})(\mathrm{TN}+\mathrm{FP})(\mathrm{TN}+\mathrm{FN})}}
+$$
+
+**Why MCC for cross-model comparison.** The four audited agents fail at different base rates (≈0.30–0.56 of tasks), so a raw RDR or F1 is not directly comparable across them. MCC normalizes against both class priors and is the recommended axis for the cross-model "money chart" (Figure 9). **Range.** Precision/F1 \(\in[0,1]\), higher better; MCC \(\in[-1,1]\), 0 = chance. Precision is reported with a 95% bootstrap CI resampling the failed and passing pools independently (`_bootstrap_precision_ci`). All three are emitted per config in the per-model JSON (`precision`, `f1`, `mcc`, `confusion`).
+
 ### 2.4 Detection Lift (ΔRDR)
 
 **Purpose.** Headline metric for RQ2: the improvement in detection rate when the structural observation channels (state + trace) are added over the answer-only baseline.
