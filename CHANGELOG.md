@@ -9,6 +9,17 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ## [Unreleased]
 
+### Fixed (2026-06-22 — thesis v10 cross-validation follow-ups)
+
+- `eval/analyze.py`: figures now iterate models in a **canonical order** (`MODEL_ORDER` =
+  deepseek-v4-pro, mimo-v2.5-pro, glm-4.7-flash, qwen3.6-flash) instead of alphabetical by model
+  ID, so figure x-axes line up with Table 7 / Table D. Fixes the figure-vs-table order mismatch
+  (figures were deepseek/qwen/mimo/glm; tables are deepseek/mimo/glm/qwen). Affects the embedded
+  Figures 6/7/8 and the standalone Figure 9; data/point estimates unchanged, column order only.
+- Thesis v10: corrected V_structural mean RDR **30.1% → 30.0%** (mean of 0.303/0.377/0.399/0.123 =
+  0.3005); regenerated `figures_v10/` in canonical order and rebuilt the PDF. (Figure 9 is generated
+  but not embedded in the thesis — only Figures 1–8 are.)
+
 ### Changed (2026-06-22 — README/requirements brought up to the tau2-bench reality)
 
 - `README.md` and `requirements.txt` were stale (pre-pivot): they pointed at the old

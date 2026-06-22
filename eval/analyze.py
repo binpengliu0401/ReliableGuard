@@ -36,6 +36,15 @@ from typing import Any
 
 LOCI = ("answer-local", "trace-local", "state-local", "intent-local")
 CONFIGS = ("v_answer", "v_structural")
+# Canonical model order for tables and figures (matches Table 7 / Table D in the thesis:
+# 2 flagship then 2 low-end). Figures iterate all_metrics in this order so their x-axes line
+# up with the tables; models not listed fall back to alphabetical after the known ones.
+MODEL_ORDER = (
+    "deepseek/deepseek-v4-pro",
+    "xiaomi/mimo-v2.5-pro",
+    "z-ai/glm-4.7-flash",
+    "qwen/qwen3.6-flash",
+)
 K_DEFAULT = 10
 CDR_KAPPAS = (5, 7, 9)
 BOOTSTRAP_B = 1000
@@ -729,8 +738,14 @@ def main() -> None:
     for r in rows:
         by_model[r["model"]].append(r)
 
+    def _model_rank(model: str) -> tuple[int, str]:
+        try:
+            return (MODEL_ORDER.index(model), "")
+        except ValueError:
+            return (len(MODEL_ORDER), model)
+
     all_metrics = []
-    for model, model_rows in sorted(by_model.items()):
+    for model, model_rows in sorted(by_model.items(), key=lambda kv: _model_rank(kv[0])):
         print(f"\nComputing: {model} ({len(model_rows):,} rows)...")
         m = compute_model_metrics(model_rows, model, k=args.k)
         all_metrics.append(m)
