@@ -1,9 +1,10 @@
 # ReliableGuard dependencies (the monitor + analysis).
 #
-# tau-bench is NOT installed from here: clone sierra-research/tau-bench and
-# `pip install -e ./tau-bench`. It bundles its own datasets (retail / airline /
-# telecom / banking_knowledge) and brings its model backend (litellm). No separate
-# dataset download is required.
+# tau2-bench is NOT installed from here: clone sierra-research/tau2-bench (v1.0.0) and
+# `pip install -e ./tau2-bench`. It provides the `tau2` package and bundles its own task
+# suites / databases / wiki.md policies (retail / airline; banking_knowledge is out of the
+# formal experiment) and brings its model backend (litellm). No separate dataset download
+# is required. See README.md "Data" for the full capture → monitor → analyze pipeline.
 
 # --- monitor core ---
 openai==2.30.0          # claim extractor LLM client (pointed at OpenRouter)

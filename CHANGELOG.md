@@ -9,6 +9,21 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ## [Unreleased]
 
+### Changed (2026-06-22 — README/requirements brought up to the tau2-bench reality)
+
+- `README.md` and `requirements.txt` were stale (pre-pivot): they pointed at the old
+  `sierra-research/tau-bench`, listed three monitor configs incl. `V_evidence`, said "one seed",
+  and referenced the deleted `eval/metrics.py`. Updated to match the current code:
+  - benchmark → **`sierra-research/tau2-bench` v1.0.0** (the `tau2` package the capture driver
+    imports); retail 114 + airline 50 = 164 tasks/repeat.
+  - monitor configs → **two** (`V_answer`, `V_structural`); `V_evidence`/`banking_knowledge` noted
+    as Future Work; statistical design → **unseeded K=10**, CIs split (Clopper-Pearson at boundary).
+  - `eval/` listing → real scripts (`run_capture_tau2`, `capture_tau2`, `monitor_pass`,
+    `reannotate_signals`, `analyze`).
+  - new **"Data"** section: a clone ships **no** data (benchmark lives in `tau2-bench`; trajectories
+    /results/ and `docs/thesis/` are gitignored), plus the end-to-end capture → monitor →
+    reannotate → analyze command chain to regenerate everything.
+
 ### Changed (2026-06-22 — doc/thesis-v9 consistency pass)
 
 - Reconciled `docs/thesis_scope.md`, `docs/tau_bench_experiment_design.md`, and
