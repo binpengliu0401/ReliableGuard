@@ -4,8 +4,9 @@
 > Failure taxonomy = locus of ground truth (answer-local / trace-local / state-local / intent-local).
 > Verdict space = {PASS\_VERIFIED, PASS\_UNCHECKED, BLOCK, AUDIT\_FAILED}. Core metric suite includes
 > FAR / RDR, ΔRDR (Detection Lift), CDR_κ (Consistent Detection Rate), locus distribution π_ℓ,
-> McNemar paired test, and bootstrap 95% CIs. Old safe/risky labels, F0–F5 categories, Type I/II
-> split, and ecommerce/reference empirical tables are superseded. Authoritative experiment design:
+> McNemar paired test, and 95% CIs (Clopper-Pearson exact for rates at the 0/1 boundary, bootstrap
+> otherwise). The pre-pivot self-made evaluation (Set A/B and its injection-recipe failure taxonomy)
+> and the ecommerce/reference empirical tables are superseded. Authoritative experiment design:
 > [tau_bench_experiment_design.md](tau_bench_experiment_design.md).
 
 This document defines the formal concepts used by ReliableGuard to support three thesis-level goals: quantification, standardization, and traceability. The scope is limited to externally verifiable failures in tool-using LLM agents with observable grounding artifacts, such as database state, retrievable knowledge-base documents, and tool execution traces.
@@ -204,17 +205,21 @@ $$
 
 Reject \(H_0\) at \(p < 0.05\). A significant result with \(n_{01} \gg n_{10}\) confirms that \(V_{\text{structural}}\) gains substantially more detections than it loses versus \(V_{\text{answer}}\).
 
-### 2.8 Bootstrap Confidence Intervals
+### 2.8 Confidence Intervals (Bootstrap and Clopper-Pearson)
 
-**Purpose.** Report uncertainty on all headline rates. Agent evaluation papers rarely report CIs; this thesis does so to make LLM non-determinism explicit and support reproducibility claims.
+**Purpose.** Report uncertainty on all headline rates. Agent evaluation papers rarely report CIs; this thesis does so to make LLM non-determinism explicit and support reproducibility claims. The CI estimator is chosen by where the rate sits, not by which rate it is: interior rates use the task-level bootstrap; rates pinned to the 0/1 boundary use the Clopper-Pearson exact binomial interval.
 
-**Method.** For a rate metric \(\hat{\mu}\) (e.g., \(\operatorname{RDR}(V)\)) over \(|T|\) tasks with \(K=10\) repeats each:
+**Non-boundary rates — task-level bootstrap.** For a rate metric \(\hat{\mu}\) (e.g., \(\operatorname{RDR}(V)\)) away from the 0/1 boundary, over \(|T|\) tasks with \(K=10\) repeats each:
 
 1. Compute per-task detect-fraction \(\hat{p}_t = \frac{1}{K}\sum_k \operatorname{detect}(\tilde{v}_{t,k}^V)\) for \(t \in T_{\text{fail}}\).
 2. Draw \(B = 1000\) bootstrap resamples (with replacement over tasks); compute \(\hat{\mu}^{(b)}\) for each.
 3. Report \([\hat{\mu}^{(0.025)},\ \hat{\mu}^{(0.975)}]\) as the 95% CI.
 
-Implementation: `eval/metrics.bootstrap_ci(values, n_resamples=1000, seed=0)`. All headline rates (FAR, FalseAlarmRate, RDR, \(\Delta\operatorname{RDR}\)) are reported with 95% CIs.
+Resampling at the task level (not the trajectory level) respects within-task correlation across the \(K\) repeats. Bootstrap implementation: `eval/analyze.py` (`_bootstrap_mean_ci`, `_bootstrap_precision_ci`, `_bootstrap_delta_rdr_ci`; \(B = 1000\), fixed resampling seed for reproducibility).
+
+**Boundary rates — Clopper-Pearson exact.** A rate at or adjacent to the 0/1 boundary makes the task-level bootstrap degenerate: when every task shares the same boundary value, every resample returns that value and the interval collapses to zero width, understating uncertainty. This is not hypothetical here — \(\operatorname{RDR}(V_{\text{answer}})\) on the trace-local and state-local loci is structurally ≈0 (RQ1's channel-limit result), so its CI would otherwise be reported as \([0, 0]\). Such boundary rates are instead reported with the **Clopper-Pearson exact binomial interval** over the relevant task count \(n\), which remains a proper (one-sided-at-the-boundary) interval — e.g. an observed 0/\(n\) yields \([0,\ 1-(\alpha/2)^{1/n}]\) at confidence \(1-\alpha\).
+
+This is the reporting convention for every headline rate (FAR, FalseAlarmRate, RDR, \(\Delta\operatorname{RDR}\)): bootstrap when interior, Clopper-Pearson exact when the rate pins to 0 or 1. Implementation: `eval/analyze.py` `_rate_ci` dispatches per rate value — `_bootstrap_mean_ci` for interior rates, `_clopper_pearson_boundary_ci` (closed-form exact interval, no scipy) at the 0/1 boundary — and is applied to RDR, FalseAlarmRate, and the per-locus detection rates. (ΔRDR, a paired difference rather than a bounded rate, keeps its dedicated paired bootstrap, `_bootstrap_delta_rdr_ci`.)
 
 ### 2.9 Coverage Split: PASS\_VERIFIED vs PASS\_UNCHECKED
 
@@ -249,7 +254,7 @@ $$
 \operatorname{EvidenceStateCoverage} = \frac{|T_E|}{|T|}
 $$
 
-The same form applies to each evidence state. Implementation fields: `avg_supported_count`, `avg_contradicted_count`, `avg_unsupported_count`, `avg_unverifiable_count`, `avg_not_found_count`, and `evidence_state_coverage` in `eval/metrics.compute_metrics`.
+The same form applies to each evidence state. The per-claim evidence-state counts that these aggregates roll up are recorded per trajectory on `ReliabilityReport` (`supported_count`, `contradicted_count`, `unsupported_count`, … in `src/reliableguard/schema.py`) and in the trace log (§6). This evidence-state distribution is a verifier-diagnostic metric and is **not** emitted by the current τ-bench `eval/analyze.py`, whose headline output is the detection suite (RDR/FAR, locus distribution, detector-classifier scores); it was produced by the retired pre-pivot `eval/metrics.py` aggregator and is retained here as a definition for diagnostic use.
 
 ### 2.11 Stage Latency and Token Cost
 
@@ -267,7 +272,7 @@ $$
 \operatorname{AvgTokens} = \frac{\sum_{t \in T_\tau}\tau_t}{|T_\tau|}
 $$
 
-where \(T_\tau\) contains only tasks with positive token counts. Implementation fields: `stage_latency_mean_ms`, `stage_latency_p95_ms`, `avg_tokens`, `total_tokens_sum`.
+where \(T_\tau\) contains only tasks with positive token counts. The raw per-trajectory inputs are recorded on `ReliabilityReport.stage_latencies` and `ReliabilityReport.token_usage` (`src/reliableguard/schema.py`, populated in `src/reliableguard/pipeline.py`). The aggregate latency/token roll-up (mean/p95 per stage, `avg_tokens`, `total_tokens_sum`) is an operational-cost diagnostic and is **not** part of the current τ-bench `eval/analyze.py` headline output; it was produced by the retired pre-pivot `eval/metrics.py` and is retained here as a definition for diagnostic use.
 
 ## 3. Domain Verifier Adapter Interface Contract
 

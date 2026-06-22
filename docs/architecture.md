@@ -26,8 +26,8 @@ eval/
   capture_tau2.py       # PLANNED — new tau2 API capture driver (retail+airline+banking, 10480 trajs)
   run_capture_tau2.py   # PLANNED — CLI wrapper for capture_tau2
   monitor_pass.py       # monitor pipeline driver: extract → V_answer + V_structural → locus → JSONL
-  analyze.py            # metrics: FAR/RDR/McNemar/bootstrap/locus-distribution → JSON + figures
-  metrics.py            # RDR / FAR / distribution metrics (McNemar / bootstrap)
+  analyze.py            # metrics: FAR/RDR/McNemar/locus-distribution + CIs (bootstrap interior,
+                        #   Clopper-Pearson exact at the 0/1 boundary via _rate_ci) → JSON + figures
 results/
   capture/              # per-model Trajectory JSONL shards (gitignored)
   monitor/              # per-model monitor result rows (gitignored)
@@ -69,7 +69,8 @@ non-completion, an answer-local signal fed to BOTH configs (it reads only `answe
 is in both, the V_structural-over-V_answer lift (ΔRDR) is attributable purely to state + trace.
 
 **Metrics (`eval/analyze.py`).** Per config: RDR / FalseAlarmRate + detector-classifier
-**Precision / F1 / MCC** (+ `confusion`), all with bootstrap CIs; MCC is the cross-model axis (the
+**Precision / F1 / MCC** (+ `confusion`), with 95% CIs — task-level bootstrap for interior rates,
+Clopper-Pearson exact at the 0/1 boundary (`_rate_ci`); MCC is the cross-model axis (the
 4 agents fail at different base rates). Figures: `figure6` (RQ1 locus), `figure7`/`figure9` (RQ2
 cross-model + detector-quality), `figure8` (RQ3 stacked). Reported results: `results/monitor_v2` →
 `results/metrics_v2` → `results/figures_v2`, produced by the deterministic overlay

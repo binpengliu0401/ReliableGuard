@@ -109,10 +109,11 @@ is out of scope). The locus priority is: pass > trace-local > state-local > inte
 
 ---
 
-## Statistical design (advisor's single-seed multi-LLM, done correctly)
+## Statistical design (multi-LLM, unseeded repeats, done correctly)
 
-- **Single seed** (42), sent to the API. (Honest caveat: at temp 0 the provider is still
-  non-deterministic — the seed barely controls variance; repeats below carry the noise estimate.)
+- **Unseeded repeats** — no fixed seed. (At temp 0 the provider is still non-deterministic, so a
+  fixed seed barely controls variance; the K repeats below are the primary noise-absorbing
+  mechanism and carry the variance estimate.)
 - **4 base agent models** (the audited models), locked Phase 0 (2026-06-10) — a 2x2 capability
   spread across 4 mainland vendors; see the **Locked configuration** section below for exact IDs.
   **Monitor extractor model fixed** and **user-simulator model fixed** (`minimax/minimax-m3`) across
@@ -120,7 +121,8 @@ is out of scope). The locus priority is: pass > trace-local > state-local > inte
 - **K = 10 repeats** per (domain, model) to estimate run-to-run noise.
 - Three statistics, each at the right level:
   1. **Significance → per-task paired McNemar test** (V_answer vs V_structural) within each model,
-     plus bootstrap CIs over tasks. Hundreds of paired tasks → high power on a single model/seed.
+     plus task-level CIs (Clopper-Pearson exact for boundary rates, bootstrap otherwise). Hundreds
+     of paired tasks → high power on a single model.
   2. **Generality → cross-model distribution** (mean±std, p25/p75) → the box/violin money chart.
      (4 model points carry generality, NOT significance — do not claim significance from 4 points.)
   3. **Noise → within-model std across the K repeats** → shows cross-model separation > repeat jitter.
@@ -173,7 +175,8 @@ is out of scope). The locus priority is: pass > trace-local > state-local > inte
 6. Remove `src/domain/ecommerce`, `src/domain/reference`, `tasks/*scenarios*.json`,
    `tier_b_prompts.json`, F0–F5 injection, Set A/B generators + results.
 7. Keep `src/reliableguard/pipeline.py`, extractor, classifier, scorer, `schema.py` verdicts,
-   `eval/metrics.py`. (The old `structural_audit.py` was deleted in the pivot; its pre/post
+   and the metrics module (the old `eval/metrics.py`, since renamed/refactored to `eval/analyze.py`).
+   (The old `structural_audit.py` was deleted in the pivot; its pre/post
    state-change pattern is re-implemented in the Phase 2 trace verifier, not kept as a file.)
 8. Add a benchmark-adapter interface — a `Trajectory` record
    `{task_id, domain, model, repeat, seed, query, final_answer, answer_text, tool_trace,
@@ -243,7 +246,8 @@ is out of scope). The locus priority is: pass > trace-local > state-local > inte
     **Precision / F1 / MCC** (+ `confusion` matrix) for V_answer and V_structural, + per-locus
     breakdown. (Definitions: formal_definitions.md §2.3a. MCC is the cross-model axis.)
     DONE — emitted in `eval/analyze.py` per config.
-17. **McNemar** per-task (V_answer vs V_structural) within each model; **bootstrap CIs** over tasks
+17. **McNemar** per-task (V_answer vs V_structural) within each model; **task-level CIs**
+    (Clopper-Pearson exact for rates at the 0/1 boundary, bootstrap otherwise) over
     (RDR, FalseAlarmRate, Precision, ΔRDR).
 18. **Cross-model** mean±std; **within-model** std across K repeats.
 19. **RQ3:** quantify the intent-local residual (reward=0 ∧ no inconsistency found); show the
@@ -324,7 +328,7 @@ answer-local input fed to the extractor is the agent's concatenated `respond` tu
 
 Domain scope: **retail (114 tasks) + airline (50 tasks) = 164 tasks/repeat**. Both via
 `tau2-bench`; telecom excluded (2285 tasks, scope too large); banking_knowledge excluded (see
-Context above). Source: `sierra-research/tau2-bench` v1.0.0. Seed 42. K = 10.
+Context above). Source: `sierra-research/tau2-bench` v1.0.0. Unseeded (no fixed seed). K = 10.
 Total trajectories: 4 models × 164 tasks × 10 repeats = **6,560**.
 
 Budget (Phase 0 calibrated on retail/airline):

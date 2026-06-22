@@ -9,6 +9,44 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ## [Unreleased]
 
+### Changed (2026-06-22 — doc/thesis-v9 consistency pass)
+
+- Reconciled `docs/thesis_scope.md`, `docs/tau_bench_experiment_design.md`, and
+  `docs/formal_definitions.md` with thesis v9 (the finalized baseline):
+  - **Task count**: `thesis_scope.md` corrected from retail 115 / total 165 → **retail 114 /
+    total 164** (matches v9 and `tau_bench_experiment_design.md`).
+  - **Seed policy**: `scope.md` and `experiment_design.md` changed from "single seed (42)" →
+    **unseeded repeats** (v9's position: at temp 0 a fixed seed does not control provider
+    non-determinism; the K=10 repeats absorb variance).
+  - **CI method**: all three docs now state the v9 reporting convention — **Clopper-Pearson exact
+    for rates at the 0/1 boundary, bootstrap otherwise** — instead of a flat "bootstrap CIs"
+    (avoids the degenerate zero-width CI on boundary rates such as V_answer RDR ≈ 0 on
+    trace/state loci). `formal_definitions.md` §2.8 retitled and split accordingly.
+  - **Cleanup**: removed the residual "F0–F5 / safe-risky / Type I/II" deprecated-label
+    enumeration from the top of `formal_definitions.md`.
+- **`eval/analyze.py`: implemented the Clopper-Pearson boundary CI** (closing the doc↔code gap
+  the consistency pass surfaced — v9 and the docs claimed it but only bootstrap existed).
+  - New `_rate_ci` dispatcher: task-level bootstrap for interior rates, `_clopper_pearson_boundary_ci`
+    (closed-form exact interval, no scipy — matches the codebase's no-scipy McNemar) at the 0/1
+    boundary where the bootstrap degenerates to zero width. Applied to RDR, FalseAlarmRate, and the
+    per-locus detection rates; ΔRDR keeps its paired bootstrap.
+  - Re-ran `analyze.py` over `results/monitor_v2` → refreshed `results/metrics_v2` + `results/figures_v2`
+    (gitignored local artifacts). Verified **all point estimates unchanged** (RDR/FAR/precision/F1/
+    MCC/ΔRDR/locus rates identical across all 4 models); only degenerate boundary CIs replaced
+    (e.g. V_answer answer-local `[1,1]`→`[0.951,1]`, intent-local `[0,0]`→`[0,0.012]`).
+- **Repointed the stale `eval/metrics.py` references** (module renamed/refactored to `eval/analyze.py`
+  in the pivot): `formal_definitions.md` §2.8/§2.10/§2.11, `architecture.md` repo layout (removed the
+  phantom `metrics.py` line) and metrics paragraph, and the Phase-1 "Keep" list in
+  `tau_bench_experiment_design.md`. §2.10/§2.11 now state honestly that the evidence-state-distribution
+  and latency/token aggregates are diagnostics not emitted by the current detection-focused
+  `analyze.py` (raw inputs live on `ReliabilityReport`).
+- **Thesis v10** (`docs/thesis/ReliableGuard_Thesis_v10.{md,pdf}` + `figures_v10/` +
+  `build_thesis_v10.sh`). Identical to v9 except **Figure 6** (RQ1 V_answer detection by locus),
+  regenerated from the CI-fixed `analyze.py` so the boundary loci now show proper Clopper-Pearson
+  error bars instead of zero-width whiskers (answer-local at rate 1.0, intent-local at ≈0).
+  Figures 1–5 carried over from v9; Figures 7/8 verified byte-identical to v9 (data unchanged) —
+  Figure 6 is the only visual change. PDF rebuilt with pandoc + xelatex (TinyTeX).
+
 ### Added (2026-06-17 — two observable signals recover a slice of "intent-local")
 
 - **Agent-loop guard (trace channel) + answer-completeness check (answer channel).** Control-group

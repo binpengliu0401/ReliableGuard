@@ -106,7 +106,7 @@ Two monitor configurations differing only in which observation channel the verif
 
 The evaluation is grounded entirely on **τ²-bench** (`sierra-research/tau2-bench` v1.0.0),
 a recognized tool-agent benchmark whose ground truth is execution-based and not authored by us.
-Formal domains: **retail (115 tasks) + airline (50 tasks) = 165 tasks/repeat**. The benchmark
+Formal domains: **retail (114 tasks) + airline (50 tasks) = 164 tasks/repeat**. The benchmark
 exposes tool trace, DB state, and a reward function (`calculate_reward()` using the goal
 annotation `r_actions`).
 
@@ -116,10 +116,11 @@ deployment-observable artifacts (final answer, `env.actions`, `env.data` before/
 **non-circular**. Failures occur naturally; each reward-0 task receives a locus tag from a
 rule-based annotator (`src/reliableguard/locus.py`).
 
-Statistical design (advisor-agreed): single seed (42), 4 audited base models, fixed extractor
-model + fixed user-simulator as controls, K = 10 repeats per (domain, model). Significance via
-per-task McNemar; generality via cross-model distribution; noise via within-model std across
-K repeats.
+Statistical design (advisor-agreed): **unseeded repeats** (no fixed seed — at temperature 0 the
+provider is still non-deterministic, so a fixed seed does not control variance; the K repeats are
+the primary noise-absorbing mechanism), 4 audited base models, fixed extractor model + fixed
+user-simulator as controls, K = 10 repeats per (domain, model). Significance via per-task McNemar;
+generality via cross-model distribution; noise via within-model std across K repeats.
 
 ---
 
@@ -134,7 +135,8 @@ K repeats.
 3. **A claim-level neuro-symbolic audit pipeline** with a benchmark-adapter pattern (neural
    extraction; symbolic verification, scoring, intervention, and tracing).
 4. **A statistically principled evaluation** on τ-bench across four base models with per-task
-   McNemar paired tests, bootstrap CIs, and CDR_κ reliability scores.
+   McNemar paired tests, 95% confidence intervals (Clopper-Pearson exact for rates at the 0/1
+   boundary, bootstrap otherwise), and CDR_κ reliability scores.
 5. **A boundary result**: the irreducible intent-local class that no black-box channel can reach,
    identified on real benchmark data via the monitor-vs-oracle gap.
 

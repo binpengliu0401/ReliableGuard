@@ -4,7 +4,8 @@ Reads results/monitor/*.jsonl produced by eval/monitor_pass.py, computes:
   FAR / RDR / FalseAlarmRate / ΔRDR per model, per locus, per domain
   π_ℓ  — locus distribution over failed tasks
   McNemar test (V_answer vs V_structural) per model, with continuity correction
-  Bootstrap 95% CIs (B=1000) for RDR, FalseAlarmRate, ΔRDR
+  95% CIs for RDR, FalseAlarmRate, ΔRDR — task-level bootstrap (B=1000) when the rate is
+    interior, Clopper-Pearson exact when it pins to the 0/1 boundary (degenerate bootstrap)
   CDR_κ at κ ∈ {5, 7, 9} for K=10 repeats (consistent detection rate)
   Per-repeat RDR (for box chart + within-model std)
 
@@ -159,6 +160,49 @@ def _bootstrap_delta_rdr_ci(
 
 
 # ---------------------------------------------------------------------------
+# Rate CI: bootstrap when interior, Clopper-Pearson exact at the 0/1 boundary
+# ---------------------------------------------------------------------------
+
+def _clopper_pearson_boundary_ci(
+    k: int, n: int, confidence: float = 0.95
+) -> tuple[float, float]:
+    """Clopper-Pearson exact binomial CI for a boundary count (k == 0 or k == n).
+
+    At the boundary the closed form needs no incomplete-beta inverse (so no scipy):
+      0/n  → [0, 1 - (alpha/2)^(1/n)]
+      n/n  → [(alpha/2)^(1/n), 1]
+    Used where the task-level bootstrap degenerates to a zero-width interval (every
+    resample returns the same boundary value). See formal_definitions.md §2.8.
+    """
+    if n <= 0:
+        return (float("nan"), float("nan"))
+    half_alpha = (1.0 - confidence) / 2.0
+    if k <= 0:
+        return (0.0, 1.0 - half_alpha ** (1.0 / n))
+    if k >= n:
+        return (half_alpha ** (1.0 / n), 1.0)
+    # Interior count — not a boundary case; caller should route to the bootstrap.
+    return (k / n, k / n)
+
+
+def _rate_ci(flags: list[float], confidence: float = 0.95) -> tuple[float, float]:
+    """95% CI for a rate = mean of 0/1 flags.
+
+    Interior rates use the task-level bootstrap (`_bootstrap_mean_ci`); rates pinned to the
+    0/1 boundary use the Clopper-Pearson exact interval, because the bootstrap is degenerate
+    there (e.g. V_answer RDR ≈ 0 on trace/state loci). Convention: formal_definitions.md §2.8.
+    """
+    if not flags:
+        return (float("nan"), float("nan"))
+    n = len(flags)
+    k = int(round(sum(flags)))
+    rate = k / n
+    if 0.0 < rate < 1.0:
+        return _bootstrap_mean_ci(flags, confidence=confidence)
+    return _clopper_pearson_boundary_ci(k, n, confidence=confidence)
+
+
+# ---------------------------------------------------------------------------
 # McNemar test (no scipy; exact for df=1 via math.erfc)
 # ---------------------------------------------------------------------------
 
@@ -193,7 +237,7 @@ def _locus_detection(rows: list[dict], verdict_key: str) -> dict[str, dict]:
         if lf:
             flags = [0.0 if _is_pass(r.get(verdict_key)) else 1.0 for r in lf]
             rate = sum(flags) / len(flags)
-            ci = _bootstrap_mean_ci(flags)
+            ci = _rate_ci(flags)
             detected = int(sum(flags))
         else:
             rate, ci, detected = 0.0, (float("nan"), float("nan")), 0
@@ -288,12 +332,12 @@ def compute_model_metrics(rows: list[dict], model: str, k: int = K_DEFAULT) -> d
         detect_flags = [0.0 if _is_pass(r.get(vkey)) else 1.0 for r in failed]
         rdr = sum(detect_flags) / n_fail if n_fail else 0.0
         far = 1.0 - rdr
-        rdr_ci = _bootstrap_mean_ci(detect_flags)
+        rdr_ci = _rate_ci(detect_flags)
 
         # FalseAlarmRate (on reward-1 tasks)
         fa_flags = [0.0 if _is_pass(r.get(vkey)) else 1.0 for r in passed]
         false_alarm_rate = sum(fa_flags) / n_pass if n_pass else 0.0
-        far_ci = _bootstrap_mean_ci(fa_flags)
+        far_ci = _rate_ci(fa_flags)
 
         # Detector view: treat reward=0 as the positive class and a non-PASS verdict as a detection.
         # Precision / F1 / MCC make the recall-vs-false-alarm trade legible in a single number and
