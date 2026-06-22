@@ -17,8 +17,13 @@ and include CHANGELOG.md in the same commit as the code changes.
   (figures were deepseek/qwen/mimo/glm; tables are deepseek/mimo/glm/qwen). Affects the embedded
   Figures 6/7/8 and the standalone Figure 9; data/point estimates unchanged, column order only.
 - Thesis v10: corrected V_structural mean RDR **30.1% → 30.0%** (mean of 0.303/0.377/0.399/0.123 =
-  0.3005); regenerated `figures_v10/` in canonical order and rebuilt the PDF. (Figure 9 is generated
-  but not embedded in the thesis — only Figures 1–8 are.)
+  0.3005, round-half-to-even); regenerated `figures_v10/` in canonical order and rebuilt the PDF.
+- Thesis v10: **embedded the detector-quality figure** into §5.2 (RQ2), after Table D. To keep
+  figure numbers monotonic in order of appearance, it is labelled **Figure 8** and the RQ3
+  stacked-bar figure is renumbered **Figure 9**. NB: thesis figure number ≠ generated filename here —
+  thesis Figure 8 renders `figures_v10/figure9_rq2_detector_quality.png` and thesis Figure 9 renders
+  `figure8_rq3_locus_stacked.png` (caption/prose carry the number; the build strips image alt-text,
+  filenames are invisible to readers). Thesis now embeds Figures 1–9.
 
 ### Changed (2026-06-22 — README/requirements brought up to the tau2-bench reality)
 
