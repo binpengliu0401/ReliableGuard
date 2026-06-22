@@ -665,7 +665,9 @@ def make_figures(all_metrics: list[dict], figures_dir: Path) -> None:
 
     axes[0].set_ylabel("Count of reward-0 tasks", fontsize=11)
     axes[0].legend(loc="upper right", fontsize=8, framealpha=0.9)
-    fig.suptitle("Figure 8 — Detected vs. Undetected Reward-0 Tasks by Locus (RQ3)", fontsize=13)
+    # Thesis numbering: this RQ3 stacked bar is embedded as Figure 9 (it follows the detector-
+    # quality chart in §5.2/§5.3). The PNG filename stays figure8_* for code/CHANGELOG continuity.
+    fig.suptitle("Figure 9 — Detected vs. Undetected Reward-0 Tasks by Locus (RQ3)", fontsize=13)
     fig.tight_layout()
     out = figures_dir / "figure8_rq3_locus_stacked.png"
     fig.savefig(out, dpi=150)
@@ -698,7 +700,9 @@ def make_figures(all_metrics: list[dict], figures_dir: Path) -> None:
         top = max(ans + str_ + [0.01])
         ax9.set_ylim(0, max(0.3, top * 1.2) if key == "mcc" else 1.05 if key != "mcc" else top * 1.2)
     axes[0].legend(fontsize=9)
-    fig.suptitle("Figure 9 — Detector Quality: $V_{answer}$ vs $V_{structural}$ (RQ2)", fontsize=13)
+    # Thesis numbering: this detector-quality chart is embedded as Figure 8 (RQ2, before the RQ3
+    # stacked bar). The PNG filename stays figure9_* for code/CHANGELOG continuity.
+    fig.suptitle("Figure 8 — Detector Quality: $V_{answer}$ vs $V_{structural}$ (RQ2)", fontsize=13)
     fig.tight_layout()
     out = figures_dir / "figure9_rq2_detector_quality.png"
     fig.savefig(out, dpi=150)

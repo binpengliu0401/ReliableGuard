@@ -24,6 +24,12 @@ and include CHANGELOG.md in the same commit as the code changes.
   thesis Figure 8 renders `figures_v10/figure9_rq2_detector_quality.png` and thesis Figure 9 renders
   `figure8_rq3_locus_stacked.png` (caption/prose carry the number; the build strips image alt-text,
   filenames are invisible to readers). Thesis now embeds Figures 1–9.
+- `eval/analyze.py`: fixed the **in-image matplotlib titles** to match the thesis renumber — the
+  detector-quality chart's `suptitle` now reads "Figure 8 — Detector Quality" and the RQ3 stacked
+  bar's reads "Figure 9 — Detected vs. Undetected …". Previously the rasterized in-image titles
+  still showed the old numbers (Figure 9 / Figure 8), so the printed-on-image number contradicted
+  the prose/caption. Code comments document that the PNG filename (figure9_=detector, figure8_=stacked)
+  is intentionally decoupled from the thesis figure number. Regenerated figures + rebuilt the PDF.
 
 ### Changed (2026-06-22 — README/requirements brought up to the tau2-bench reality)
 
