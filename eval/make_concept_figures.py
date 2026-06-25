@@ -9,7 +9,11 @@ title is NOT drawn inside the canvas; the bold "Figure N." caption lives in the 
 mirroring the related work.
 
 Run from the repo root:  python3 eval/make_concept_figures.py
-Output:                   docs/thesis/figures_v9/figure1..5.png
+Output:                   docs/thesis/figures_v11/figure1..5.png
+
+Scope note: the evidence-local locus is intentionally absent from these concept figures — it is
+not instantiated in the retail/airline domains evaluated here, so the taxonomy shown is the four
+loci that the thesis actually measures (answer-, trace-, state-, intent-local).
 """
 
 from __future__ import annotations
@@ -23,7 +27,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Ellipse, FancyArrowPatch, FancyBboxPatch, PathPatch
 from matplotlib.path import Path
 
-OUT_DIR = "docs/thesis/figures_v9"
+OUT_DIR = "docs/thesis/figures_v11"
 
 # Muted academic palette: light fills, a shade-darker thin border, role-coded after tau-bench
 # (gray = neutral/tools/unreachable, blue = agent/structural, green = answer channel, red = user/
@@ -130,12 +134,11 @@ def figure1():
         (5.05, "answer-local", F_ANSWER, E_ANSWER, 4.55, None),
         (3.85, "trace-local", F_AGENT, E_AGENT, 2.95, None),
         (2.65, "state-local", F_AGENT, E_AGENT, 1.35, None),
-        (1.50, "evidence-local", F_NEUT, E_NEUT, None, "no KB channel"),
-        (0.55, "intent-local", F_NEUT, E_NEUT, None, "ground truth in user goal"),
+        (1.20, "intent-local", F_NEUT, E_NEUT, None, "ground truth in user goal"),
     ]
-    # Unreachable grouping band behind the two gray loci.
-    band(ax, 6.4, 0.45, 2.95, 2.0, fc=BAND_GRAY, ec=E_NEUT, ls=(0, (4, 3)), lw=1.1)
-    ax.text(7.875, 0.27, "beyond any black-box monitor", ha="center", fontsize=8.2,
+    # Unreachable grouping band behind the single intent-local locus.
+    band(ax, 6.4, 0.92, 2.95, 1.42, fc=BAND_GRAY, ec=E_NEUT, ls=(0, (4, 3)), lw=1.1)
+    ax.text(7.875, 0.66, "beyond any black-box monitor", ha="center", fontsize=8.2,
             style="italic", color=MUTE)
     for yc, name, fc, ec, ch_y, note in loci:
         box(ax, 6.5, yc, 2.75, 0.92, name, fc=fc, ec=ec, fs=10.5, bold=True,
@@ -174,17 +177,16 @@ def figure2():
     # Ellipses sized so each text label sits in a clear band, never on an arc. The answer-local
     # core is kept small to widen the blue band that holds the (long) trace+state label.
     rings = [
-        (8.6, 6.9, F_NEUT, E_NEUT, "-", "intent-local", cy + 3.05),
-        (6.7, 5.3, "#f3f3f3", E_NEUT, (0, (5, 3)), "evidence-local", cy + 2.25),
-        (4.9, 3.9, F_AGENT, E_AGENT, "-", "trace-local + state-local", cy + 1.15),
-        (2.2, 1.55, F_ANSWER, E_ANSWER, "-", "answer-local", cy + 0.0),
+        (8.6, 6.9, F_NEUT, E_NEUT, "-", "intent-local", cy + 2.75),
+        (5.8, 4.6, F_AGENT, E_AGENT, "-", "trace-local + state-local", cy + 1.20),
+        (2.6, 1.9, F_ANSWER, E_ANSWER, "-", "answer-local", cy + 0.0),
     ]
     for w, h, fc, ec, ls, _, _ in rings:
         ax.add_patch(Ellipse((cx, cy), w, h, facecolor=fc, edgecolor=ec, linewidth=1.4,
                              linestyle=ls, zorder=1))
     # Ring labels, shrunk proportionally so the longest one clears the blue arc.
-    label_fs = [11, 9.5, 9.5, 10]
-    label_col = [MUTE, MUTE, E_AGENT, E_ANSWER]
+    label_fs = [11, 9.5, 10]
+    label_col = [MUTE, E_AGENT, E_ANSWER]
     for (w, h, fc, ec, ls, name, ly), fs, col in zip(rings, label_fs, label_col):
         ax.text(cx, ly, name, ha="center", fontsize=fs, fontweight="bold", color=col, zorder=5)
 
@@ -192,20 +194,18 @@ def figure2():
 
     # Side legend (kept entirely outside the rings so no text crosses a line).
     lx = 9.5
-    band(ax, lx - 0.3, 1.4, 2.7, 4.0, fc=BAND, ec="#d8dde3", lw=1.0)
+    band(ax, lx - 0.3, 2.05, 2.7, 3.4, fc=BAND, ec="#d8dde3", lw=1.0)
     ax.text(lx + 1.05, 5.05, "Monitor reach", ha="center", fontsize=10.5, fontweight="bold")
     legend = [
-        (4.55, F_ANSWER, E_ANSWER, "V_answer:", "answer-local core"),
-        (3.55, F_AGENT, E_AGENT, "V_structural:", "+ trace + state"),
-        (2.45, F_NEUT, E_NEUT, "unreachable:", "evidence / intent"),
+        (4.45, F_ANSWER, E_ANSWER, "V_answer:", "answer-local core"),
+        (3.45, F_AGENT, E_AGENT, "V_structural:", "+ trace + state"),
+        (2.45, F_NEUT, E_NEUT, "unreachable:", "intent-local"),
     ]
     for yy, fc, ec, head, body in legend:
         ax.add_patch(FancyBboxPatch((lx, yy), 0.34, 0.34, boxstyle="round,pad=0.01,rounding_size=0.08",
                                     facecolor=fc, edgecolor=ec, linewidth=1.1, zorder=4))
         ax.text(lx + 0.5, yy + 0.32, head, ha="left", va="center", fontsize=9.2, fontweight="bold")
         ax.text(lx + 0.5, yy + 0.02, body, ha="left", va="center", fontsize=8.6, color=MUTE)
-    ax.text(lx + 1.05, 1.62, "dashed = not\nimplemented here", ha="center", fontsize=7.6,
-            style="italic", color=MUTE)
 
     fig.savefig(os.path.join(OUT_DIR, "figure2_observability_boundary.png"), dpi=200,
                 bbox_inches="tight")

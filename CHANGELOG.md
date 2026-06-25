@@ -9,6 +9,16 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ## [Unreleased]
 
+### Changed (2026-06-25 — drop evidence-local from concept figures + thesis v11)
+
+- `eval/make_concept_figures.py`: removed the **evidence-local** locus from Figure 1 (now 4 loci:
+  answer/trace/state/intent) and Figure 2 (3 nested ellipses; legend "unreachable: intent-local", no
+  dashed evidence ring). `OUT_DIR` -> `docs/thesis/figures_v11`. The thesis has no evidence-local
+  experiment, so the concept figures now match the four loci actually measured. Figures regenerated.
+- Thesis v11 text (gitignored, local): removed the "evidence-local not instantiated / no KB" sentence
+  in §3.2 and the future-work "KB gaps" phrase, so v11 is **4-locus everywhere** (concept and results).
+  The per-claim `evidence_state` outcome is unrelated and unchanged.
+
 ### Added (2026-06-25 — thesis v11: reward-fn-corrected results integrated)
 
 - `docs/thesis/ReliableGuard_Thesis_v11.md` + `.pdf` + `build_thesis_v11.sh`: the thesis now reports
