@@ -1,0 +1,75 @@
+{
+  "total_reward_lt1": 2992,
+  "loop_flagged": 34,
+  "intent_local": {
+    "deepseek-v4-pro": {
+      "RESIDUAL": 221,
+      "A1": 46,
+      "A2": 66,
+      "B_loop": 1
+    },
+    "mimo-v2.5-pro": {
+      "RESIDUAL": 359,
+      "A2": 99,
+      "A1": 130,
+      "B_loop": 8
+    },
+    "glm-4.7-flash": {
+      "RESIDUAL": 332,
+      "A1": 68,
+      "A2": 74,
+      "B_loop": 3
+    },
+    "qwen3.6-flash": {
+      "RESIDUAL": 409,
+      "B_loop": 18,
+      "A1": 168,
+      "A2": 131,
+      "B_comm": 1
+    }
+  },
+  "intent_local_all": {
+    "RESIDUAL": 1321,
+    "A1": 412,
+    "A2": 370,
+    "B_loop": 30,
+    "B_comm": 1
+  },
+  "reward_lt1": {
+    "deepseek-v4-pro": {
+      "RESIDUAL": 307,
+      "A2": 89,
+      "A1": 64,
+      "B_loop": 2,
+      "B_comm": 9
+    },
+    "mimo-v2.5-pro": {
+      "RESIDUAL": 578,
+      "A2": 122,
+      "A1": 210,
+      "B_loop": 10,
+      "B_comm": 7
+    },
+    "glm-4.7-flash": {
+      "RESIDUAL": 581,
+      "A1": 86,
+      "A2": 93,
+      "B_loop": 3,
+      "B_comm": 10
+    },
+    "qwen3.6-flash": {
+      "RESIDUAL": 479,
+      "B_loop": 19,
+      "A1": 179,
+      "A2": 139,
+      "B_comm": 5
+    }
+  },
+  "reward_lt1_all": {
+    "RESIDUAL": 1945,
+    "A2": 443,
+    "A1": 539,
+    "B_loop": 34,
+    "B_comm": 31
+  }
+}

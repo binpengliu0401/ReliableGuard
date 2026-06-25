@@ -522,11 +522,22 @@ def make_figures(all_metrics: list[dict], figures_dir: Path) -> None:
                alpha=0.85, yerr=[yerr_lo, yerr_hi], capsize=3,
                error_kw={"linewidth": 1, "ecolor": "black"})
 
-    # Dashed ceiling line per locus based on π_ℓ averages
-    for li, locus in enumerate(loci_plot):
-        avg_pi = sum(m["pi_l"].get(locus, 0.0) for m in all_metrics) / n_models
-        ax.plot([li - 0.4, li + 0.4], [avg_pi, avg_pi], "k--", linewidth=1.0,
-                label="π_ℓ ceiling" if li == 0 else None)
+    # Note: no per-locus reference line. The bars are within-locus recall
+    # (denominator = failures of that locus); locus prevalence π_ℓ has a
+    # different denominator (all failures) and is therefore not an upper bound
+    # on these bars — overlaying it would falsely read as a "ceiling". The
+    # π_ℓ distribution and the 1 − π_intent ceiling live in Figure 9 (RQ3).
+
+    # Mark intent-local as a measured zero (large n), not missing data: every
+    # model detects 0 of its intent-local failures, the modal failure class.
+    intent_ns = [m["v_answer"]["locus_detection"].get("intent-local", {}).get("n", 0)
+                 for m in all_metrics]
+    if intent_ns and max(intent_ns) > 0:
+        intent_x = loci_plot.index("intent-local")
+        ax.text(intent_x, 0.06,
+                f"0% detected\n(measured, n={min(intent_ns)}–{max(intent_ns)})",
+                ha="center", va="bottom", fontsize=9, color="#7a3b3b",
+                fontstyle="italic")
 
     ax.set_xticks(x)
     ax.set_xticklabels(loci_plot, fontsize=12)

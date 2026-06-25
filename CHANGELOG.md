@@ -9,6 +9,106 @@ and include CHANGELOG.md in the same commit as the code changes.
 
 ## [Unreleased]
 
+### Added (2026-06-25 — thesis v11: reward-fn-corrected results integrated)
+
+- `docs/thesis/ReliableGuard_Thesis_v11.md` + `.pdf` + `build_thesis_v11.sh`: the thesis now reports
+  the **reward-fn-corrected** numbers as the single result set (no before/after; the V10 raw numbers
+  are not referenced). A new **"Reward-oracle correction"** methodology paragraph in §5.1 defines the
+  corrected failure set `T_fail` (re-score reward=0 -> success when write-effects == gold actions AND
+  every non-DB reward component is provably 1 AND the locus is intent-local). "Provably 1" covers
+  empty/substring-matched COMMUNICATE, empty NL-assertions, AND NL-assertions whose required numeric
+  facts (prices/quantities) appear verbatim in the answer; purely-qualitative NL-assertions are
+  conservatively kept as failures. **628 trajectories re-scored.** Tables A–D, the RQ1/RQ2/RQ3 prose,
+  the contributions, Table 9 (incl. a reward-oracle residual row), and the conclusion are updated.
+- `eval/build_monitor_v11.py`: writes `results/monitor_v11/*.jsonl` (monitor_v2 with the 628
+  intent-local provable reward-fn re-scored to PASS). `python -m eval.analyze --monitor-dir
+  results/monitor_v11 --out-dir results/metrics_v11 --figures-dir docs/thesis/figures_v11` regenerates
+  the corrected metrics and Figures 6–9; concept Figures 1–5 are copied unchanged. The numeric-fact
+  check was validated against the 40-row manual review: it flips zero reviewer-judged failures
+  (R35/R36 kept) and re-scores only reviewer-judged successes.
+- **Corrected headline numbers (now the thesis values):** aggregate π_intent 61.7% over 2,242
+  failures; mean V_structural RDR 37.0%, FalseAlarmRate 3.8%–10.1%, precision 66.2%–79.4%; mean ΔRDR
+  +22.0pp (range +11.4 to +34.4), all McNemar p<0.001 with n_10=0; monitor-vs-oracle gap still 0.000.
+  Per-model V_structural RDR: deepseek 0.363, mimo 0.480, glm 0.461, qwen 0.176.
+
+### Added (2026-06-25 — deterministic reward-false-negative overlay, full population)
+
+- `eval/overlay_reward_fn.py`: scales the 40-row manual intent-local spot-check to the **whole**
+  `reward<1` population (2992 trajectories; intent-local subset 2134) with **no LLM and no
+  re-capture**. For each trajectory it deterministically classifies: **A1** provable reward
+  false-negative (agent writes == gold actions with full args, AND every non-DB `reward_basis`
+  component is provably 1 — empty NL_ASSERTION/COMMUNICATE, or COMMUNICATE substrings all present —
+  so `reward=0` can only be the premature-termination guard `evaluator.py:113`); **A2** undetermined
+  (DB-match but a non-empty `nl_assertions` is LLM-judged, not replicable); **B_loop / B_comm**
+  observable failure (stall-loop in the answer / required COMMUNICATE string absent); **RESIDUAL**
+  DB mismatch (genuine DB-level `reward=0`). Handles tau2's component-specific scoring (retail
+  DB×NL_ASSERTION, airline DB×COMMUNICATE) and malformed/no-op tool calls. Emits
+  `eval/locus_spotcheck/reward_fn_overlay.{md,json}`.
+- **Findings:** intent-local is **19.3% provable reward-fn (A1, floor)** + 17.3% undetermined (A2) +
+  1.5% observable defect + 61.9% genuine DB-mismatch residual. **18.0% of ALL `reward<1`** are
+  provable reward false-negatives — the termination artifact contaminates RQ1/RQ2 failure sets, not
+  just RQ3. **Corrected agent success rate** (re-scoring A1): deepseek 71.3%->75.2%, mimo
+  43.5%->**56.3%**, glm 52.9%->58.1%, qwen 49.9%->60.9% (floor; ceiling adds A2). Validation: the
+  deterministic classes (A1/B_loop/B_comm/RESIDUAL) are **100% consistent (29/29)** with the manual
+  verdicts; only A2 is intentionally ambiguous, and the overlay independently corrects the one
+  inconsistent manual label (R5->A2). Caveat: the 40-row sample's 47.5% reward-fn overstates the
+  population (stratified sampling over-weighted no-write refuse/info tasks); the population floor is
+  19.3%. Counts are for the `monitor_v2`/`capture` draw (LLM non-determinism -> representative, not
+  re-runnable to identical values).
+
+### Added (2026-06-25 — reward-fn-corrected thesis metrics, before/after)
+
+- `eval/correct_metrics_rewardfn.py`: an uncorrected-vs-corrected comparison tool (the thesis reports
+  the corrected column only). Reuses `eval.analyze.compute_model_metrics` verbatim (so the "before"
+  column reproduces `results/metrics_v2` exactly — sanity-checked OK for all 4 models) and re-scores
+  the **same 628 intent-local provable reward-fn** as the V11 pipeline (A1 + A2-numeric, imported from
+  `eval/build_monitor_v11.py`). Provenance written to `eval/locus_spotcheck/reward_fn_corrected_metrics.md`.
+  Brackets the alternatives (all-A1, all-A1+A2) to show that re-scoring non-intent-local A1 would
+  convert legitimate detections into false alarms (verification != enforcement) — it drags mimo's RDR
+  down (.377->.371) — which is why those are left as failures.
+- **Before -> after (correction is a strict improvement; precision unchanged, no false alarms added):**
+  mean V_structural RDR **30.0% -> 37.0%**, mean ΔRDR **+17.8pp -> +22.0pp**, mean MCC **0.27 -> 0.37**,
+  FalseAlarmRate falls (e.g. mimo .130->.101), pi_intent drops (e.g. mimo .623->.520). The
+  monitor-vs-oracle gap stays exactly 0.000 — the ceiling identity is structural, so the correction
+  raises the ceiling (1-pi_intent) and the achieved RDR together. Per model V_structural RDR:
+  deepseek .303->.363, mimo .377->.480, glm .399->.461, qwen .123->.176.
+
+### Added (2026-06-23 — intent-local spot-check harness, RQ3 validity)
+
+- `eval/make_locus_spotcheck.py`: generates a **reproducible** intent-local review sheet to
+  validate the purity of the annotator's intent-local *residual* (RQ3). **Seeded-random** stratified
+  sampling (SEED=20260623, per-model seed `f"{SEED}:{model}"`) — 10 trajectories per audited model
+  (40 total = 8.1% of the 492 distinct intent-local (domain, task_id) scenarios; one representative
+  repeat per scenario); re-running with the same seed reproduces the exact draw. Joins `monitor_v2`
+  (locus tag) × `capture` (query / answer / tool_trace) × tau²-bench retail+airline `tasks.json`
+  (user intent + gold actions). Emits `eval/locus_spotcheck/intent_local_review.{md,csv}`: per row
+  the user intent, gold write actions **with full arguments** (intent-level reference) beside the
+  agent's full tool-call sequence, an **auto-computed PARAM DIFF table** (gold↔agent write actions
+  matched by (name, id); per matched pair the argument fields that differ, plus gold actions the
+  agent omitted and agent writes with no gold counterpart) — so argument-level divergences
+  (insurance, variant, quantity) are visible at a glance without diffing JSON or opening
+  `tasks.json` — and the review template
+  (`counterfactual_holds`, `discriminator_only_in_gold`, `verdict` ∈ {true-intent-local,
+  missed-detection, unsure}, `true_class_if_missed`, required `basis`). The reviewer's
+  missed-detection rate bounds π_intent mis-labelling, upgrading the RQ3 limitation from
+  "unvalidated residual" to a spot-validated figure.
+
+### Fixed (2026-06-23 — Figure 6 ceiling-line removal + intent-local annotation)
+
+- `eval/analyze.py` (Figure 6, RQ1): **removed the dashed "π_ℓ ceiling" line.** It plotted locus
+  *prevalence* π_ℓ (denominator = all failures), overlaid on bars that are *within-locus recall*
+  (denominator = failures of that locus) — two different quantities, so the line never bounded the
+  bars. It produced false "bar exceeds ceiling" reads (glm trace-local 0.29 > line 0.20; and
+  answer-local recall 1.0 ≫ line 0.077) and, worst, floated at 0.70 over the zero-height
+  intent-local bar — visually suggesting intent-local "should" reach 70%. Prevalence and the
+  1 − π_intent ceiling already live in Figure 9 (RQ3), where the denominator is correct.
+- `eval/analyze.py` (Figure 6): annotated the intent-local group as **"0% detected (measured,
+  n=315–670)"** so the empty bar reads as a large-n measured zero (0 for *both* V_answer and
+  V_structural), not missing data.
+- Thesis v10 Figure 6 caption: rewrote to state bars are within-locus recall, V_answer is
+  complete/partial-leakage/zero across answer/trace+state/intent loci, and to point prevalence +
+  ceiling to Figure 9. Regenerated `results/figures_v2/figure6` and synced `figures_v10/figure6`.
+
 ### Fixed (2026-06-22 — thesis v10 cross-validation follow-ups)
 
 - `eval/analyze.py`: figures now iterate models in a **canonical order** (`MODEL_ORDER` =
