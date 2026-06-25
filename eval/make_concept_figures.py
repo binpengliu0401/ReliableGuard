@@ -396,12 +396,14 @@ def figure5():
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-    figure1()
+    # figure1 is hand-authored (a manually optimized PNG kept directly in OUT_DIR); do NOT regenerate
+    # it from figure1() below or the hand-drawn version would be overwritten. The figure1() function
+    # is retained for reference only.
     figure2()
     figure3()
     figure4()
     figure5()
-    print(f"wrote figure1..5 to {OUT_DIR}")
+    print(f"wrote figure2..5 to {OUT_DIR} (figure1 is hand-authored, left untouched)")
 
 
 if __name__ == "__main__":

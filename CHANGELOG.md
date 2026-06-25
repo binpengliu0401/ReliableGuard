@@ -18,6 +18,9 @@ and include CHANGELOG.md in the same commit as the code changes.
 - Thesis v11 text (gitignored, local): removed the "evidence-local not instantiated / no KB" sentence
   in §3.2 and the future-work "KB gaps" phrase, so v11 is **4-locus everywhere** (concept and results).
   The per-claim `evidence_state` outcome is unrelated and unchanged.
+- Figure 1 is now a **hand-authored** PNG (`docs/thesis/figures_v11/figure1_concept_overview.png`,
+  gitignored): `figure1()` in `make_concept_figures.py` is disabled so the script regenerates only
+  Figures 2-5 and never overwrites the hand-drawn Figure 1.
 
 ### Added (2026-06-25 — thesis v11: reward-fn-corrected results integrated)
 
